@@ -1,8 +1,5 @@
-package arma.orinocosqf;
+package arma.orinocosqf.type;
 
-import arma.orinocosqf.type.CodeType;
-import arma.orinocosqf.type.ExpandedValueType;
-import arma.orinocosqf.type.PolymorphicWrapperValueType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

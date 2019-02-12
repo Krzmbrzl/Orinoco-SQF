@@ -6,8 +6,8 @@ import arma.orinocosqf.type.PolymorphicWrapperValueType;
 import arma.orinocosqf.type.SingletonArrayExpandedValueType;
 import org.junit.Test;
 
-import static arma.orinocosqf.ValueType.BaseType;
-import static arma.orinocosqf.ValueType.typeEquivalent;
+import static arma.orinocosqf.type.ValueType.BaseType;
+import static arma.orinocosqf.type.ValueType.typeEquivalent;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

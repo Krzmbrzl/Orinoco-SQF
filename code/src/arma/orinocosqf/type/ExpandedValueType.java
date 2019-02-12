@@ -1,5 +1,4 @@
 package arma.orinocosqf.type;
-import arma.orinocosqf.ValueType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
