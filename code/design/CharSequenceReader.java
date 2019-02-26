@@ -1,8 +1,14 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 
 /**
+ * An implementation of a {@link Reader} that works on a {@link CharSequence} as
+ * an input. This prevents the need to use a {@link ByteArrayInputStream}
+ * alongside with an {@link InputStreamReader}.
+ * 
  * @author K
  * @since 02/20/2019
  */
@@ -26,7 +32,7 @@ public class CharSequenceReader extends Reader {
 
 	@Override
 	public void close() {
-		//do nothing
+		// do nothing
 	}
 
 }

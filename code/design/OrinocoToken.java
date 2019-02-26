@@ -2,7 +2,8 @@ import jdk.internal.jline.internal.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A token class that can either hold text or an id for things like {@link OrinocoTokenType#Command}
+ * A token class that can either hold text or an id for things like
+ * {@link OrinocoSQFTokenType#Command}
  *
  * @author K
  * @since 02/21/2019
@@ -13,7 +14,7 @@ public class OrinocoToken {
 	private OrinocoTokenType tokenType;
 
 	public OrinocoToken(@NotNull String text, @NotNull OrinocoTokenType tokenType) {
-		if(tokenType.isIdBased()) {
+		if (tokenType.isIdBased()) {
 			throw new IllegalArgumentException();
 		}
 		this.text = text;
@@ -22,7 +23,7 @@ public class OrinocoToken {
 	}
 
 	public OrinocoToken(int id, @NotNull OrinocoTokenType tokenType) {
-		if(!tokenType.isIdBased()) {
+		if (!tokenType.isIdBased()) {
 			throw new IllegalArgumentException();
 		}
 		this.text = null;
@@ -30,13 +31,16 @@ public class OrinocoToken {
 		this.tokenType = tokenType;
 	}
 
-	/** @return null if this token is id based, or the text if the token is text based */
+	/**
+	 * @return null if this token is id based, or the text if the token is text
+	 *         based
+	 */
 	@Nullable
 	public String getText() {
 		return text;
 	}
 
-	/**@return -1 if the token is text based, or the id if id based*/
+	/** @return -1 if the token is text based, or the id if id based */
 	public int getId() {
 		return id;
 	}

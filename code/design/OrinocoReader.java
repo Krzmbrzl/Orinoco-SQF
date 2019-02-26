@@ -12,14 +12,38 @@ import java.nio.charset.Charset;
  */
 public abstract class OrinocoReader extends Reader {
 
+	/**
+	 * Creates a new {@link OrinocoReader} from the given {@link CharSequence}
+	 * 
+	 * @param cs The CharSequence to build the Reader from
+	 * @return The instantiated Reader
+	 */
 	@NotNull
 	public static OrinocoReader fromCharSequence(@NotNull CharSequence cs) {
 		return new OrinocoReaderWrapper(new CharSequenceReader(cs));
 	}
 
+	/**
+	 * Creates a new {@link OrinocoReader} from the given {@link File}
+	 * (automatically opening an InputStream on it)
+	 * 
+	 * @param f The File to build the Reader from
+	 * @return The instantiated Reader
+	 */
 	@NotNull
 	public static OrinocoReader fromFile(@NotNull File f, @NotNull Charset c) throws FileNotFoundException {
 		return new OrinocoReaderWrapper(new InputStreamReader(new FileInputStream(f), c));
+	}
+
+	/**
+	 * Creates a new {@link OrinocoReader} from the given {@link InputStream}
+	 * 
+	 * @param in The InputStream to build the Reader from
+	 * @return The instantiated Reader
+	 */
+	@NotNull
+	public static OrinocoReader fromStream(@NotNull InputStream in, @NotNull Charset c) throws FileNotFoundException {
+		return new OrinocoReaderWrapper(new InputStreamReader(in, c));
 	}
 
 	public static class OrinocoReaderWrapper extends OrinocoReader {

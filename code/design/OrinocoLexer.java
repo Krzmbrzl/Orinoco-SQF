@@ -1,15 +1,19 @@
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A lexer that tokenizes text separated by whitespace ("words" or "tokens") and submits each token to a {@link OrinocoLexerStream}.
- * This lexer also has a cyclic dependency on a preprocessor. Due to the fact that each token may have a macro inside it, the lexer stores a
- * set of macro's as a reference to know when the preprocessor is needed. When a preprocessor is needed for a token, it submits the token to
- * {@link OrinocoLexerStream#preProcessToken(char[], int, int)}.
- * Subsequently, the preprocessed result re-enters the lexer for re-lexing via {@link #acceptPreProcessedText(String)}. This
- * preprocessed result may need further preprocessing after the re-lex because the preprocessor doesn't handle tokenizing the text (see example 1).
+ * A lexer that tokenizes text (into "words" or "tokens") and submits each token
+ * to a {@link OrinocoLexerStream}. This lexer also has a cyclic dependency on a
+ * preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that
+ * each token may have a macro inside it, the lexer stores a set of macro's as a
+ * reference to know when the preprocessor is needed. When a preprocessor is
+ * needed for a token, it submits the token to
+ * {@link OrinocoLexerStream#preProcessToken(char[], int, int)}. Subsequently,
+ * the preprocessed result re-enters the lexer for re-lexing via
+ * {@link #acceptPreProcessedText(String)}. This preprocessed result may need
+ * further preprocessing after the re-lex because the preprocessor doesn't
+ * handle tokenizing the text (see example 1).
  *
- * Example 1:
- * <code>
+ * Example 1: <code>
  * #define ONE 1
  * #define ASSIGN(VAR) VAR = ONE;
  * ASSIGN(hello) //begin lexing here
@@ -41,7 +45,8 @@ public abstract class OrinocoLexer {
 	public abstract void start();
 
 	/**
-	 * Accepts partially or fully preprocessed text (see Example 1 in class level doc) from the {@link OrinocoLexerStream}.
+	 * Accepts partially or fully preprocessed text (see Example 1 in class level
+	 * doc) from the {@link OrinocoLexerStream}.
 	 *
 	 * @param text the preprocessed, untokenized text
 	 */
