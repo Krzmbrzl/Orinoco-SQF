@@ -1,5 +1,7 @@
 /**
- * Here is the format for a preprocessor command: <b>#commandName body?</b>. The ? means optional.
+ * Here is the format for a preprocessor command: <b>#commandName body?</b>. The
+ * ? means optional.
+ * 
  * @author K
  * @since 02/20/2019
  */
@@ -14,17 +16,19 @@ public enum PreProcessorCommand {
 	EndIf,
 	/**
 	 * <ul>
-	 * <li>#define MACRO body </li>
-	 * <li>#define MACRO(PARAM1) PARAM1 </li>
-	 * <li>#define MACRO(PARAM1,PARAM2) PARAM1 PARAM2 </li>
+	 * <li>#define MACRO body</li>
+	 * <li>#define MACRO(PARAM1) PARAM1</li>
+	 * <li>#define MACRO(PARAM1,PARAM2) PARAM1 PARAM2</li>
 	 * </ul>
 	 */
 	Define,
 	/** #undef MACRO */
 	Undef,
-	/** <ul>
+	/**
+	 * <ul>
 	 * <li>#include "file"</li>
 	 * <li>#include &lt;file&gt;</li>
-	 * </ul> */
+	 * </ul>
+	 */
 	Include
 }

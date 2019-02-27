@@ -1,6 +1,7 @@
 /**
- * A type of {@link OrinocoTokenProcessor} that collects whole statements
- * and then submits a filled {@link OrinocoTokenQueue} to a {@link StatementProcessingScheduler}.
+ * A type of {@link OrinocoTokenProcessor} that collects whole statements and
+ * then submits a filled {@link OrinocoTokenQueue} to a
+ * {@link StatementProcessingScheduler}.
  *
  * @author K
  * @since 02/21/2019

@@ -8,8 +8,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class OrinocoTokenQueue implements OrinocoTokenProcessor {
 	/**
-	 * A thread blocking operation that will copy all of this queue's tokens to another {@link OrinocoTokenQueue}.
-	 * All data is passed by reference to the other queue. This queue is then emptied.
+	 * A thread blocking operation that will copy all of this queue's tokens to
+	 * another {@link OrinocoTokenQueue}. All data is passed by reference to the
+	 * other queue. This queue is then emptied.
 	 */
 	public abstract void drainTo(@NotNull OrinocoTokenQueue other);
 }
