@@ -25,9 +25,9 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 	}
 
 	public TokenExpector(@NotNull List<AcceptedToken> expectedTokens) {
-		super(new AcceptedTokenFactoryQueue());
+		super(new AcceptedTokenFactory());
 		this.expectedTokens = expectedTokens;
-		this.actualTokens = ((AcceptedTokenFactoryQueue) this.wrappedProcessor).getTokens();
+		this.actualTokens = ((AcceptedTokenFactory) this.wrappedProcessor).getTokens();
 	}
 
 	public void addExpectedToken(@NotNull AcceptedToken t) {
@@ -170,7 +170,7 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 	}
 
 	public static class AcceptedTokenFactory implements OrinocoTokenProcessor {
-		protected AcceptedToken latest;
+		private final List<AcceptedToken> q = new ArrayList<>();
 
 		@Override
 		public void begin() {
@@ -179,90 +179,38 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 
 		@Override
 		public void acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
-			latest = AcceptedToken.acceptCommand(id, preprocessedOffset, originalOffset, originalLength);
+			q.add(AcceptedToken.acceptCommand(id, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
 		public void acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
-			latest = AcceptedToken.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength);
+			q.add(AcceptedToken.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
 		public void acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
-			latest = AcceptedToken.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength);
+			q.add(AcceptedToken.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
 		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
 								  int originalOffset, int originalLength) {
-			latest = AcceptedToken.acceptLiteral(type, token, preprocessedOffset, originalOffset, originalLength);
+			q.add(AcceptedToken.acceptLiteral(type, token, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
 		public void preProcessorTokenSkipped(@NotNull String token, int offset) {
-			latest = AcceptedToken.preProcessorTokenSkipped(token, offset);
+			q.add(AcceptedToken.preProcessorTokenSkipped(token, offset));
 		}
 
 		@Override
 		public void preProcessorCommandSkipped(@NotNull String command, int offset) {
-			latest = AcceptedToken.preProcessorCommandSkipped(command, offset);
+			q.add(AcceptedToken.preProcessorCommandSkipped(command, offset));
 		}
 
 		@Override
 		public void end() {
 
-		}
-
-		@NotNull
-		public AcceptedToken getLatest() {
-			return latest;
-		}
-	}
-
-	public static class AcceptedTokenFactoryQueue extends AcceptedTokenFactory {
-		private final List<AcceptedToken> q = new ArrayList<>();
-
-		@Override
-		public void acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
-			super.acceptCommand(id, preprocessedOffset, originalOffset, originalLength);
-			q.add(latest);
-		}
-
-		@Override
-		public void acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
-			super.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength);
-			q.add(latest);
-		}
-
-		@Override
-		public void acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
-			super.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength);
-			q.add(latest);
-		}
-
-		@Override
-		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
-								  int originalOffset, int originalLength) {
-			super.acceptLiteral(type, token, preprocessedOffset, originalOffset, originalLength);
-			q.add(latest);
-		}
-
-		@Override
-		public void preProcessorTokenSkipped(@NotNull String token, int offset) {
-			super.preProcessorTokenSkipped(token, offset);
-			q.add(latest);
-		}
-
-		@Override
-		public void preProcessorCommandSkipped(@NotNull String command, int offset) {
-			super.preProcessorCommandSkipped(command, offset);
-			q.add(latest);
-		}
-
-		@Override
-		public void end() {
-			super.end();
-			q.add(latest);
 		}
 
 		@NotNull
