@@ -1,0 +1,282 @@
+package arma.orinocosqf.helpers;
+
+import arma.orinocosqf.OrinocoLexerLiteralType;
+import arma.orinocosqf.OrinocoTokenProcessor;
+import arma.orinocosqf.OrinocoTokenProcessorWrapper;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+/**
+ * A helper class for checking if a {@link arma.orinocosqf.OrinocoTokenProcessor} received a token via an accept method
+ *
+ * @author K
+ * @since 3/10/19
+ */
+public class TokenExpector extends OrinocoTokenProcessorWrapper {
+	private final List<AcceptedToken> actualTokens;
+	private final List<AcceptedToken> expectedTokens;
+
+	public TokenExpector() {
+		this(new ArrayList<>());
+	}
+
+	public TokenExpector(@NotNull List<AcceptedToken> expectedTokens) {
+		super(new AcceptedTokenFactoryQueue());
+		this.expectedTokens = expectedTokens;
+		this.actualTokens = ((AcceptedTokenFactoryQueue) this.wrappedProcessor).getTokens();
+	}
+
+	public void addExpectedToken(@NotNull AcceptedToken t) {
+		expectedTokens.add(t);
+	}
+
+	public void assertTokensMatch() {
+		Iterator<AcceptedToken> actualIter = actualTokens.iterator();
+		for (AcceptedToken expectedToken : expectedTokens) {
+			if (!actualIter.hasNext()) {
+				fail("Actual ran out of tokens");
+			}
+			AcceptedToken actualNext = actualIter.next();
+			assertEquals(
+					String.format("Expected token mismatch. Expected %s got %s.",
+							expectedToken.toString(),
+							actualNext.toString()
+					)
+					, expectedToken, actualNext
+			);
+		}
+		if (actualIter.hasNext()) {
+			StringBuilder left = new StringBuilder();
+			while (actualIter.hasNext()) {
+				AcceptedToken next = actualIter.next();
+				left.append(next.toString());
+				if (actualIter.hasNext()) {
+					left.append('\n');
+				}
+			}
+			fail("Too many tokens lexed. Leftovers:\n" + left.toString());
+		}
+	}
+
+	public static class AcceptedToken {
+		private final Map<String, Object> parameters = new HashMap<>();
+		private final AcceptMethod method;
+
+		public AcceptedToken(@NotNull AcceptMethod method) {
+			this.method = method;
+		}
+
+		@NotNull
+		public AcceptMethod getMethod() {
+			return method;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T> T getParameterValue(@NotNull String name) {
+			return (T) parameters.get(name);
+		}
+
+		public void putParameter(@NotNull String name, @NotNull Object v) {
+			parameters.put(name, v);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == this) {
+				return true;
+			}
+			if (!(o instanceof AcceptedToken)) {
+				return false;
+			}
+			AcceptedToken other = (AcceptedToken) o;
+			return this.method == other.method
+					&& parameters.equals(other.parameters);
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("AcceptedToken{");
+			sb.append("method=");
+			sb.append(method.name());
+			sb.append(',');
+			sb.append("paramethers=");
+			sb.append(parameters.toString());
+			sb.append('}');
+			return sb.toString();
+		}
+
+		@NotNull
+		public static AcceptedToken acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptCommand);
+			t.putParameter("id", id);
+			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("originalOffset", originalOffset);
+			t.putParameter("originalLength", originalLength);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptLocalVariable);
+			t.putParameter("id", id);
+			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("originalOffset", originalOffset);
+			t.putParameter("originalLength", originalLength);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptGlobalVariable);
+			t.putParameter("id", id);
+			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("originalOffset", originalOffset);
+			t.putParameter("originalLength", originalLength);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
+												  int originalOffset, int originalLength) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptLiteral);
+			t.putParameter("type", type);
+			t.putParameter("token", token);
+			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("originalOffset", originalOffset);
+			t.putParameter("originalLength", originalLength);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken preProcessorTokenSkipped(@NotNull String token, int offset) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.PreProcessorTokenSkipped);
+			t.putParameter("token", token);
+			t.putParameter("offset", offset);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken preProcessorCommandSkipped(@NotNull String command, int offset) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.PreProcessorCommandSkipped);
+			t.putParameter("command", command);
+			t.putParameter("offset", offset);
+			return t;
+		}
+	}
+
+	public static class AcceptedTokenFactory implements OrinocoTokenProcessor {
+		protected AcceptedToken latest;
+
+		@Override
+		public void begin() {
+
+		}
+
+		@Override
+		public void acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			latest = AcceptedToken.acceptCommand(id, preprocessedOffset, originalOffset, originalLength);
+		}
+
+		@Override
+		public void acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			latest = AcceptedToken.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength);
+		}
+
+		@Override
+		public void acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			latest = AcceptedToken.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength);
+		}
+
+		@Override
+		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
+								  int originalOffset, int originalLength) {
+			latest = AcceptedToken.acceptLiteral(type, token, preprocessedOffset, originalOffset, originalLength);
+		}
+
+		@Override
+		public void preProcessorTokenSkipped(@NotNull String token, int offset) {
+			latest = AcceptedToken.preProcessorTokenSkipped(token, offset);
+		}
+
+		@Override
+		public void preProcessorCommandSkipped(@NotNull String command, int offset) {
+			latest = AcceptedToken.preProcessorCommandSkipped(command, offset);
+		}
+
+		@Override
+		public void end() {
+
+		}
+
+		@NotNull
+		public AcceptedToken getLatest() {
+			return latest;
+		}
+	}
+
+	public static class AcceptedTokenFactoryQueue extends AcceptedTokenFactory {
+		private final List<AcceptedToken> q = new ArrayList<>();
+
+		@Override
+		public void acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			super.acceptCommand(id, preprocessedOffset, originalOffset, originalLength);
+			q.add(latest);
+		}
+
+		@Override
+		public void acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			super.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength);
+			q.add(latest);
+		}
+
+		@Override
+		public void acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+			super.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength);
+			q.add(latest);
+		}
+
+		@Override
+		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
+								  int originalOffset, int originalLength) {
+			super.acceptLiteral(type, token, preprocessedOffset, originalOffset, originalLength);
+			q.add(latest);
+		}
+
+		@Override
+		public void preProcessorTokenSkipped(@NotNull String token, int offset) {
+			super.preProcessorTokenSkipped(token, offset);
+			q.add(latest);
+		}
+
+		@Override
+		public void preProcessorCommandSkipped(@NotNull String command, int offset) {
+			super.preProcessorCommandSkipped(command, offset);
+			q.add(latest);
+		}
+
+		@Override
+		public void end() {
+			super.end();
+			q.add(latest);
+		}
+
+		@NotNull
+		public List<AcceptedToken> getTokens() {
+			return q;
+		}
+	}
+
+	public enum AcceptMethod {
+		AcceptCommand,
+		AcceptLocalVariable,
+		AcceptGlobalVariable,
+		AcceptLiteral,
+		PreProcessorTokenSkipped,
+		PreProcessorCommandSkipped
+	}
+}
