@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 /**
  * @author K
  * @see OrinocoLexerStream
@@ -19,7 +21,7 @@ public enum OrinocoSQFTokenType implements OrinocoTokenType {
 	GlobalVariable(true),
 	/**
 	 * This type represents all available literal-types available in SQF
-	 * 
+	 *
 	 * @see OrinocoLexerLiteralType
 	 * @see OrinocoLexerSQFLiteralType
 	 */

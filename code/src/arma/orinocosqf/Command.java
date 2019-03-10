@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -5,7 +7,7 @@ import java.util.List;
 /**
  * An interface describing a general command-object that will be used to offer
  * the information necessary to parse its potential arguments properly.
- * 
+ *
  * @author K
  * @since 02/20/2019
  */
@@ -24,7 +26,7 @@ public interface Command {
 	 * @return true if this command is always nular (always no arguments). Returns
 	 *         false if the command is nular sometimes (arguments are optional) or
 	 *         is never nular (always has at least 1 argument)
-	 * 
+	 *
 	 * @see #canBeNular()
 	 * @see #getSyntaxList()
 	 */
@@ -32,7 +34,7 @@ public interface Command {
 
 	/**
 	 * @return true if this command can be nular (can be used without arguments)
-	 * 
+	 *
 	 * @see #getSyntaxList()
 	 */
 	boolean canBeNular();
@@ -41,7 +43,7 @@ public interface Command {
 	 * @return true if this command is always binary (always has a left and right
 	 *         argument). Returns false if the command is not always binary (at
 	 *         least one argument is optional)
-	 * 
+	 *
 	 * @see #canBeBinary()
 	 * @see #getSyntaxList()
 	 */
@@ -50,7 +52,7 @@ public interface Command {
 	/**
 	 * @return true if this command can be binary (can take a left and a right
 	 *         argument)
-	 * 
+	 *
 	 * @see #getSyntaxList()
 	 */
 	boolean canBeBinary();
@@ -59,7 +61,7 @@ public interface Command {
 	 * @return true if this command is always unary (always has one right argument).
 	 *         Returns false if this command is not always unary (right argument is
 	 *         optional or is binary command)
-	 * 
+	 *
 	 * @see #canBeUnary()
 	 * @see #getSyntaxList()
 	 */
@@ -67,7 +69,7 @@ public interface Command {
 
 	/**
 	 * @return true if this command can be unary (can takes a right argument)
-	 * 
+	 *
 	 * @see #getSyntaxList()
 	 */
 	boolean canBeUnary();

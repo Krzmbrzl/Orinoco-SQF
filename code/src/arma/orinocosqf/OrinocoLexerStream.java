@@ -1,10 +1,12 @@
+package arma.orinocosqf;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
  * This interface describes a stream-object that will process everything
  * {@link OrinocoLexer} lexes. Additionally it is also responsible for providing
  * preprocessing-support.
- * 
+ *
  * @author K
  * @since 02/20/2019
  */
@@ -66,7 +68,7 @@ public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	/**
 	 * Used to notify the stream that a comment (either single- or multiline) has
 	 * been lexed
-	 * 
+	 *
 	 * @param originalOffset text offset of where the comment begins in the original
 	 *        input
 	 * @param originalLength length of the comment in the original input

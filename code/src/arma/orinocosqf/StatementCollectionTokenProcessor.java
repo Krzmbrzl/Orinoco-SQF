@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 /**
  * A type of {@link OrinocoTokenProcessor} that collects whole statements and
  * then submits a filled {@link OrinocoTokenQueue} to a

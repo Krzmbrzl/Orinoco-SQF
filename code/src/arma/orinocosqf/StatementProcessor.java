@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 /**
  * A type of {@link OrinocoTokenProcessor} that collects whole statements
  * (commands and variables) up to a semicolon and stores in a

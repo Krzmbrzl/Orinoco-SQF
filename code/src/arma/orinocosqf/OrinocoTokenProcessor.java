@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -86,7 +88,7 @@ public interface OrinocoTokenProcessor {
 	 *        messages.</b>
 	 */
 	void acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset, int originalOffset,
-			int originalLength);
+					   int originalLength);
 
 	/**
 	 * Invoked when a macro-token was encountered in the input. This method is only

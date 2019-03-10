@@ -1,3 +1,5 @@
+package arma.orinocosqf;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -14,7 +16,7 @@ public abstract class OrinocoReader extends Reader {
 
 	/**
 	 * Creates a new {@link OrinocoReader} from the given {@link CharSequence}
-	 * 
+	 *
 	 * @param cs The CharSequence to build the Reader from
 	 * @return The instantiated Reader
 	 */
@@ -26,7 +28,7 @@ public abstract class OrinocoReader extends Reader {
 	/**
 	 * Creates a new {@link OrinocoReader} from the given {@link File}
 	 * (automatically opening an InputStream on it)
-	 * 
+	 *
 	 * @param f The File to build the Reader from
 	 * @return The instantiated Reader
 	 */
@@ -37,7 +39,7 @@ public abstract class OrinocoReader extends Reader {
 
 	/**
 	 * Creates a new {@link OrinocoReader} from the given {@link InputStream}
-	 * 
+	 *
 	 * @param in The InputStream to build the Reader from
 	 * @return The instantiated Reader
 	 */

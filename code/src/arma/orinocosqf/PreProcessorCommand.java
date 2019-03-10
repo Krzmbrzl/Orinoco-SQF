@@ -1,7 +1,9 @@
+package arma.orinocosqf;
+
 /**
  * Here is the format for a preprocessor command: <b>#commandName body?</b>. The
  * ? means optional.
- * 
+ *
  * @author K
  * @since 02/20/2019
  */
