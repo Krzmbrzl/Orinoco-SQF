@@ -12,6 +12,12 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	/**
+	 * Sets the lexer for this lexer stream. When a {@link OrinocoLexer} is constructed, this method will be invoked automatically by the
+	 * {@link OrinocoLexer}.
+	 */
+	void setLexer(@NotNull OrinocoLexer lexer);
+
+	/**
 	 * This method is invoked once at the beginning of each lex. If true,
 	 * {@link #acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)}
 	 * will never be invoked. Also, if true,

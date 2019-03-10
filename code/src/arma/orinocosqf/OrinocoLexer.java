@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * further preprocessing after the re-lex because the preprocessor doesn't
  * handle tokenizing the text (see example 1).
  *
- * Example 1: <code>
+ * Example 1: <pre>
  * #define ONE 1
  * #define ASSIGN(VAR) VAR = ONE;
  * ASSIGN(hello) //begin lexing here
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
  * // The lexer then lexes ONE and it matches a macro. It then feeds that to the preprocessor, preprocessor spits out "1" to the lexer.
  * // Lexer lexes 1, submits to {@link OrinocoLexerStream} without further preprocessing,
  * // and then finally ";" is lexed from the first {@link #acceptPreProcessedText(String)}
- * </code>
+ * </pre>
  *
  * @author K
  * @since 02/20/2019
@@ -39,6 +39,7 @@ public abstract class OrinocoLexer {
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.r = r;
 		this.lexerStream = lexerStream;
+		lexerStream.setLexer(this);
 	}
 
 	/**
