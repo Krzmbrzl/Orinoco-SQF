@@ -64,18 +64,19 @@ public class OrinocoPreProcessorTest {
 		final int commaStart = text.indexOf(',');
 		final int zStart = text.indexOf('z');
 		final int rparenStart = text.indexOf(')');
+		final int offset = define.length();
 
 		final int lparenId = OrinocoLexer.getCommandId("(");
 		final int rparenId = OrinocoLexer.getCommandId(")");
 		final int commaId = OrinocoLexer.getCommandId(",");
 
 		//todo include #define in tokens?
-		tokenFactory.acceptGlobalVariable(0, textStart, textStart, 5);
-		tokenFactory.acceptCommand(lparenId, lparenStart, lparenStart, 1);
-		tokenFactory.acceptGlobalVariable(1, vStart, vStart, 1);
-		tokenFactory.acceptCommand(commaId, commaStart, commaStart, 1);
-		tokenFactory.acceptGlobalVariable(2, zStart, zStart, 1);
-		tokenFactory.acceptCommand(rparenId, rparenStart, rparenStart, 1);
+		tokenFactory.acceptGlobalVariable(0, 0, textStart, 5);
+		tokenFactory.acceptCommand(lparenId, lparenStart - offset, lparenStart, 1);
+		tokenFactory.acceptGlobalVariable(1, vStart - offset, vStart, 1);
+		tokenFactory.acceptCommand(commaId, commaStart - offset, commaStart, 1);
+		tokenFactory.acceptGlobalVariable(2, zStart - offset, zStart, 1);
+		tokenFactory.acceptCommand(rparenId, rparenStart - offset, rparenStart, 1);
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
