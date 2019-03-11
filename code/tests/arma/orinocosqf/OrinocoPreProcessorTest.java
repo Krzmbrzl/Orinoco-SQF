@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class OrinocoPreProcessorTest {
@@ -89,6 +90,33 @@ public class OrinocoPreProcessorTest {
 		tokenFactory.acceptCommand(commaId, commaStart - offset, commaStart, 1);
 		tokenFactory.acceptGlobalVariable(2, zStart - offset, zStart, 1);
 		tokenFactory.acceptCommand(rparenId, rparenStart - offset, rparenStart, 1);
+
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void simpleParamMacro() {
+		final String expected = "v=z";
+		Consumer<String> cb = s -> assertEquals(expected, s);
+
+		String define = "#define MACRO(arg,arg2) arg=arg2";
+		String text = "MACRO(v,z)";
+		String all = define + "\n" + text;
+		lexerFromText(all, cb);
+
+		final int textStart = define.length() + 1; // +1 for \n
+
+		final int eqId = OrinocoLexer.getCommandId("=");
+
+		final int vInd = expected.indexOf('v');
+		final int eqInd = expected.indexOf('=');
+		final int zInd = expected.indexOf('z');
+
+		tokenFactory.acceptGlobalVariable(0, vInd, textStart, text.length());
+		tokenFactory.acceptCommand(eqId, eqInd, textStart, text.length());
+		tokenFactory.acceptGlobalVariable(1, zInd, textStart, text.length());
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
