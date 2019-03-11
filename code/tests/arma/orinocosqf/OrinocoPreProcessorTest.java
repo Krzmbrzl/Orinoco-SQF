@@ -59,16 +59,17 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(all);
 
 		final int textStart = define.length() + 1; // +1 for \n
-		final int lparenStart = all.indexOf('(');
-		final int vStart = all.indexOf('v');
-		final int commaStart = all.indexOf(',');
-		final int zStart = all.indexOf('z');
-		final int rparenStart = all.indexOf(')');
+		final int lparenStart = text.indexOf('(');
+		final int vStart = text.indexOf('v');
+		final int commaStart = text.indexOf(',');
+		final int zStart = text.indexOf('z');
+		final int rparenStart = text.indexOf(')');
 
 		final int lparenId = OrinocoLexer.getCommandId("(");
 		final int rparenId = OrinocoLexer.getCommandId(")");
 		final int commaId = OrinocoLexer.getCommandId(",");
 
+		//todo include #define in tokens?
 		tokenFactory.acceptGlobalVariable(0, textStart, textStart, 5);
 		tokenFactory.acceptCommand(lparenId, lparenStart, lparenStart, 1);
 		tokenFactory.acceptGlobalVariable(1, vStart, vStart, 1);
