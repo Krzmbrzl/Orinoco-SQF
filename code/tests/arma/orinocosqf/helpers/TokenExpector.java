@@ -41,13 +41,26 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 				fail("Actual ran out of tokens");
 			}
 			AcceptedToken actualNext = actualIter.next();
-			assertEquals(
-					String.format("Expected token mismatch. Expected %s got %s.",
-							expectedToken.toString(),
+			assertEquals(expectedToken.method, actualNext.method);
+			Map<String, Object> actualParams = actualNext.parameters;
+			for (Map.Entry<String, Object> entry : expectedToken.parameters.entrySet()) {
+				Object o = actualParams.get(entry.getKey());
+				if (o == null) {
+					String msg = String.format(
+							"Missing parameter %s in actual token: %s",
+							entry.getKey(),
 							actualNext.toString()
-					)
-					, expectedToken, actualNext
-			);
+					);
+					fail(msg);
+				}
+				String msg = String.format(
+						"Expected %s for parameter %s, got %s",
+						entry.getValue().toString(),
+						entry.getKey(),
+						o.toString()
+				);
+				assertEquals(msg, entry.getValue(), o);
+			}
 		}
 		if (actualIter.hasNext()) {
 			StringBuilder left = new StringBuilder();

@@ -70,7 +70,6 @@ public class OrinocoPreProcessorTest {
 		final int rparenId = OrinocoLexer.getCommandId(")");
 		final int commaId = OrinocoLexer.getCommandId(",");
 
-		//todo include #define in tokens?
 		tokenFactory.acceptGlobalVariable(0, 0, textStart, 5);
 		tokenFactory.acceptCommand(lparenId, lparenStart - offset, lparenStart, 1);
 		tokenFactory.acceptGlobalVariable(1, vStart - offset, vStart, 1);
