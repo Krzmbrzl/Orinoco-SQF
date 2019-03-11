@@ -33,6 +33,10 @@ import org.jetbrains.annotations.NotNull;
  * @since 02/20/2019
  */
 public class OrinocoLexer {
+	public static int getCommandId(@NotNull String command) {
+		return 0; //todo
+	}
+
 	private final OrinocoReader r;
 	private final OrinocoLexerStream lexerStream;
 

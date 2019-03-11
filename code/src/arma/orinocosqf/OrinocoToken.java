@@ -1,7 +1,7 @@
 package arma.orinocosqf;
 
-import jdk.internal.jline.internal.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A token class that can either hold text or an id for things like

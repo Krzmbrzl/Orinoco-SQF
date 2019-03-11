@@ -62,6 +62,10 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 		}
 	}
 
+	public void addExpectedTokens(@NotNull List<AcceptedToken> tokens) {
+		expectedTokens.addAll(tokens);
+	}
+
 	public static class AcceptedToken {
 		private final Map<String, Object> parameters = new HashMap<>();
 		private final AcceptMethod method;
@@ -104,7 +108,7 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 			sb.append("method=");
 			sb.append(method.name());
 			sb.append(',');
-			sb.append("paramethers=");
+			sb.append("parameters=");
 			sb.append(parameters.toString());
 			sb.append('}');
 			return sb.toString();
