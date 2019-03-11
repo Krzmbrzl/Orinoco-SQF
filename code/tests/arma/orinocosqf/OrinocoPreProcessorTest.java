@@ -1,5 +1,6 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.helpers.TestOrinocoLexer;
 import arma.orinocosqf.helpers.TokenExpector;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -8,24 +9,32 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+
+import static org.junit.Assert.fail;
 
 public class OrinocoPreProcessorTest {
 	private final TokenExpector expector = new TokenExpector();
 	private final OrinocoPreProcessor preProcessor = new OrinocoPreProcessor(expector);
-	private OrinocoLexer lexer;
+	private TestOrinocoLexer lexer;
 	private final TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
 
-	private void lexerFromText(@NotNull String text) {
-		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor);
+	private void lexerFromText(@NotNull String text, @NotNull Consumer<String> preprocessTextCb) {
+		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 	}
 
-	private void lexerFromFile(@NotNull File f) throws FileNotFoundException {
-		lexer = new OrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), preProcessor);
+	private void lexerFromFile(@NotNull File f, @NotNull Consumer<String> preprocessTextCb) throws FileNotFoundException {
+		lexer = new TestOrinocoLexer(
+				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
+				preProcessor,
+				preprocessTextCb
+		);
 	}
 
 	@Test
 	public void noPreProcessing_command() {
-		lexerFromText("format");
+		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		lexerFromText("format", cb);
 		final int formatId = OrinocoLexer.getCommandId("format");
 		tokenFactory.acceptCommand(formatId, 0, 0, 6);
 		expector.addExpectedTokens(tokenFactory.getTokens());
@@ -35,7 +44,8 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_globalVariable() {
-		lexerFromText("text1");
+		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		lexerFromText("text1", cb);
 		tokenFactory.acceptGlobalVariable(0, 0, 0, 5);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -44,7 +54,8 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_localVariable() {
-		lexerFromText("_text1");
+		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		lexerFromText("_text1", cb);
 		tokenFactory.acceptLocalVariable(0, 0, 0, 6);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -53,10 +64,12 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_macroUnmatched() {
+		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+
 		String define = "#define Macro(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
 		String all = define + "\n" + text;
-		lexerFromText(all);
+		lexerFromText(all, cb);
 
 		final int textStart = define.length() + 1; // +1 for \n
 		final int lparenStart = text.indexOf('(');
