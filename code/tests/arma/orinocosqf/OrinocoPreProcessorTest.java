@@ -98,6 +98,7 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void simpleParamMacro() {
+		// This test is for a simple macro with parameters
 		final String expected = "v=z";
 		Consumer<String> cb = s -> assertEquals(expected, s);
 
@@ -121,5 +122,138 @@ public class OrinocoPreProcessorTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void noPreProcessing_matchButMissingHashHash() {
+		// this test creates valid defines that get matched, but arma's preprocessor doesn't
+		// allow for replacing text inbetween text unless there is a ##
+		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+
+		String[] lines = {
+				"#define e a",
+				"#define oo a",
+				"The cow jumped over the moon!"
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void simpleDefine() {
+		// This test is for a simple macro without parameters
+
+		String[] expected = {"a", "b", "c"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"#define ARG2 b",
+				"#define ARG3 c",
+				"ARG = 1 + ARG2 + ARG3"
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void simpleDefineWithParam() {
+		// This test is for a simple macro with a single parameter
+
+		String[] expected = {"N(0)"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define N(NUMBER) number NUMBER",
+				"Hello N(0)",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void simpleDefineWithParamMissingGlue() {
+		// This test is for a simple macro with a single parameter,
+		// but there is no preprocessing because of missing ##
+
+		Consumer<String> cb = s -> fail("Expected no text to preprocess, got " + s);
+
+		String[] lines = {
+				"#define N(NUMBER) number NUMBER",
+				"Hello N(0)word",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void simpleDefineWithParamWithGlue() {
+		// This test is for a simple macro with a single parameter,
+		// and there is a ## between the macro and a word.
+
+		String[] expected = {"N(0)##word"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define N(NUMBER) number NUMBER",
+				"Hello N(0)##word",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void glueTwist() {
+		// This test is for a simple macro without parameters with a twist: a macro is almost matched (ARG2),
+		// but the ## makes it match ARG instead and then glues it with a 2
+
+		String[] expected = {"ARG", "ARG##2", "ARG3"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"#define ARG2 b",
+				"#define ARG3 c",
+				"ARG = 1 + ARG##2 + ARG3"
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	// todo glue(g1,g2) g1##g2
+	// todo model = \\OFP2\\Structures\\Various\\##FOLDER##\\##FOLDER; #define FOLDER myFolder
+
+	@Test
+	public void glueInMacroBody() {
+		// This test is for checking glue (##) inside a macro body
+
+		String[] expected = {"twenty", "##TWO##0"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define TWO 2",
+				"#define twenty ##TWO##0",
+				"hint str twenty;", // outputs "20"
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
 	}
 }
