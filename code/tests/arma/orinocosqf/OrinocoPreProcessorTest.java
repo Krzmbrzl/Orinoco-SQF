@@ -164,7 +164,7 @@ public class OrinocoPreProcessorTest {
 	public void simpleDefineWithParam() {
 		// This test is for a simple macro with a single parameter
 
-		String[] expected = {"N(0)"};
+		String[] expected = {"number 0"};
 		int[] expectedInd = {0};
 		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
@@ -200,7 +200,7 @@ public class OrinocoPreProcessorTest {
 		// This test is for a simple macro with a single parameter,
 		// and there is a ## between the macro and a word.
 
-		String[] expected = {"N(0)##word"};
+		String[] expected = {"Hello number 0word"};
 		int[] expectedInd = {0};
 		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
@@ -219,7 +219,7 @@ public class OrinocoPreProcessorTest {
 		// This test is for a simple macro without parameters with a twist: a macro is almost matched (ARG2),
 		// but the ## makes it match ARG instead and then glues it with a 2
 
-		String[] expected = {"ARG", "ARG##2", "ARG3"};
+		String[] expected = {"a", "a2", "c"};
 		int[] expectedInd = {0};
 		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
@@ -242,7 +242,7 @@ public class OrinocoPreProcessorTest {
 	public void glueInMacroBody() {
 		// This test is for checking glue (##) inside a macro body
 
-		String[] expected = {"twenty", "##TWO##0"};
+		String[] expected = {"##TWO##0", "20"};
 		int[] expectedInd = {0};
 		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
