@@ -286,23 +286,6 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 	}
 
-
-	@Test
-	public void glueInString() {
-		// This test is for glue inside a string literal
-
-		Consumer<String> cb = s -> assertEquals("'\\OFP2\\Structures\\Various\\myFolder\\myFolder;'", s);
-
-		String[] lines = {
-				"#define FOLDER myFolder",
-				"model = '\\OFP2\\Structures\\Various\\##FOLDER##\\##FOLDER;'",
-		};
-
-		lexerFromText(String.join("\n", lines), cb);
-
-		lexer.start();
-	}
-
 	@Test
 	public void stringify() { //todo talk about this
 		// This test is for stringify
