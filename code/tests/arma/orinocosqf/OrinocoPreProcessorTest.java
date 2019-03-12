@@ -179,6 +179,22 @@ public class OrinocoPreProcessorTest {
 	}
 
 	@Test
+	public void simpleDefineWithParams() {
+		// This test is for a simple macro with multiple parameters
+
+		Consumer<String> cb = s -> assertEquals("car setVelocity [0,0,5];", s);
+
+		String[] lines = {
+				"#define BLASTOFF(UNIT,RATE) UNIT setVelocity [0,0,RATE];",
+				"disableSerialization; BLASTOFF(car,5)",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
 	public void simpleDefineWithParamMissingGlue() {
 		// This test is for a simple macro with a single parameter,
 		// but there is no preprocessing because of missing ##
@@ -235,9 +251,6 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 	}
 
-	// todo glue(g1,g2) g1##g2
-	// todo model = \\OFP2\\Structures\\Various\\##FOLDER##\\##FOLDER; #define FOLDER myFolder
-
 	@Test
 	public void glueInMacroBody() {
 		// This test is for checking glue (##) inside a macro body
@@ -250,6 +263,58 @@ public class OrinocoPreProcessorTest {
 				"#define TWO 2",
 				"#define twenty ##TWO##0",
 				"hint str twenty;", // outputs "20"
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void glueParameters() {
+		// This test is for glueing 2 macro parameters together
+
+		Consumer<String> cb = s -> assertEquals("123456", s);
+
+		String[] lines = {
+				"#define GLUE(g1,g2) g1##g2",
+				"GLUE(123,456)",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+
+	@Test
+	public void glueInString() {
+		// This test is for glue inside a string literal
+
+		Consumer<String> cb = s -> assertEquals("'\\OFP2\\Structures\\Various\\myFolder\\myFolder;'", s);
+
+		String[] lines = {
+				"#define FOLDER myFolder",
+				"model = '\\OFP2\\Structures\\Various\\##FOLDER##\\##FOLDER;'",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void stringify() { //todo talk about this
+		// This test is for stringify
+
+		String[] expected = {"\"123\";", "\"456\";"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define STRINGIFY(s) #s;",
+				"test1 = STRINGIFY(123)",
+				"test2 = STRINGIFY(FOO)"
 		};
 
 		lexerFromText(String.join("\n", lines), cb);
