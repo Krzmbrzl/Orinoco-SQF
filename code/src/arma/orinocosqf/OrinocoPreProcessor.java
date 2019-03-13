@@ -10,9 +10,10 @@ import org.jetbrains.annotations.NotNull;
  */
 public class OrinocoPreProcessor implements OrinocoLexerStream {
 	private OrinocoLexer lexer;
+	private final OrinocoTokenProcessor processor;
 
-	public OrinocoPreProcessor() {
-
+	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor p) {
+		this.processor = p;
 	}
 
 	@Override

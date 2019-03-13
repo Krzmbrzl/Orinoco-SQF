@@ -32,7 +32,11 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 02/20/2019
  */
-public abstract class OrinocoLexer {
+public class OrinocoLexer {
+	public static int getCommandId(@NotNull String command) {
+		return 0; //todo
+	}
+
 	private final OrinocoReader r;
 	private final OrinocoLexerStream lexerStream;
 
@@ -45,7 +49,9 @@ public abstract class OrinocoLexer {
 	/**
 	 * Starts the lexing process.
 	 */
-	public abstract void start();
+	public void start() {
+
+	}
 
 	/**
 	 * Accepts partially or fully preprocessed text (see Example 1 in class level
@@ -53,5 +59,7 @@ public abstract class OrinocoLexer {
 	 *
 	 * @param text the preprocessed, untokenized text
 	 */
-	abstract void acceptPreProcessedText(@NotNull String text);
+	public void acceptPreProcessedText(@NotNull String text) {
+
+	}
 }
