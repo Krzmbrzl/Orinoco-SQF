@@ -1,8 +1,11 @@
 package arma.orinocosqf.helpers;
 
+import arma.orinocosqf.OrinocoLexer;
 import arma.orinocosqf.OrinocoLexerContext;
 import arma.orinocosqf.OrinocoLexerLiteralType;
-import arma.orinocosqf.OrinocoTokenProcessor;
+import arma.orinocosqf.OrinocoLexerStream;
+import arma.orinocosqf.PreProcessorCommand;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -16,17 +19,27 @@ import static org.junit.Assert.fail;
  * @author K
  * @since 3/10/19
  */
-public class TokenExpector implements OrinocoTokenProcessor {
+public class TokenExpector implements OrinocoLexerStream {
 	private final AcceptedTokenFactory acceptFactory;
 	private final List<AcceptedToken> expectedTokens;
+	private boolean skipPreprocessing;
 
 	public TokenExpector() {
-		this(new ArrayList<>());
+		this(new ArrayList<>(), false);
+	}
+
+	public TokenExpector(boolean skipPreprocessing) {
+		this(new ArrayList<>(), skipPreprocessing);
 	}
 
 	public TokenExpector(@NotNull List<AcceptedToken> expectedTokens) {
+		this(expectedTokens, false);
+	}
+
+	public TokenExpector(@NotNull List<AcceptedToken> expectedTokens, boolean skipPreprocessing) {
 		this.acceptFactory = new AcceptedTokenFactory();
 		this.expectedTokens = expectedTokens;
+		this.skipPreprocessing = skipPreprocessing;
 	}
 
 	public void addExpectedToken(@NotNull AcceptedToken t) {
@@ -107,6 +120,38 @@ public class TokenExpector implements OrinocoTokenProcessor {
 	@Override
 	public void preProcessorCommandSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
 		acceptFactory.preProcessorCommandSkipped(offset, length, ctx);
+	}
+
+	@Override
+	public void setLexer(@NotNull OrinocoLexer lexer) {
+		acceptFactory.setLexer(lexer);
+	}
+
+	@Override
+	public boolean skipPreProcessing() {
+		return skipPreprocessing;
+	}
+
+	@Override
+	public void acceptPreProcessorCommand(@NotNull PreProcessorCommand command, @NotNull char[] bufReadOnly, int offset, int bodyLength) {
+		acceptFactory.acceptPreProcessorCommand(command, bufReadOnly, offset, bodyLength);
+	}
+
+	@Override
+	public void preProcessToken(@NotNull char[] bufReadOnly, int offset, int length) {
+		acceptFactory.preProcessToken(bufReadOnly, offset, length);
+	}
+
+	@Override
+	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+			@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, ctx);
+	}
+
+	@Override
+	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+			@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, ctx);
 	}
 
 	@Override
@@ -218,9 +263,46 @@ public class TokenExpector implements OrinocoTokenProcessor {
 			t.putParameter("offset", offset);
 			return t;
 		}
+
+		@NotNull
+		public static AcceptedToken acceptPreProcessorCommand(@NotNull PreProcessorCommand command, @NotNull char[] bufReadOnly, int offset,
+				int bodyLength) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.acceptPreprocessorCommand);
+			t.putParameter("command", command);
+			t.putParameter("bufReadOnly", bufReadOnly);
+			t.putParameter("offset", offset);
+			t.putParameter("bodyLength", bodyLength);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+				@NotNull String originalToken, @NotNull String preprocessedToken) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.acceptWhitespace);
+			t.putParameter("originalOffset", originalOffset);
+			t.putParameter("originalLength", originalLength);
+			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("preprocessedLength", preprocessedLength);
+			t.putParameter("originalToken", originalToken);
+			t.putParameter("preprocessedToken", preprocessedToken);
+			return t;
+		}
+
+		@NotNull
+		public static AcceptedToken acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+				@NotNull String originalToken, @NotNull String preprocessedToken) {
+			AcceptedToken t = new AcceptedToken(AcceptMethod.acceptComment);
+			t.putParameter("originalOffset", originalOffset);
+			t.putParameter("originalLength", originalLength);
+			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("preprocessedLength", preprocessedLength);
+			t.putParameter("originalToken", originalToken);
+			t.putParameter("preprocessedToken", preprocessedToken);
+			return t;
+		}
 	}
 
-	public static class AcceptedTokenFactory implements OrinocoTokenProcessor {
+	public static class AcceptedTokenFactory implements OrinocoLexerStream {
 		private final List<AcceptedToken> q = new ArrayList<>();
 
 		@Override
@@ -264,6 +346,43 @@ public class TokenExpector implements OrinocoTokenProcessor {
 		}
 
 		@Override
+		public void setLexer(@NotNull OrinocoLexer lexer) {
+
+		}
+
+		@Override
+		public boolean skipPreProcessing() {
+			return true;
+		}
+
+		@Override
+		public void acceptPreProcessorCommand(@NotNull PreProcessorCommand command, @NotNull char[] bufReadOnly, int offset,
+				int bodyLength) {
+			q.add(AcceptedToken.acceptPreProcessorCommand(command, bufReadOnly, offset, bodyLength));
+		}
+
+		@Override
+		public void preProcessToken(@NotNull char[] bufReadOnly, int offset, int length) {
+
+		}
+
+		@Override
+		public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+				@NotNull OrinocoLexerContext ctx) {
+			q.add(AcceptedToken.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
+					ctx.getTextBuffer().getText(originalOffset, originalLength),
+					ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength)));
+		}
+
+		@Override
+		public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+				@NotNull OrinocoLexerContext ctx) {
+			q.add(AcceptedToken.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
+					ctx.getTextBuffer().getText(originalOffset, originalLength),
+					ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength)));
+		}
+
+		@Override
 		public void end() {
 
 		}
@@ -275,6 +394,7 @@ public class TokenExpector implements OrinocoTokenProcessor {
 	}
 
 	public enum AcceptMethod {
-		AcceptCommand, AcceptLocalVariable, AcceptGlobalVariable, AcceptLiteral, PreProcessorTokenSkipped, PreProcessorCommandSkipped
+		AcceptCommand, AcceptLocalVariable, AcceptGlobalVariable, AcceptLiteral, PreProcessorTokenSkipped, PreProcessorCommandSkipped,
+		acceptPreprocessorCommand, acceptWhitespace, acceptComment
 	}
 }
