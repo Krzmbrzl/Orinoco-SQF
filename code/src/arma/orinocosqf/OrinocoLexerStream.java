@@ -60,7 +60,7 @@ public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
 	void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerStream ctx);
+			@NotNull OrinocoLexerContext ctx);
 
 	/**
 	 * Used to notify the stream that a comment (either single- or multiline) has been lexed
@@ -77,5 +77,5 @@ public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
 	void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerStream ctx);
+			@NotNull OrinocoLexerContext ctx);
 }

@@ -82,13 +82,13 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerStream ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 
 	}
 
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerStream ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 
 	}
 
