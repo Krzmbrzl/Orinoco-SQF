@@ -62,4 +62,13 @@ public class OrinocoLexer {
 	public void acceptPreProcessedText(@NotNull String text) {
 
 	}
+
+	/**
+	 * @return The current {@link OrinocoLexerContext} of this lexer
+	 */
+	@NotNull
+	public OrinocoLexerContext getContext() {
+		// TODO
+		throw new UnsupportedOperationException("Get context not yet implemented!");
+	}
 }
