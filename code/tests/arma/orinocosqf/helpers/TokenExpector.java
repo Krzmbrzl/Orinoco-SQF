@@ -77,6 +77,9 @@ public class TokenExpector implements OrinocoLexerStream {
 			}
 			fail("Too many tokens lexed. Leftovers:\n" + left.toString());
 		}
+		
+		// clear stored tokens
+		acceptFactory.getTokens().clear();
 	}
 
 	public void addExpectedTokens(@NotNull List<AcceptedToken> tokens) {
