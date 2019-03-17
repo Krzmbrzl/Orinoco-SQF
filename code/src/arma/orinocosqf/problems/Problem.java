@@ -13,24 +13,24 @@ public abstract class Problem {
 	 * @return The display name of this problem
 	 */
 	@NotNull
-	abstract String getDisplayName();
+	public abstract String getDisplayName();
 
 	/**
 	 * @return The general description of this problem
 	 */
 	@NotNull
-	abstract String getDescription();
+	public abstract String getDescription();
 
 	/**
 	 * @return The {@link Severity} of this problem
 	 */
 	@NotNull
-	abstract Severity getSeverity();
+	public abstract Severity getSeverity();
 
 	/**
 	 * @return The unique Id of this problem
 	 */
-	abstract int getId();
+	public abstract int getId();
 
 
 	/**
@@ -45,11 +45,23 @@ public abstract class Problem {
 
 	// Base classes of all concrete problems
 	public abstract class Warning extends Problem {
+		@Override
+		public Severity getSeverity() {
+			return Severity.WARNING;
+		}
 	}
 
 	public abstract class Error extends Problem {
+		@Override
+		public Severity getSeverity() {
+			return Severity.ERROR;
+		}
 	}
 
 	public abstract class Info extends Problem {
+		@Override
+		public Severity getSeverity() {
+			return Severity.INFO;
+		}
 	}
 }
