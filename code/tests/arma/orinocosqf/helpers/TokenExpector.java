@@ -3,7 +3,6 @@ package arma.orinocosqf.helpers;
 import arma.orinocosqf.OrinocoLexerContext;
 import arma.orinocosqf.OrinocoLexerLiteralType;
 import arma.orinocosqf.OrinocoTokenProcessor;
-import arma.orinocosqf.OrinocoTokenProcessorWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
