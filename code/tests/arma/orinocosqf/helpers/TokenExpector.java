@@ -17,8 +17,8 @@ import static org.junit.Assert.fail;
  * @author K
  * @since 3/10/19
  */
-public class TokenExpector extends OrinocoTokenProcessorWrapper {
-	private final List<AcceptedToken> actualTokens;
+public class TokenExpector implements OrinocoTokenProcessor {
+	private final AcceptedTokenFactory acceptFactory;
 	private final List<AcceptedToken> expectedTokens;
 
 	public TokenExpector() {
@@ -26,9 +26,8 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 	}
 
 	public TokenExpector(@NotNull List<AcceptedToken> expectedTokens) {
-		super(new AcceptedTokenFactory());
+		this.acceptFactory = new AcceptedTokenFactory();
 		this.expectedTokens = expectedTokens;
-		this.actualTokens = ((AcceptedTokenFactory) this.wrappedProcessor).getTokens();
 	}
 
 	public void addExpectedToken(@NotNull AcceptedToken t) {
@@ -36,7 +35,7 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 	}
 
 	public void assertTokensMatch() {
-		Iterator<AcceptedToken> actualIter = actualTokens.iterator();
+		Iterator<AcceptedToken> actualIter = acceptFactory.getTokens().iterator();
 		for (AcceptedToken expectedToken : expectedTokens) {
 			if (!actualIter.hasNext()) {
 				fail("Actual ran out of tokens");
@@ -47,19 +46,11 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 			for (Map.Entry<String, Object> entry : expectedToken.parameters.entrySet()) {
 				Object o = actualParams.get(entry.getKey());
 				if (o == null) {
-					String msg = String.format(
-							"Missing parameter %s in actual token: %s",
-							entry.getKey(),
-							actualNext.toString()
-					);
+					String msg = String.format("Missing parameter %s in actual token: %s", entry.getKey(), actualNext.toString());
 					fail(msg);
 				}
-				String msg = String.format(
-						"Expected %s for parameter %s, got %s",
-						entry.getValue().toString(),
-						entry.getKey(),
-						o.toString()
-				);
+				String msg = String.format("Expected %s for parameter %s, got %s", entry.getValue().toString(), entry.getKey(),
+						o.toString());
 				assertEquals(msg, entry.getValue(), o);
 			}
 		}
@@ -78,6 +69,50 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 
 	public void addExpectedTokens(@NotNull List<AcceptedToken> tokens) {
 		expectedTokens.addAll(tokens);
+	}
+
+	@Override
+	public void begin() {
+		acceptFactory.begin();
+	}
+
+	@Override
+	public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+			@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.acceptCommand(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
+	}
+
+	@Override
+	public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+			@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
+	}
+
+	@Override
+	public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+			@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
+	}
+
+	@Override
+	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+			int originalLength, @NotNull OrinocoLexerContext ctx) {
+		acceptFactory.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
+	}
+
+	@Override
+	public void preProcessorTokenSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
+		acceptFactory.preProcessorTokenSkipped(offset, length, ctx);
+	}
+
+	@Override
+	public void preProcessorCommandSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
+		acceptFactory.preProcessorCommandSkipped(offset, length, ctx);
+	}
+
+	@Override
+	public void end() {
+		acceptFactory.end();
 	}
 
 	public static class AcceptedToken {
@@ -111,8 +146,7 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 				return false;
 			}
 			AcceptedToken other = (AcceptedToken) o;
-			return this.method == other.method
-					&& parameters.equals(other.parameters);
+			return this.method == other.method && parameters.equals(other.parameters);
 		}
 
 		@Override
@@ -160,7 +194,7 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 
 		@NotNull
 		public static AcceptedToken acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
-												  int originalOffset, int originalLength) {
+				int originalOffset, int originalLength) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptLiteral);
 			t.putParameter("type", type);
 			t.putParameter("token", token);
@@ -196,24 +230,28 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 		}
 
 		@Override
-		public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength, @NotNull OrinocoLexerContext ctx) {
+		public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+				@NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptCommand(id, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
-		public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength, @NotNull OrinocoLexerContext ctx) {
+		public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+				@NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
-		public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength, @NotNull OrinocoLexerContext ctx) {
+		public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+				@NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
-		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength,
-								  int originalOffset, int originalLength, @NotNull OrinocoLexerContext ctx) {
-			q.add(AcceptedToken.acceptLiteral(type, ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength), preprocessedOffset, originalOffset, originalLength));
+		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+				int originalLength, @NotNull OrinocoLexerContext ctx) {
+			q.add(AcceptedToken.acceptLiteral(type, ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength),
+					preprocessedOffset, originalOffset, originalLength));
 		}
 
 		@Override
@@ -238,11 +276,6 @@ public class TokenExpector extends OrinocoTokenProcessorWrapper {
 	}
 
 	public enum AcceptMethod {
-		AcceptCommand,
-		AcceptLocalVariable,
-		AcceptGlobalVariable,
-		AcceptLiteral,
-		PreProcessorTokenSkipped,
-		PreProcessorCommandSkipped
+		AcceptCommand, AcceptLocalVariable, AcceptGlobalVariable, AcceptLiteral, PreProcessorTokenSkipped, PreProcessorCommandSkipped
 	}
 }
