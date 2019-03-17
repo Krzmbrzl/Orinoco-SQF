@@ -80,6 +80,7 @@ public class TokenExpector implements OrinocoLexerStream {
 		
 		// clear stored tokens
 		acceptFactory.getTokens().clear();
+		expectedTokens.clear();
 	}
 
 	public void addExpectedTokens(@NotNull List<AcceptedToken> tokens) {
