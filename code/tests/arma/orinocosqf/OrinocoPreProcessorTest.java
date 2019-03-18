@@ -304,4 +304,13 @@ public class OrinocoPreProcessorTest {
 
 		lexer.start();
 	}
+
+	// todo
+	// #define MACRO(NAME,VAL) NAME=VAL
+	// #define MACRO2(ARG2) MACRO(ARG2,1)
+
+	// todo this tests the order of defines isn't relevant
+	// #define ONE TWO
+	// #define TWO Something
+	// ONE
 }
