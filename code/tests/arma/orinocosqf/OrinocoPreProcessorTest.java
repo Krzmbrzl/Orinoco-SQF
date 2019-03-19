@@ -164,9 +164,7 @@ public class OrinocoPreProcessorTest {
 	public void simpleDefineWithParam() {
 		// This test is for a simple macro with a single parameter
 
-		String[] expected = {"number 0"};
-		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<String> cb = s -> assertEquals("number 0", s);
 
 		String[] lines = {
 				"#define N(NUMBER) number NUMBER",
@@ -255,9 +253,7 @@ public class OrinocoPreProcessorTest {
 	public void glueInMacroBody() {
 		// This test is for checking glue (##) inside a macro body
 
-		String[] expected = {"##TWO##0", "20"};
-		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<String> cb = s -> assertEquals("20", s);
 
 		String[] lines = {
 				"#define TWO 2",
@@ -287,7 +283,7 @@ public class OrinocoPreProcessorTest {
 	}
 
 	@Test
-	public void stringify() { //todo talk about this
+	public void stringify() {
 		// This test is for stringify
 
 		String[] expected = {"\"123\";", "\"456\";"};
@@ -305,12 +301,229 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 	}
 
-	// todo
-	// #define MACRO(NAME,VAL) NAME=VAL
-	// #define MACRO2(ARG2) MACRO(ARG2,1)
+	@Test
+	public void embodiedMacro() {
+		// This test is for testing if a macro inside the body of another macro will be properly invoked
 
-	// todo this tests the order of defines isn't relevant
-	// #define ONE TWO
-	// #define TWO Something
-	// ONE
+		Consumer<String> cb = s -> assertEquals("Foo=1;", s);
+
+		String[] lines = {
+				"#define ASSIGN(NAME,VAL) NAME=VAL",
+				"#define SET_TO_ONE(NAME) ASSIGN(NAME,1)",
+				"SET_TO_ONE(Foo);"
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+
+		// This test is to make sure that there are different instances of NAME across different macro definitions.
+		// Notice how in this test, ASSIGN uses KEY rather than NAME.
+		String[] lines2 = {
+				"#define ASSIGN(KEY,VAL) KEY=VAL",
+				"#define SET_TO_ONE(NAME) ASSIGN(NAME,1)",
+				"SET_TO_ONE(Foo);"
+		};
+
+		lexerFromText(String.join("\n", lines2), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void macroDefineOrderDoesntMatter() {
+		// This test is for making sure that no matter the order of the #defines, the embodied macros are still properly handled
+
+		Consumer<String> cb = s -> assertEquals("Something", s);
+
+		String[] lines = {
+				"#define ONE TWO", //notice how ONE is dependent on TWO, but TWO is defined after ONE
+				"#define TWO Something",
+				"ONE",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+
+		lexer.start();
+	}
+
+	@Test
+	public void undef() {
+		// This test is for a simple macro that becomes undefined
+
+		String[] expected = {"a"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"ARG",
+				"#undef ARG",
+				"ARG",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void undefThenRedef() {
+		// This test is for a simple macro that becomes undefined and then redefined
+
+		String[] expected = {"a", "BB"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"ARG",
+				"#undef ARG",
+				"ARG",
+				"#define ARG BB",
+				"ARG",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void ifdef() {
+		// This test is for a simple macro that becomes defined inside an ifdef
+
+		String[] expected = {"def", "def"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"#ifdef ARG",
+				"#define DEF def",
+				"DEF",
+				"#endif",
+				"DEF",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void ifdefElse() {
+		// This test is for #else for #ifdef
+
+		String[] expected = {"beg"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#ifdef ARG",
+				"#define DEF def",
+				"DEF", //this is here to ensure the #define is skipped
+				"#else",
+				"#define BEG beg",
+				"#endif",
+				"DEF",
+				"ARG",
+				"BEG",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void ifdefIgnoreElse() {
+		// This test is for #else for #ifdef, but the #else block is skipped because #ifdef is true
+
+		String[] expected = {"def", "a"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"#ifdef ARG",
+				"#define DEF def",
+				"#else",
+				"#define BEG beg",
+				"#endif",
+				"DEF",
+				"ARG",
+				"BEG",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void ifndef() {
+		// This test is for a simple macro that becomes defined inside an ifndef
+
+		String[] expected = {"def", "def"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#ifndef ARG",
+				"#define DEF def",
+				"DEF",
+				"#endif",
+				"DEF",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void ifndefElse() {
+		// This test is for #else for #ifndef
+
+		String[] expected = {"a", "beg"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"#ifndef ARG",
+				"#define DEF def",
+				"DEF", //this is here to ensure the #define is skipped
+				"#else",
+				"#define BEG beg",
+				"#endif",
+				"DEF",
+				"ARG",
+				"BEG",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	@Test
+	public void ifndefIgnoreElse() {
+		// This test is for #else for #ifndef but #else block is skipped because #ifndef is true
+
+		String[] expected = {"def"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#ifndef ARG",
+				"#define DEF def",
+				"#else",
+				"#define BEG beg",
+				"#endif",
+				"DEF",
+				"ARG",
+				"BEG",
+		};
+
+		lexerFromText(String.join("\n", lines), cb);
+		lexer.start();
+	}
+
+	//todo include: discuss how lexer handles working directories for preprocessor include
+
 }
