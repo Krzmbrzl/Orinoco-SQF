@@ -130,12 +130,12 @@ public class PreProcessorMacro {
 	public static class MacroArgumentSegment extends BodySegment {
 
 		private final String argumentName;
-		private final BodySegment replacement;
+		private final int argIndex;
 
-		public MacroArgumentSegment(@NotNull PreProcessorMacro macro, @NotNull String argumentName, @NotNull BodySegment replacement) {
+		public MacroArgumentSegment(@NotNull PreProcessorMacro macro, @NotNull String argumentName, int argIndex) {
 			super(macro);
 			this.argumentName = argumentName;
-			this.replacement = replacement;
+			this.argIndex = argIndex;
 		}
 
 		@NotNull
@@ -146,7 +146,7 @@ public class PreProcessorMacro {
 		@NotNull
 		@Override
 		public CharSequence applyArguments(@NotNull List<CharSequence> args) {
-			return replacement.applyArguments(args);
+			return args.get(argIndex);
 		}
 
 		@Override
@@ -157,7 +157,7 @@ public class PreProcessorMacro {
 
 		@Override
 		public String toString() {
-			return "MacroArgumentSegment{" + argumentName + ", repl=" + replacement + '}';
+			return "MacroArgumentSegment{" + argumentName + ", index=" + argIndex + '}';
 		}
 	}
 
