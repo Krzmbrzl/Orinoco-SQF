@@ -51,6 +51,64 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
+	public void literal_string_doubleQuotes_escapedQuotes() {
+		String input = "\"\"\"\"";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "\"With \"\"input\"\"\"";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "\"With \"\"\"\"input\"\"\"\"\"";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void literal_string_doubleQuotes_containingSingeQuotes() {
+		String input = "\"'\"";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "\"With 'input'\"";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "\"With ''input''\"";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
 	public void literal_string_singleQuotes() {
 		String input = "''";
 		lexerFromText(input);
@@ -62,6 +120,64 @@ public class OrinocoLexerTest {
 		
 		
 		input = "'With input'";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void literal_string_singleQuotes_escapedQuotes() {
+		String input = "''''";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "'With ''input'''";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "'With ''''input'''''";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void literal_string_singleQuotes_containingDoubleQuotes() {
+		String input = "'\"'";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "'With \"input\"'";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "'With \"\"input\"\"'";
 		lexerFromText(input);
 		
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
