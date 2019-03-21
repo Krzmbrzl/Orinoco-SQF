@@ -542,7 +542,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void globalVariable() throws UnknownIdException {
+	public void globalVariables() throws UnknownIdException {
 		String input = "test";
 		lexerFromText(input);
 		
@@ -562,7 +562,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void globalVariable_withNumbers() throws UnknownIdException {
+	public void globalVariables_withNumbers() throws UnknownIdException {
 		String input = "test123";
 		lexerFromText(input);
 		
@@ -591,7 +591,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void globalVariable_withUnderscores() throws UnknownIdException {
+	public void globalVariables_withUnderscores() throws UnknownIdException {
 		String input = "test_";
 		lexerFromText(input);
 		
@@ -629,7 +629,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void globalVariable_withNumbersAndUnderscores() throws UnknownIdException {
+	public void globalVariables_withNumbersAndUnderscores() throws UnknownIdException {
 		String input = "test_123";
 		lexerFromText(input);
 		
@@ -667,7 +667,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void localVariable() throws UnknownIdException {
+	public void localVariables() throws UnknownIdException {
 		String input = "_test";
 		lexerFromText(input);
 		
@@ -687,7 +687,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void localVariable_withNumbers() throws UnknownIdException {
+	public void localVariables_withNumbers() throws UnknownIdException {
 		String input = "_test123";
 		lexerFromText(input);
 		
@@ -716,7 +716,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void localVariable_withUnderscores() throws UnknownIdException {
+	public void localVariables_withUnderscores() throws UnknownIdException {
 		String input = "_test_";
 		lexerFromText(input);
 		
@@ -754,7 +754,7 @@ public class OrinocoLexerTest {
 	}
 	
 	@Test
-	public void localVariable_withNumbersAndUnderscores() throws UnknownIdException {
+	public void localVariables_withNumbersAndUnderscores() throws UnknownIdException {
 		String input = "_test_123";
 		lexerFromText(input);
 		
@@ -786,6 +786,46 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 		
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void comments_singleLine() {
+		String input = "//";
+		lexerFromText(input);
+		
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "// I am a comment";
+		lexerFromText(input);
+		
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void comments_singleLine_weirdCharacters() {
+		String input = "//#`}^°<>~,;.:-_äöü";
+		lexerFromText(input);
+		
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "// ĀǢŒÞ¢ǿ"; // unicode
+		lexerFromText(input);
+		
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
