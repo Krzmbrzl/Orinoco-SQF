@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.TokenExpector;
 
 public class OrinocoLexerTest {
@@ -28,6 +29,14 @@ public class OrinocoLexerTest {
 
 	private void lexerFromFile(@NotNull File f) throws FileNotFoundException {
 		lexer = new OrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), expector);
+	}
+	
+	private IdTransformer<String> getVariableTransformer() {
+		throw new UnsupportedOperationException("Variable ID-transformer not yet implemented");
+	}
+	
+	private IdTransformer<String> getCommandTransformer() {
+		throw new UnsupportedOperationException("Command ID-transformer not yet implemented");
 	}
 
 	@Test
@@ -527,6 +536,256 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 		
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void globalVariable() throws UnknownIdException {
+		String input = "test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "otherTest";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void globalVariable_withNumbers() throws UnknownIdException {
+		String input = "test123";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "other456Test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "o7the8rTe9st10";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void globalVariable_withUnderscores() throws UnknownIdException {
+		String input = "test_";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "other_Test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "o_the_rTe_st__";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "o_the______rTe_st__";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void globalVariable_withNumbersAndUnderscores() throws UnknownIdException {
+		String input = "test_123";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "test_123_";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "other_456_Test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "o_7___the_8rTe____9____st_10____";
+		lexerFromText(input);
+		
+		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void localVariable() throws UnknownIdException {
+		String input = "_test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_otherTest";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void localVariable_withNumbers() throws UnknownIdException {
+		String input = "_test123";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_other456Test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_o7the8rTe9st10";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void localVariable_withUnderscores() throws UnknownIdException {
+		String input = "_test_";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_other_Test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_o_the_rTe_st__";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_o_the______rTe_st__";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void localVariable_withNumbersAndUnderscores() throws UnknownIdException {
+		String input = "_test_123";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_test_123_";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_other_456_Test";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "_o_7___the_8rTe____9____st_10____";
+		lexerFromText(input);
+		
+		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
