@@ -36,8 +36,12 @@ public class PreProcessorMacro {
 	 */
 	private final BodySegment body;
 
+	/** The {@link MacroSet} instance which contains this macro */
+	protected final MacroSet macroSet;
+
 	public PreProcessorMacro(@NotNull MacroSet macroSet, @NotNull String name, @NotNull List<String> params,
 							 @NotNull char[] buffReadOnly, int boffset, int length) {
+		this.macroSet = macroSet;
 		this.name = name;
 		int i = 0;
 		if (params.isEmpty()) {
@@ -79,24 +83,53 @@ public class PreProcessorMacro {
 		return null; // todo
 	}
 
+	/**
+	 * A {@link BodySegment} is a portion of a {@link PreProcessorMacro} body. #define MACRO body. When a macro is invoked, use {@link
+	 * #applyArguments(List)} on the body to get the preprocessed result. If a macro has parameters (i.e. #define MACRO(PARAM) PARAM), the
+	 * the arguments passed from the macro invocation are listed in the order that they appear in text.
+	 * <pre>
+	 *     #define MACRO(PARAM1,PARAM2) PARAM1=PARAM2
+	 *     MACRO(hello,2)
+	 *     // "hello" is first argument
+	 *     // "2" is second argument
+	 * </pre>
+	 */
 	public static abstract class BodySegment {
 		protected final PreProcessorMacro ownerMacro;
 
+		/**
+		 * @param macro the macro that owns this segment
+		 */
 		public BodySegment(@NotNull PreProcessorMacro macro) {
 			this.ownerMacro = macro;
 		}
 
+		/**
+		 * @param args the arguments of the macro's invocation, or empty list if no arguments were passed (see class level doc)
+		 * @return the preprocessed result
+		 */
 		@NotNull
 		public abstract CharSequence applyArguments(@NotNull List<CharSequence> args);
 
+		/**
+		 * @return the unpreprocessed segment as it would appear in text/the #define
+		 */
 		@NotNull
 		public abstract CharSequence toStringNoPreProcessing();
 	}
 
+	/**
+	 * A type of {@link BodySegment} in that it contains a sequence/list of segments. When {@link #applyArguments(List)} is invoked, each
+	 * {@link BodySegment#applyArguments(List)} is invoked and appended one after the other with no delimeter.
+	 */
 	public static class BodySegmentSequence extends BodySegment {
 
 		private final List<BodySegment> segments;
 
+		/**
+		 * @param macro the macro which owns this body
+		 * @param segments the list of segments
+		 */
 		public BodySegmentSequence(@NotNull PreProcessorMacro macro, @NotNull List<BodySegment> segments) {
 			super(macro);
 			this.segments = segments;
@@ -128,10 +161,17 @@ public class PreProcessorMacro {
 		}
 	}
 
+	/**
+	 * The simplest type of {@link BodySegment}. When {@link #applyArguments(List)} is invoked, it returns a hardcoded String
+	 */
 	public static class TextSegment extends BodySegment {
 
 		private final String text;
 
+		/**
+		 * @param macro the macro which owns this segment
+		 * @param text the text to return in {@link #applyArguments(List)}
+		 */
 		public TextSegment(@NotNull PreProcessorMacro macro, @NotNull String text) {
 			super(macro);
 			this.text = text;
@@ -155,17 +195,39 @@ public class PreProcessorMacro {
 		}
 	}
 
+	/**
+	 * A segment used to distinguish when a parameter of a macro is appearing in the body of a macro.
+	 * <pre>
+	 *     #define MACRO(PARAM) PARAM word
+	 *     //PARAM inside the body of the macro is the {@link MacroArgumentSegment}
+	 * </pre>
+	 * when {@link #applyArguments(List)} is invoked, it simply returns the element at index {@link #getArgumentIndex()}
+	 */
 	public static class MacroArgumentSegment extends BodySegment {
 
 		private final String argumentName;
 		private final int argIndex;
 
+		/**
+		 * @param macro the macro which owns this segment
+		 * @param argumentName the name of the argument
+		 * @param argIndex the index of the argument which appears in the #define (i.e. #define MACRO(PARAM1,PARAM2) => PARAM1 is index 0,
+		 * PARAM2 is index 1)
+		 */
 		public MacroArgumentSegment(@NotNull PreProcessorMacro macro, @NotNull String argumentName, int argIndex) {
 			super(macro);
 			this.argumentName = argumentName;
 			this.argIndex = argIndex;
 		}
 
+		/** @return the index of the argument which appears in the macro #define (see class level doc) */
+		public int getArgumentIndex() {
+			return argIndex;
+		}
+
+		/**
+		 * @return the argument name
+		 */
 		@NotNull
 		public String getArgumentName() {
 			return argumentName;
@@ -189,21 +251,35 @@ public class PreProcessorMacro {
 		}
 	}
 
+	/**
+	 * A non {@link MacroArgumentSegment} which is simply a word which can either be a {@link PreProcessorMacro} itself or just plain text.
+	 * When {@link #applyArguments(List)} is invoked, it returns either the word, or if the word is a macro, returns the macro's {@link
+	 * PreProcessorMacro#getBody()} result
+	 * <pre>
+	 *     #define MACRO hello //hello is just a word
+	 *     #define MAC2 MACRO //MACRO is a reference to a macro
+	 *     MAC2 //results in "hello"
+	 *     #undef MACRO
+	 *     MAC2 //results in "MACRO" as MACRO is no longer a defined macro
+	 * </pre>
+	 */
 	public static class WordSegment extends BodySegment {
 
-		private final MacroSet macroSet;
 		private final String word;
 
-		public WordSegment(@NotNull PreProcessorMacro macro, @NotNull MacroSet macroSet, @NotNull String word) {
+		/**
+		 * @param macro the macro which owns this segment
+		 * @param word the word (see class level doc)
+		 */
+		public WordSegment(@NotNull PreProcessorMacro macro, @NotNull String word) {
 			super(macro);
-			this.macroSet = macroSet;
 			this.word = word;
 		}
 
 		@NotNull
 		@Override
 		public CharSequence applyArguments(@NotNull List<CharSequence> args) {
-			PreProcessorMacro macro = macroSet.get(word);
+			PreProcessorMacro macro = ownerMacro.macroSet.get(word);
 			if (macro != null) {
 				return macro.getBody().applyArguments(args);
 			}
@@ -222,15 +298,28 @@ public class PreProcessorMacro {
 		}
 	}
 
+	/**
+	 * Similar to a {@link WordSegment}, except this segment allows for parameters.
+	 * <pre>
+	 *     #define MACRO word(param1) //word(param1) is {@link ParameterizedWordSegment}
+	 *     #define MAC2 wordd(p,2) //word(p,2) is {@link ParameterizedWordSegment}
+	 *     #define MAC3 wordd() //not valid {@link ParameterizedWordSegment}
+	 *     #define MAC4(PARAM) word //no {@link ParameterizedWordSegment} present
+	 *     #define MAC5 MAC4(hello) //MAC4(hello) is {@link ParameterizedWordSegment}, and is mapped to existing macro
+	 * </pre>
+	 */
 	public static class ParameterizedWordSegment extends BodySegment {
 
-		private final MacroSet macroSet;
 		private final String word;
 		private final List<BodySegment> args;
 
-		public ParameterizedWordSegment(@NotNull PreProcessorMacro macro, @NotNull MacroSet macroSet, @NotNull String word, @NotNull List<BodySegment> args) {
+		/**
+		 * @param macro the macro which owns this segment
+		 * @param word the word that comes before the parameters (#define MACRO word(arg1))
+		 * @param args the arguments that come after the word  (#define MACRO word(arg1,arg2))
+		 */
+		public ParameterizedWordSegment(@NotNull PreProcessorMacro macro, @NotNull String word, @NotNull List<BodySegment> args) {
 			super(macro);
-			this.macroSet = macroSet;
 			this.word = word;
 			this.args = args;
 		}
@@ -238,7 +327,7 @@ public class PreProcessorMacro {
 		@NotNull
 		@Override
 		public CharSequence applyArguments(@NotNull List<CharSequence> args) {
-			PreProcessorMacro macro = macroSet.get(word);
+			PreProcessorMacro macro = ownerMacro.macroSet.get(word);
 			if (macro != null) {
 				ArrayList<CharSequence> newArgs = new ArrayList<>(args.size());
 
@@ -254,8 +343,8 @@ public class PreProcessorMacro {
 				 * SET_TO_ONE(Key); //yields Key=1;
 				 *
 				 * In SET_TO_ONE, this loop is applied. NAME in "SET_TO_ONE(NAME)" is matched with NAME in "ASSIGN(NAME, 1)".
-				 * The argument "Key" is passed to ASSIGN's first parameter "NAME". Then, since "1" isn't matched with a parameter in SET_TO_ONE,
-				 * 1 is is just added to the new argument list to be passed through the embodied ASSIGN.
+				 * The argument "Key" is passed to ASSIGN's first parameter "NAME". Then, since "1" isn't matched with a parameter in
+				 * SET_TO_ONE, 1 is is just added to the new argument list to be passed through the embodied ASSIGN.
 				 */
 				for (BodySegment bs : this.args) {
 					if (bs instanceof MacroArgumentSegment) {
@@ -300,10 +389,18 @@ public class PreProcessorMacro {
 		}
 	}
 
+	/**
+	 * A segment which has a # in it ("#define MACRO #segment"). When {@link #applyArguments(List)} is invoked, it returns the segment
+	 * following the # with quotes wrapped around it
+	 */
 	public static class StringifySegment extends BodySegment {
 
 		private final BodySegment segment;
 
+		/**
+		 * @param macro the macro which owns this segment
+		 * @param segment the segment following the #
+		 */
 		public StringifySegment(@NotNull PreProcessorMacro macro, @NotNull BodySegment segment) {
 			super(macro);
 			this.segment = segment;
@@ -327,6 +424,10 @@ public class PreProcessorMacro {
 		}
 	}
 
+	/**
+	 * A segment used for ## inside the macro body (#define MACRO leftSegment##rightSegment). When {@link #applyArguments(List)} is invoked,
+	 * it concatenates the left and right {@link BodySegment}s and returns the result
+	 */
 	public static class GlueSegment extends BodySegment {
 
 		private final BodySegment left;
