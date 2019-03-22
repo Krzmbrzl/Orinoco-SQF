@@ -201,7 +201,8 @@ public class OrinocoPreProcessorTest {
 
 		String[] lines = {
 				"#define N(NUMBER) number NUMBER",
-				"Hello N(0)word",
+				"#define MAC Hello N(0)word",
+				"MAC"
 		};
 
 		lexerFromText(String.join("\n", lines), cb);
@@ -220,28 +221,8 @@ public class OrinocoPreProcessorTest {
 
 		String[] lines = {
 				"#define N(NUMBER) number NUMBER",
-				"Hello N(0)##word",
-		};
-
-		lexerFromText(String.join("\n", lines), cb);
-
-		lexer.start();
-	}
-
-	@Test
-	public void glueTwist() {
-		// This test is for a simple macro without parameters with a twist: a macro is almost matched (ARG2),
-		// but the ## makes it match ARG instead and then glues it with a 2
-
-		String[] expected = {"a", "a2", "c"};
-		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
-
-		String[] lines = {
-				"#define ARG a",
-				"#define ARG2 b",
-				"#define ARG3 c",
-				"ARG = 1 + ARG##2 + ARG3"
+				"#define MAC Hello N(0)##word",
+				"MAC"
 		};
 
 		lexerFromText(String.join("\n", lines), cb);

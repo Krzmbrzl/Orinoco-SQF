@@ -5,50 +5,78 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
+ * A {@link PreProcessorMacro} is a macro defined with a #define. It allows for params which are set at #define, i.e. #define MACRO(PARAM)
+ * body. A no parameterized macro looks like the following: #define MACRO body. The macro name ({@link #getName()}) is the first word after
+ * #define, i.e. #define MACRO results in MACRO being the name. The macro body is the text following the name and optional parameters. The
+ * body is parsed into {@link BodySegment} instances. The root segment will be of type {@link BodySegmentSequence} if the body has multiple
+ * segments.
+ *
+ * In order for the {@link BodySegment} instances to function properly, it needs access to the current set of defined macros. This is
+ * provided via {@link MacroSet}.
+ *
  * @author K
+ * @see #parseBody(MacroSet, char[], int, int, List)
+ * @see BodySegment
  * @since 3/17/19
  */
 public class PreProcessorMacro {
+	/**
+	 * Name of the macro
+	 */
 	private final String name;
+	/**
+	 * Array of parameters as their names
+	 */
 	private final String[] params;
+	private static final String[] EMPTY = {};
+	/**
+	 * The root body segment
+	 */
 	private final BodySegment body;
 
-	public PreProcessorMacro(@NotNull MacroSet macroSet, @NotNull String name, @NotNull List<String> params, @NotNull String body) {
+	public PreProcessorMacro(@NotNull MacroSet macroSet, @NotNull String name, @NotNull List<String> params,
+							 @NotNull char[] buffReadOnly, int boffset, int length) {
 		this.name = name;
-		this.params = new String[params.size()];
 		int i = 0;
-		for (String s : params) {
-			this.params[i++] = s;
+		if (params.isEmpty()) {
+			this.params = EMPTY;
+		} else {
+			this.params = new String[params.size()];
+			for (String s : params) {
+				this.params[i++] = s;
+			}
 		}
-		this.body = parseBody(macroSet, body, params);
+		this.body = parseBody(macroSet, buffReadOnly, boffset, length, params);
 	}
 
+	/**
+	 * @return the root {@link BodySegment} instance for this macro
+	 */
 	@NotNull
 	public BodySegment getBody() {
 		return body;
 	}
 
+	/**
+	 * @return the name of the macro
+	 */
 	@NotNull
 	public String getName() {
 		return name;
 	}
 
+	/** @return an array of the params, or empty array if there are none */
 	@NotNull
 	public String[] getParams() {
 		return params;
 	}
 
 	@NotNull
-	public static BodySegment parseBody(@NotNull MacroSet currentMacros, @NotNull String body, @NotNull List<String> params) {
+	public static BodySegment parseBody(@NotNull MacroSet currentMacros, @NotNull char[] bodyReadOnly, int boffset, int length,
+										@NotNull List<String> params) {
 		return null; // todo
-	}
-
-	//todo move to outer class
-	public abstract static class MacroSet implements Map<String, PreProcessorMacro> {
-
 	}
 
 	public static abstract class BodySegment {
@@ -296,6 +324,42 @@ public class PreProcessorMacro {
 		@Override
 		public String toString() {
 			return "StringifySegment{" + segment + '}';
+		}
+	}
+
+	public static class GlueSegment extends BodySegment {
+
+		private final BodySegment left;
+		private final BodySegment right;
+
+		public GlueSegment(@NotNull PreProcessorMacro macro, @NotNull BodySegment left, @NotNull BodySegment right) {
+			super(macro);
+			this.left = left;
+			this.right = right;
+		}
+
+		@NotNull
+		@Override
+		public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(left.applyArguments(args));
+			sb.append(right.applyArguments(args));
+			return sb;
+		}
+
+		@Override
+		@NotNull
+		public CharSequence toStringNoPreProcessing() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(left.toStringNoPreProcessing());
+			sb.append("##");
+			sb.append(right.toStringNoPreProcessing());
+			return sb;
+		}
+
+		@Override
+		public String toString() {
+			return "GlueSegment{left=" + left + ",right=" + right + '}';
 		}
 	}
 }
