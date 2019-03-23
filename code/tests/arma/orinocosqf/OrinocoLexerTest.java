@@ -1,5 +1,7 @@
 package arma.orinocosqf;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -988,6 +990,189 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void commands_sqfkeywords() throws UnknownIdException {
+		String input = "hint";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "format";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "call";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "if";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "createUnit";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "addAction";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void commands_sqfkeywords_caseInsensitive() throws UnknownIdException {
+		// precondition: the used transformer is case-insensitive
+		assertEquals("The used command-transformer appears to be case-sensitive", getCommandTransformer().toId("createUnit"),
+				getCommandTransformer().toId("createunit"));
+		
+		int createUnitId = getCommandTransformer().toId("createUnit");
+		int addActionId = getCommandTransformer().toId("addAction");
+		int callId = getCommandTransformer().toId("call");
+
+		String input = "createUnit";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "createunit";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "CreAteUnit";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "CREATEUNIT";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "CreateuniT";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "addAction";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "addaction";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "AdDAction";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "ADDACTION";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "AddactioN";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "call";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "CALL";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "CaLl";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
