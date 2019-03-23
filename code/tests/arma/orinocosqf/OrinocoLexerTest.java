@@ -578,7 +578,7 @@ public class OrinocoLexerTest {
 		// precondition: Used id-transformer is case-insensitive
 		assertEquals("The used variable transformer appears to be case-sensitive", getVariableTransformer().toId("test"),
 				getVariableTransformer().toId("TeSt"));
-		
+
 		int testId = getVariableTransformer().toId("test");
 		int secondTestId = getVariableTransformer().toId("second_Test");
 
@@ -589,8 +589,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "Test";
 		lexerFromText(input);
 
@@ -598,8 +598,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "tesT";
 		lexerFromText(input);
 
@@ -607,8 +607,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "TEST";
 		lexerFromText(input);
 
@@ -616,8 +616,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "tEsT";
 		lexerFromText(input);
 
@@ -634,8 +634,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "second_test";
 		lexerFromText(input);
 
@@ -643,8 +643,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "Second_TesT";
 		lexerFromText(input);
 
@@ -652,8 +652,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "SECOND_TEST";
 		lexerFromText(input);
 
@@ -661,8 +661,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "sEcOnD_tEsT";
 		lexerFromText(input);
 
@@ -796,13 +796,13 @@ public class OrinocoLexerTest {
 		lexer.start();
 		expector.assertTokensMatch();
 	}
-	
+
 	@Test
 	public void localVariables_caseInsensitive() throws UnknownIdException {
 		// precondition: Used id-transformer is case-insensitive
 		assertEquals("The used variable transformer appears to be case-sensitive", getVariableTransformer().toId("_test"),
 				getVariableTransformer().toId("_TeSt"));
-		
+
 		int testId = getVariableTransformer().toId("_test");
 		int secondTestId = getVariableTransformer().toId("_second_Test");
 
@@ -813,8 +813,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_Test";
 		lexerFromText(input);
 
@@ -822,8 +822,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_tesT";
 		lexerFromText(input);
 
@@ -831,8 +831,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_TEST";
 		lexerFromText(input);
 
@@ -840,8 +840,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_tEsT";
 		lexerFromText(input);
 
@@ -858,8 +858,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_second_test";
 		lexerFromText(input);
 
@@ -867,8 +867,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_Second_TesT";
 		lexerFromText(input);
 
@@ -876,8 +876,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_SECOND_TEST";
 		lexerFromText(input);
 
@@ -885,8 +885,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "_sEcOnD_tEsT";
 		lexerFromText(input);
 
