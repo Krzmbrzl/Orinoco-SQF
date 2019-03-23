@@ -40,6 +40,16 @@ public class OrinocoLexerTest {
 	}
 
 	@Test
+	public void emptyInput() {
+		String input = "";
+		lexerFromText(input);
+
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
 	public void literal_string_doubleQuotes() {
 		String input = "\"\"";
 		lexerFromText(input);
@@ -838,6 +848,146 @@ public class OrinocoLexerTest {
 
 		tokenFactory.acceptComment(0, input.length() - 1, 0, input.length() - 1, lexer.getContext());
 		tokenFactory.acceptWhitespace(input.length() - 1, 1, input.length() - 1, 1, lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine() {
+		String input = "/**/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am a comment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine_withNL() {
+		String input = "/*\n*/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am \na \ncomment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine_withNL_withCarriageReturn() {
+		String input = "/*\r\n*/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am \r\na \r\ncomment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine_withStars() {
+		String input = "/***/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am *a *comment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine_withStars_withNL() {
+		String input = "/*\n*\n*/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am \n*a *com\nment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine_nestedStartSequence() {
+		String input = "/*/**/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am /*a \n/*comment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+
+	@Test
+	public void comments_multiLine_almostEndSequence() {
+		String input = "/** /*/";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/* I am *\n/a *\t/ * /comment */";
+		lexerFromText(input);
+
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
