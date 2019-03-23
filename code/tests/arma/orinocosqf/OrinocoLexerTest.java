@@ -1247,6 +1247,15 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
+		
+		
+		input = "atan2";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
 	}
 
 	@Test
@@ -1371,6 +1380,251 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+	}
+	
+	@Test
+	public void commands_operators() throws UnknownIdException {
+		String input = "+";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "-";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "*";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "/";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "^";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "%";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+
+
+		input = "#";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "(";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ")";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "[";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "]";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "{";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "}";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ",";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ";";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "!";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "&&";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "||";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ":";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "=";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "==";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "!=";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "<";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = "<=";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ">";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ">=";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start();
+		expector.assertTokensMatch();
+		
+		
+		input = ">>";
+		lexerFromText(input);
+
+		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
