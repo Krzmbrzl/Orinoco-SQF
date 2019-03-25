@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 /**
- * A {@link OrinocoLexer} instance made for testing. This class listens to {@link #acceptPreProcessedText(String)} via a {@link Consumer}
+ * A {@link OrinocoLexer} instance made for testing. This class listens to {@link OrinocoLexer#acceptPreProcessedText(CharSequence)} via a {@link Consumer}
  * callback and submits the text through it for assertions.
  *
  * @author K
@@ -25,7 +25,7 @@ public class TestOrinocoLexer extends OrinocoLexer {
 	}
 
 	@Override
-	public void acceptPreProcessedText(@NotNull String text) {
+	public void acceptPreProcessedText(@NotNull CharSequence text) {
 		// do this first to stop further preprocessing before assertions
 		preprocessedTextCallback.accept(text);
 

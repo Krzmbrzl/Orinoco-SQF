@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * needed for a token, it submits the token to
  * {@link OrinocoLexerStream#preProcessToken(char[], int, int)}. Subsequently,
  * the preprocessed result re-enters the lexer for re-lexing via
- * {@link #acceptPreProcessedText(String)}.
+ * {@link #acceptPreProcessedText(CharSequence)}.
  *
  * Example 1: <pre>
  * #define ONE 1
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * // The lexer sees ASSIGN(hello), which matches a macro. It feeds "ASSIGN(hello)" to the preprocessor.
  * // The preprocessor then fully preprocesses ASSIGN(hello), thus yielding "hello = 1;".
- * // The lexer then receives that text via {@link #acceptPreProcessedText(String)}. The lexer lexes "hello", "=", "1", and ";" and submits
+ * // The lexer then receives that text via {@link #acceptPreProcessedText(CharSequence)}. The lexer lexes "hello", "=", "1", and ";" and submits
  * // them to the proper {@link OrinocoLexerStream} accept method that doesn't involve preprocessing.
  * </pre>
  *
@@ -54,7 +54,7 @@ public class OrinocoLexer {
 	 *
 	 * @param text the preprocessed, untokenized text
 	 */
-	public void acceptPreProcessedText(@NotNull String text) {
+	public void acceptPreProcessedText(@NotNull CharSequence text) {
 
 	}
 }
