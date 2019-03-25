@@ -1,6 +1,7 @@
 package arma.orinocosqf;
 
 import arma.orinocosqf.helpers.TestOrinocoLexer;
+import arma.orinocosqf.helpers.TestOrinocoPreProcessor;
 import arma.orinocosqf.helpers.TokenExpector;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -10,32 +11,37 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class OrinocoPreProcessorTest {
 	private final TokenExpector expector = new TokenExpector();
-	private final OrinocoPreProcessor preProcessor = new OrinocoPreProcessor(expector);
+	private TestOrinocoPreProcessor preProcessor;
 	private TestOrinocoLexer lexer;
 	private final TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
 
-	private void lexerFromText(@NotNull String text, @NotNull Consumer<String> preprocessTextCb) {
+	private void lexerFromText(@NotNull String text, @NotNull Consumer<String> preprocessTextCb,
+							   @NotNull Function<String, OrinocoReader> includeHandler) {
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
+		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 	}
 
-	private void lexerFromFile(@NotNull File f, @NotNull Consumer<String> preprocessTextCb) throws FileNotFoundException {
+	private void lexerFromFile(@NotNull File f, @NotNull Consumer<String> preprocessTextCb,
+							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
 		lexer = new TestOrinocoLexer(
 				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
 				preProcessor,
 				preprocessTextCb
 		);
+		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 	}
 
 	@Test
 	public void noPreProcessing_command() {
 		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("format", cb);
+		lexerFromText("format", cb, s -> null);
 		final int formatId = OrinocoLexer.getCommandId("format");
 		tokenFactory.acceptCommand(formatId, 0, 0, 6);
 		expector.addExpectedTokens(tokenFactory.getTokens());
@@ -46,7 +52,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void noPreProcessing_globalVariable() {
 		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("text1", cb);
+		lexerFromText("text1", cb, s -> null);
 		tokenFactory.acceptGlobalVariable(0, 0, 0, 5);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -56,7 +62,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void noPreProcessing_localVariable() {
 		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("_text1", cb);
+		lexerFromText("_text1", cb, s -> null);
 		tokenFactory.acceptLocalVariable(0, 0, 0, 6);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -70,7 +76,7 @@ public class OrinocoPreProcessorTest {
 		String define = "#define Macro(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
 		String all = define + "\n" + text;
-		lexerFromText(all, cb);
+		lexerFromText(all, cb, s -> null);
 
 		final int textStart = define.length() + 1; // +1 for \n
 		final int lparenStart = text.indexOf('(');
@@ -105,7 +111,7 @@ public class OrinocoPreProcessorTest {
 		String define = "#define MACRO(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
 		String all = define + "\n" + text;
-		lexerFromText(all, cb);
+		lexerFromText(all, cb, s -> null);
 
 		final int textStart = define.length() + 1; // +1 for \n
 
@@ -136,7 +142,7 @@ public class OrinocoPreProcessorTest {
 				"The cow jumped over the moon!"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -155,7 +161,7 @@ public class OrinocoPreProcessorTest {
 				"ARG = 1 + ARG2 + ARG3"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -171,7 +177,7 @@ public class OrinocoPreProcessorTest {
 				"Hello N(0)",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -187,7 +193,7 @@ public class OrinocoPreProcessorTest {
 				"disableSerialization; BLASTOFF(car,5)",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -205,7 +211,7 @@ public class OrinocoPreProcessorTest {
 				"MAC"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -225,7 +231,7 @@ public class OrinocoPreProcessorTest {
 				"MAC"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -242,7 +248,7 @@ public class OrinocoPreProcessorTest {
 				"hint str twenty;", // outputs "20"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -258,7 +264,7 @@ public class OrinocoPreProcessorTest {
 				"GLUE(123,456)",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -277,7 +283,7 @@ public class OrinocoPreProcessorTest {
 				"test2 = STRINGIFY(FOO)"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -294,7 +300,7 @@ public class OrinocoPreProcessorTest {
 				"SET_TO_ONE(Foo);"
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 
@@ -306,7 +312,7 @@ public class OrinocoPreProcessorTest {
 				"SET_TO_ONE(Foo);"
 		};
 
-		lexerFromText(String.join("\n", lines2), cb);
+		lexerFromText(String.join("\n", lines2), cb, s -> null);
 
 		lexer.start();
 	}
@@ -323,7 +329,7 @@ public class OrinocoPreProcessorTest {
 				"ONE",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
 	}
@@ -343,7 +349,7 @@ public class OrinocoPreProcessorTest {
 				"ARG",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -364,7 +370,7 @@ public class OrinocoPreProcessorTest {
 				"ARG",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -385,7 +391,7 @@ public class OrinocoPreProcessorTest {
 				"DEF",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -409,7 +415,7 @@ public class OrinocoPreProcessorTest {
 				"BEG",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -433,7 +439,7 @@ public class OrinocoPreProcessorTest {
 				"BEG",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -453,7 +459,7 @@ public class OrinocoPreProcessorTest {
 				"DEF",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -478,7 +484,7 @@ public class OrinocoPreProcessorTest {
 				"BEG",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
@@ -486,9 +492,7 @@ public class OrinocoPreProcessorTest {
 	public void ifndefIgnoreElse() {
 		// This test is for #else for #ifndef but #else block is skipped because #ifndef is true
 
-		String[] expected = {"def"};
-		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<String> cb = s -> assertEquals("def", s);
 
 		String[] lines = {
 				"#ifndef ARG",
@@ -501,12 +505,33 @@ public class OrinocoPreProcessorTest {
 				"BEG",
 		};
 
-		lexerFromText(String.join("\n", lines), cb);
+		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
 	}
 
+	@Test
+	public void includeVirtual() {
+		// This test is for a simple include where the included handler returns hard coded text
+
+		String[] expected = {"a", "included"};
+		int[] expectedInd = {0};
+		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define ARG a",
+				"ARG",
+				"#include \"test include\"", //doesn't matter what is included as include handler is hard coded
+				"INCLUDE_MACRO"
+		};
+
+		Function<String, OrinocoReader> includeHandler = s -> OrinocoReader.fromCharSequence("#define INCLUDE_MACRO included");
+		lexerFromText(String.join("\n", lines), cb, includeHandler);
+
+		lexer.start();
+	}
+
+
 	//todo macro test for parameter macro that has whitespace between commas ( HELLO(IsItMe, YourLooking, For) )
 	//todo macro test for parameter macro that has whitespace ( HELLO(IsItMe YourLooking For))
-	//todo include: discuss how lexer handles working directories for preprocessor include
 
 }
