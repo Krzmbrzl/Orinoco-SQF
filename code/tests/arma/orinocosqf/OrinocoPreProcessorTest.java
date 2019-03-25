@@ -22,13 +22,13 @@ public class OrinocoPreProcessorTest {
 	private TestOrinocoLexer lexer;
 	private final TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
 
-	private void lexerFromText(@NotNull String text, @NotNull Consumer<String> preprocessTextCb,
+	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) {
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 	}
 
-	private void lexerFromFile(@NotNull File f, @NotNull Consumer<String> preprocessTextCb,
+	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
 		lexer = new TestOrinocoLexer(
 				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
@@ -40,7 +40,7 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_command() {
-		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("format", cb, s -> null);
 		final int formatId = OrinocoLexer.getCommandId("format");
 		tokenFactory.acceptCommand(formatId, 0, 0, 6, 6, lexer.getContext());
@@ -51,7 +51,7 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_globalVariable() {
-		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("text1", cb, s -> null);
 		tokenFactory.acceptGlobalVariable(0, 0, 0, 5, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
@@ -61,7 +61,7 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_localVariable() {
-		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("_text1", cb, s -> null);
 		tokenFactory.acceptLocalVariable(0, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
@@ -71,7 +71,7 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void noPreProcessing_macroUnmatched() {
-		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 
 		String define = "#define Macro(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
@@ -106,7 +106,7 @@ public class OrinocoPreProcessorTest {
 	public void simpleParamMacro() {
 		// This test is for a simple macro with parameters
 		final String expected = "v=z";
-		Consumer<String> cb = s -> assertEquals(expected, s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected, s);
 
 		String define = "#define MACRO(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
@@ -134,7 +134,7 @@ public class OrinocoPreProcessorTest {
 	public void noPreProcessing_matchButMissingHashHash() {
 		// this test creates valid defines that get matched, but arma's preprocessor doesn't
 		// allow for replacing text inbetween text unless there is a ##
-		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 
 		String[] lines = {
 				"#define e a",
@@ -152,7 +152,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"a", "b", "c"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
@@ -170,7 +170,7 @@ public class OrinocoPreProcessorTest {
 	public void simpleDefineWithParam() {
 		// This test is for a simple macro with a single parameter
 
-		Consumer<String> cb = s -> assertEquals("number 0", s);
+		Consumer<CharSequence> cb = s -> assertEquals("number 0", s);
 
 		String[] lines = {
 				"#define N(NUMBER) number NUMBER",
@@ -186,7 +186,7 @@ public class OrinocoPreProcessorTest {
 	public void simpleDefineWithParams() {
 		// This test is for a simple macro with multiple parameters
 
-		Consumer<String> cb = s -> assertEquals("car setVelocity [0,0,5];", s);
+		Consumer<CharSequence> cb = s -> assertEquals("car setVelocity [0,0,5];", s);
 
 		String[] lines = {
 				"#define BLASTOFF(UNIT,RATE) UNIT setVelocity [0,0,RATE];",
@@ -203,7 +203,7 @@ public class OrinocoPreProcessorTest {
 		// This test is for a simple macro with a single parameter,
 		// but there is no preprocessing because of missing ##
 
-		Consumer<String> cb = s -> fail("Expected no text to preprocess, got " + s);
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess, got " + s);
 
 		String[] lines = {
 				"#define N(NUMBER) number NUMBER",
@@ -223,7 +223,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"Hello number 0word"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define N(NUMBER) number NUMBER",
@@ -240,7 +240,7 @@ public class OrinocoPreProcessorTest {
 	public void glueInMacroBody() {
 		// This test is for checking glue (##) inside a macro body
 
-		Consumer<String> cb = s -> assertEquals("20", s);
+		Consumer<CharSequence> cb = s -> assertEquals("20", s);
 
 		String[] lines = {
 				"#define TWO 2",
@@ -257,7 +257,7 @@ public class OrinocoPreProcessorTest {
 	public void glueParameters() {
 		// This test is for glueing 2 macro parameters together
 
-		Consumer<String> cb = s -> assertEquals("123456", s);
+		Consumer<CharSequence> cb = s -> assertEquals("123456", s);
 
 		String[] lines = {
 				"#define GLUE(g1,g2) g1##g2",
@@ -275,7 +275,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"\"123\";", "\"456\";"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define STRINGIFY(s) #s;",
@@ -292,7 +292,7 @@ public class OrinocoPreProcessorTest {
 	public void stringifyWhitespaceParameters() {
 		// This test is for stringify
 
-		Consumer<String> cb = s -> assertEquals("\"Is it me youre looking for\"", s);
+		Consumer<CharSequence> cb = s -> assertEquals("\"Is it me youre looking for\"", s);
 
 		String[] lines = {
 				"#define HELLO(s) #s",
@@ -309,7 +309,7 @@ public class OrinocoPreProcessorTest {
 		// This test is for stringify and if whitespace between paramters are properly preprocessed.
 		// This test is in-game tested in Arma 3 SQF
 
-		Consumer<String> cb = s -> assertEquals("Hello, \" Is it me youre looking for\"?", s);
+		Consumer<CharSequence> cb = s -> assertEquals("Hello, \" Is it me youre looking for\"?", s);
 
 		String[] lines = {
 				"#define HELLO(hi,s,end) hi, #s##end",//## is so we can put ? right after "
@@ -325,7 +325,7 @@ public class OrinocoPreProcessorTest {
 	public void embodiedMacro() {
 		// This test is for testing if a macro inside the body of another macro will be properly invoked
 
-		Consumer<String> cb = s -> assertEquals("Foo=1;", s);
+		Consumer<CharSequence> cb = s -> assertEquals("Foo=1;", s);
 
 		String[] lines = {
 				"#define ASSIGN(NAME,VAL) NAME=VAL",
@@ -354,7 +354,7 @@ public class OrinocoPreProcessorTest {
 	public void macroDefineOrderDoesntMatter() {
 		// This test is for making sure that no matter the order of the #defines, the embodied macros are still properly handled
 
-		Consumer<String> cb = s -> assertEquals("Something", s);
+		Consumer<CharSequence> cb = s -> assertEquals("Something", s);
 
 		String[] lines = {
 				"#define ONE TWO", //notice how ONE is dependent on TWO, but TWO is defined after ONE
@@ -373,7 +373,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"a"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
@@ -392,7 +392,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"a", "BB"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
@@ -413,7 +413,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"def", "def"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
@@ -434,7 +434,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"beg"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#ifdef ARG",
@@ -458,7 +458,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"def", "a"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
@@ -482,7 +482,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"def", "def"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#ifndef ARG",
@@ -502,7 +502,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"a", "beg"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
@@ -525,7 +525,7 @@ public class OrinocoPreProcessorTest {
 	public void ifndefIgnoreElse() {
 		// This test is for #else for #ifndef but #else block is skipped because #ifndef is true
 
-		Consumer<String> cb = s -> assertEquals("def", s);
+		Consumer<CharSequence> cb = s -> assertEquals("def", s);
 
 		String[] lines = {
 				"#ifndef ARG",
@@ -548,7 +548,7 @@ public class OrinocoPreProcessorTest {
 
 		String[] expected = {"a", "included"};
 		int[] expectedInd = {0};
-		Consumer<String> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
 		String[] lines = {
 				"#define ARG a",
