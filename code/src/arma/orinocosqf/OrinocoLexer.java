@@ -11,9 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * needed for a token, it submits the token to
  * {@link OrinocoLexerStream#preProcessToken(char[], int, int)}. Subsequently,
  * the preprocessed result re-enters the lexer for re-lexing via
- * {@link #acceptPreProcessedText(String)}. This preprocessed result may need
- * further preprocessing after the re-lex because the preprocessor doesn't
- * handle tokenizing the text (see example 1).
+ * {@link #acceptPreProcessedText(String)}.
  *
  * Example 1: <pre>
  * #define ONE 1
@@ -21,12 +19,9 @@ import org.jetbrains.annotations.NotNull;
  * ASSIGN(hello) //begin lexing here
  *
  * // The lexer sees ASSIGN(hello), which matches a macro. It feeds "ASSIGN(hello)" to the preprocessor.
- * // The preprocessor then goes to the body of ASSIGN and replaces VAR with hello, thus yielding "hello = ONE;".
- * // The lexer then receives that text via {@link #acceptPreProcessedText(String)}. The lexer lexes "hello" and "=" and submits
+ * // The preprocessor then fully preprocesses ASSIGN(hello), thus yielding "hello = 1;".
+ * // The lexer then receives that text via {@link #acceptPreProcessedText(String)}. The lexer lexes "hello", "=", "1", and ";" and submits
  * // them to the proper {@link OrinocoLexerStream} accept method that doesn't involve preprocessing.
- * // The lexer then lexes ONE and it matches a macro. It then feeds that to the preprocessor, preprocessor spits out "1" to the lexer.
- * // Lexer lexes 1, submits to {@link OrinocoLexerStream} without further preprocessing,
- * // and then finally ";" is lexed from the first {@link #acceptPreProcessedText(String)}
  * </pre>
  *
  * @author K
