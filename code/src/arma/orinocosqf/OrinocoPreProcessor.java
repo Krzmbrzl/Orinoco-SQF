@@ -37,48 +37,41 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	}
 
 	@Override
-	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength) {
-
-	}
-
-	@Override
-	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength) {
-
-	}
-
-	@Override
 	public void begin() {
 
 	}
 
 	@Override
-	public void acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+	public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+							  @NotNull OrinocoLexerContext ctx) {
 
 	}
 
 	@Override
-	public void acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+	public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+									@NotNull OrinocoLexerContext ctx) {
 
 	}
 
 	@Override
-	public void acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+	public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
+									 @NotNull OrinocoLexerContext ctx) {
 
 	}
 
 	@Override
-	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset, int originalOffset,
-							  int originalLength) {
+	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+							  int originalLength, @NotNull OrinocoLexerContext ctx) {
 
 	}
 
 	@Override
-	public void preProcessorTokenSkipped(@NotNull String token, int offset) {
+	public void preProcessorTokenSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
 
 	}
 
 	@Override
-	public void preProcessorCommandSkipped(@NotNull String command, int offset) {
+	public void preProcessorCommandSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
 
 	}
 
@@ -86,4 +79,18 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	public void end() {
 
 	}
+
+	@Override
+	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+								 @NotNull OrinocoLexerContext ctx) {
+
+	}
+
+	@Override
+	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
+							  @NotNull OrinocoLexerContext ctx) {
+
+	}
+
+
 }

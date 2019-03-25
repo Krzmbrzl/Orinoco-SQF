@@ -43,7 +43,7 @@ public class OrinocoPreProcessorTest {
 		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("format", cb, s -> null);
 		final int formatId = OrinocoLexer.getCommandId("format");
-		tokenFactory.acceptCommand(formatId, 0, 0, 6);
+		tokenFactory.acceptCommand(formatId, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -53,7 +53,7 @@ public class OrinocoPreProcessorTest {
 	public void noPreProcessing_globalVariable() {
 		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("text1", cb, s -> null);
-		tokenFactory.acceptGlobalVariable(0, 0, 0, 5);
+		tokenFactory.acceptGlobalVariable(0, 0, 0, 5, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -63,7 +63,7 @@ public class OrinocoPreProcessorTest {
 	public void noPreProcessing_localVariable() {
 		Consumer<String> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("_text1", cb, s -> null);
-		tokenFactory.acceptLocalVariable(0, 0, 0, 6);
+		tokenFactory.acceptLocalVariable(0, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -90,12 +90,12 @@ public class OrinocoPreProcessorTest {
 		final int rparenId = OrinocoLexer.getCommandId(")");
 		final int commaId = OrinocoLexer.getCommandId(",");
 
-		tokenFactory.acceptGlobalVariable(0, 0, textStart, 5);
-		tokenFactory.acceptCommand(lparenId, lparenStart - offset, lparenStart, 1);
-		tokenFactory.acceptGlobalVariable(1, vStart - offset, vStart, 1);
-		tokenFactory.acceptCommand(commaId, commaStart - offset, commaStart, 1);
-		tokenFactory.acceptGlobalVariable(2, zStart - offset, zStart, 1);
-		tokenFactory.acceptCommand(rparenId, rparenStart - offset, rparenStart, 1);
+		tokenFactory.acceptGlobalVariable(0, 0, textStart, 5, 1, lexer.getContext());
+		tokenFactory.acceptCommand(lparenId, lparenStart - offset, lparenStart, 1, 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(1, vStart - offset, vStart, 1, 1, lexer.getContext());
+		tokenFactory.acceptCommand(commaId, commaStart - offset, commaStart, 1, 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(2, zStart - offset, zStart, 1, 1, lexer.getContext());
+		tokenFactory.acceptCommand(rparenId, rparenStart - offset, rparenStart, 1, 1, lexer.getContext());
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -121,9 +121,9 @@ public class OrinocoPreProcessorTest {
 		final int eqInd = expected.indexOf('=');
 		final int zInd = expected.indexOf('z');
 
-		tokenFactory.acceptGlobalVariable(0, vInd, textStart, text.length());
-		tokenFactory.acceptCommand(eqId, eqInd, textStart, text.length());
-		tokenFactory.acceptGlobalVariable(1, zInd, textStart, text.length());
+		tokenFactory.acceptGlobalVariable(0, vInd, textStart, text.length(), 1, lexer.getContext());
+		tokenFactory.acceptCommand(eqId, eqInd, textStart, text.length(), 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(1, zInd, textStart, text.length(), 1, lexer.getContext());
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();

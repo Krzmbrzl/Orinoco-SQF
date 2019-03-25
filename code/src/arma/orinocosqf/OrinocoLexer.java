@@ -69,4 +69,13 @@ public class OrinocoLexer {
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
 
 	}
+
+	/**
+	 * @return The current {@link OrinocoLexerContext} of this lexer
+	 */
+	@NotNull
+	public OrinocoLexerContext getContext() {
+		// TODO
+		throw new UnsupportedOperationException("Get context not yet implemented!");
+	}
 }

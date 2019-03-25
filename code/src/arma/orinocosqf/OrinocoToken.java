@@ -14,23 +14,36 @@ public class OrinocoToken {
 	private String text;
 	private int id;
 	private OrinocoTokenType tokenType;
+	private int preprocessedOffset;
+	private int originalOffset;
+	private int originalLength;
 
-	public OrinocoToken(@NotNull String text, @NotNull OrinocoTokenType tokenType) {
+	public OrinocoToken(@NotNull String text, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset,
+						int originalLength) {
+		this(tokenType, preprocessedOffset, originalOffset, originalLength);
+
 		if (tokenType.isIdBased()) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Tried to instantiate Id-based token with text!");
 		}
 		this.text = text;
 		this.id = -1;
-		this.tokenType = tokenType;
 	}
 
-	public OrinocoToken(int id, @NotNull OrinocoTokenType tokenType) {
+	public OrinocoToken(int id, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset, int originalLength) {
+		this(tokenType, preprocessedOffset, originalOffset, originalLength);
+
 		if (!tokenType.isIdBased()) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Tried to instantiate text-based token with Id!");
 		}
 		this.text = null;
 		this.id = id;
+	}
+
+	private OrinocoToken(OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset, int originalLength) {
 		this.tokenType = tokenType;
+		this.preprocessedOffset = preprocessedOffset;
+		this.originalOffset = originalOffset;
+		this.originalLength = originalLength;
 	}
 
 	/**
@@ -50,6 +63,18 @@ public class OrinocoToken {
 	@NotNull
 	public OrinocoTokenType getTokenType() {
 		return tokenType;
+	}
+
+	public int getPreprocessedOffset() {
+		return preprocessedOffset;
+	}
+
+	public int getOriginalOffset() {
+		return originalOffset;
+	}
+
+	public int getOriginalLength() {
+		return originalLength;
 	}
 
 
