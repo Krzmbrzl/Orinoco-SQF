@@ -289,6 +289,39 @@ public class OrinocoPreProcessorTest {
 	}
 
 	@Test
+	public void stringifyWhitespaceParameters() {
+		// This test is for stringify
+
+		Consumer<String> cb = s -> assertEquals("\"Is it me youre looking for\"", s);
+
+		String[] lines = {
+				"#define HELLO(s) #s",
+				"HELLO(Is it me youre looking for)",
+		};
+
+		lexerFromText(String.join("\n", lines), cb, s -> null);
+
+		lexer.start();
+	}
+
+	@Test
+	public void stringifyWhitespaceParametersAndCommas() {
+		// This test is for stringify and if whitespace between paramters are properly preprocessed.
+		// This test is in-game tested in Arma 3 SQF
+
+		Consumer<String> cb = s -> assertEquals("Hello, \" Is it me youre looking for\"?", s);
+
+		String[] lines = {
+				"#define HELLO(hi,s,end) hi, #s##end",//## is so we can put ? right after "
+				"HELLO(Hello, Is it me youre looking for,?)",
+		};
+
+		lexerFromText(String.join("\n", lines), cb, s -> null);
+
+		lexer.start();
+	}
+
+	@Test
 	public void embodiedMacro() {
 		// This test is for testing if a macro inside the body of another macro will be properly invoked
 
@@ -530,8 +563,5 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 	}
 
-
-	//todo macro test for parameter macro that has whitespace between commas ( HELLO(IsItMe, YourLooking, For) )
-	//todo macro test for parameter macro that has whitespace ( HELLO(IsItMe YourLooking For))
 
 }
