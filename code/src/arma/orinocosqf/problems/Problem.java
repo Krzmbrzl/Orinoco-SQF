@@ -4,9 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Base class of all problem-objects that is being used for the error-reporting mechanism inside Orinoco
- * 
- * @author Raven
  *
+ * @author Raven
  */
 public abstract class Problem {
 	/**
@@ -35,9 +34,8 @@ public abstract class Problem {
 
 	/**
 	 * An enum for problem severities
-	 * 
-	 * @author Raven
 	 *
+	 * @author Raven
 	 */
 	enum Severity {
 		INFO, WARNING, ERROR

@@ -2,9 +2,8 @@ package arma.orinocosqf.exceptions;
 
 /**
  * An exception that is thrown if a provided Id is unknown
- * 
- * @author Raven
  *
+ * @author Raven
  */
 public class UnknownIdException extends OrinocoException {
 	private static final long serialVersionUID = -2150394272107512233L;
@@ -35,7 +34,7 @@ public class UnknownIdException extends OrinocoException {
 	 *
 	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
-	 *        and indicates that the cause is nonexistent or unknown.)
+	 * and indicates that the cause is nonexistent or unknown.)
 	 * @since 1.4
 	 */
 	public UnknownIdException(String message, Throwable cause) {
@@ -48,7 +47,7 @@ public class UnknownIdException extends OrinocoException {
 	 * than wrappers for other throwables (for example, {@link java.security.PrivilegedActionException}).
 	 *
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
-	 *        and indicates that the cause is nonexistent or unknown.)
+	 * and indicates that the cause is nonexistent or unknown.)
 	 * @since 1.4
 	 */
 	public UnknownIdException(Throwable cause) {

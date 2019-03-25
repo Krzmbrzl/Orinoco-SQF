@@ -19,7 +19,7 @@ public class OrinocoToken {
 	private int originalLength;
 
 	public OrinocoToken(@NotNull String text, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset,
-			int originalLength) {
+						int originalLength) {
 		this(tokenType, preprocessedOffset, originalOffset, originalLength);
 
 		if (tokenType.isIdBased()) {

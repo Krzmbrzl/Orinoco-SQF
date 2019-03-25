@@ -27,7 +27,7 @@ public interface OrinocoTokenProcessor {
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
 	void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-			@NotNull OrinocoLexerContext ctx);
+					   @NotNull OrinocoLexerContext ctx);
 
 	/**
 	 * Accept a _localVariable token
@@ -44,7 +44,7 @@ public interface OrinocoTokenProcessor {
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
 	void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-			@NotNull OrinocoLexerContext ctx);
+							 @NotNull OrinocoLexerContext ctx);
 
 	/**
 	 * Accept a global variable token
@@ -61,7 +61,7 @@ public interface OrinocoTokenProcessor {
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
 	void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-			@NotNull OrinocoLexerContext ctx);
+							  @NotNull OrinocoLexerContext ctx);
 
 	/**
 	 * Accepts literals
@@ -78,7 +78,7 @@ public interface OrinocoTokenProcessor {
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
 	void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-			int originalLength, @NotNull OrinocoLexerContext ctx);
+					   int originalLength, @NotNull OrinocoLexerContext ctx);
 
 	/**
 	 * Invoked when a macro-token was encountered in the input. This method is only invoked if preprocessing is disabled<br>
