@@ -2,6 +2,9 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.util.Stack;
+
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
  * cyclic dependency on a preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that each token may have a macro inside
@@ -32,11 +35,14 @@ public class OrinocoLexer {
 	 * The current {@link OrinocoReader} instance
 	 */
 	private @NotNull OrinocoReader reader;
+	private final Stack<OrinocoReader> readerStack = new Stack<>();
 	private final OrinocoLexerStream lexerStream;
 	/**
 	 * The offset of tokens after preprocessing
 	 */
 	private int preprocessedOffset;
+	private int currentWordLength = 0;
+	private @NotNull LexState state = LexState.Start;
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.reader = r;
@@ -48,7 +54,102 @@ public class OrinocoLexer {
 	 * Starts the lexing process.
 	 */
 	public void start() {
+		while (true) {
+			lexCurrentReader();
+			if (readerStack.isEmpty()) {
+				break;
+			}
 
+			this.reader = readerStack.pop();
+		}
+	}
+
+	private void lexCurrentReader() {
+		char[] buf = new char[256]; //todo make this class level rather than method level because of includes
+		int start = 0;
+		int end = buf.length;
+
+		while (true) {
+			int read;
+			try {
+				read = reader.read(buf, start, end);
+				if (read <= 0) {
+					break;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			int i = 0;
+			// initial state
+			boolean readingWord = true;
+
+			for (; i < buf.length; i++) {
+				char c = buf[i];
+				preprocessedOffset++;
+				//todo handle preprocessor commands
+				switch (state) {
+					case Start: {
+						if (Character.isWhitespace(c)) {
+							state = LexState.Whitespace;
+							readingWord = false;
+						} else {
+							state = LexState.FirstChar;
+						}
+						break;
+					}
+					case FirstChar: {
+						//this state should be resolved outside switch
+						throw new IllegalStateException();
+					}
+					case LocalVar: {
+						if (Character.isWhitespace(c)) {
+							state = LexState.Whitespace;
+							//todo determine what token it is
+						} else {
+							currentWordLength++;
+						}
+						break;
+					}
+					case Word: {
+						if (Character.isWhitespace(c)) {
+							state = LexState.Whitespace;
+							//todo determine what token it is
+						} else {
+							currentWordLength++;
+							//todo binary search
+						}
+						break;
+					}
+					case Whitespace: {
+						if (!Character.isWhitespace(c)) {
+							// todo lexerStream.acceptWhitespace();
+							state = LexState.FirstChar;
+						}
+						break;
+					}
+				}
+
+				if (state != LexState.Whitespace) {
+					readingWord = true;
+
+					if (state == LexState.FirstChar) {
+						if (c == '_') {
+							state = LexState.LocalVar;
+						} else if (c == '#') {
+							// todo preprocessor command?
+							// todo check for newlines
+						} else if (Character.isAlphabetic(c)) {
+							//todo get index of character in command array
+						} else {
+							// todo binary search last index of command array
+						}
+					}
+				}
+			}
+			if (readingWord) {
+				// todo change start and end and System.arraycopy the contents to front of array
+			}
+		}
 	}
 
 	/**
@@ -57,7 +158,7 @@ public class OrinocoLexer {
 	 * @param text the preprocessed, untokenized text
 	 */
 	public void acceptPreProcessedText(@NotNull CharSequence text) {
-
+		acceptIncludedReader(OrinocoReader.fromCharSequence(text));
 	}
 
 	/**
@@ -67,7 +168,8 @@ public class OrinocoLexer {
 	 * @param reader the reader to immediately begin lexing
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
-
+		readerStack.push(this.reader);
+		this.reader = reader;
 	}
 
 	/**
@@ -77,5 +179,13 @@ public class OrinocoLexer {
 	public OrinocoLexerContext getContext() {
 		// TODO
 		throw new UnsupportedOperationException("Get context not yet implemented!");
+	}
+
+	private enum LexState {
+		Start,
+		FirstChar,
+		Word,
+		LocalVar,
+		Whitespace
 	}
 }
