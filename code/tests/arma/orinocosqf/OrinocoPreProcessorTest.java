@@ -30,12 +30,12 @@ public class OrinocoPreProcessorTest {
 
 	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
+		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 		lexer = new TestOrinocoLexer(
 				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
 				preProcessor,
 				preprocessTextCb
 		);
-		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 	}
 
 	@Test
