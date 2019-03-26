@@ -24,8 +24,8 @@ public class OrinocoPreProcessorTest {
 
 	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) {
-		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
+		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 	}
 
 	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
