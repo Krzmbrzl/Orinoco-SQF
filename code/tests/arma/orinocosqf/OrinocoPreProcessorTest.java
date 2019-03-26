@@ -24,18 +24,18 @@ public class OrinocoPreProcessorTest {
 
 	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) {
-		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
+		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 	}
 
 	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
+		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 		lexer = new TestOrinocoLexer(
 				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
 				preProcessor,
 				preprocessTextCb
 		);
-		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 	}
 
 	@Test
@@ -46,6 +46,7 @@ public class OrinocoPreProcessorTest {
 		tokenFactory.acceptCommand(formatId, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
@@ -56,6 +57,7 @@ public class OrinocoPreProcessorTest {
 		tokenFactory.acceptGlobalVariable(0, 0, 0, 5, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
@@ -66,6 +68,7 @@ public class OrinocoPreProcessorTest {
 		tokenFactory.acceptLocalVariable(0, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
@@ -99,6 +102,7 @@ public class OrinocoPreProcessorTest {
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
@@ -127,6 +131,7 @@ public class OrinocoPreProcessorTest {
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
@@ -144,6 +149,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -164,6 +170,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -180,6 +187,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -196,6 +204,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -214,6 +223,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -234,6 +244,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -251,6 +262,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -267,6 +279,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -286,6 +299,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -302,6 +316,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -319,6 +334,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -336,6 +352,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 
 		// This test is to make sure that there are different instances of NAME across different macro definitions.
 		// Notice how in this test, ASSIGN uses KEY rather than NAME.
@@ -348,6 +365,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines2), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -365,6 +383,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -384,6 +403,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -405,6 +425,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -426,6 +447,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -450,6 +472,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -474,6 +497,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -494,6 +518,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -519,6 +544,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -540,6 +566,7 @@ public class OrinocoPreProcessorTest {
 
 		lexerFromText(String.join("\n", lines), cb, s -> null);
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -561,6 +588,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb, includeHandler);
 
 		lexer.start();
+		lexer.assertPreProcessorUsed();
 	}
 
 

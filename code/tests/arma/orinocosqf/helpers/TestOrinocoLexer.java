@@ -16,6 +16,7 @@ import java.util.function.Consumer;
  */
 public class TestOrinocoLexer extends OrinocoLexer {
 	private final Consumer<CharSequence> preprocessedTextCallback;
+	private boolean preprocessorUsed = false;
 
 	public TestOrinocoLexer(@NotNull OrinocoReader r,
 							@NotNull OrinocoLexerStream lexerStream,
@@ -30,5 +31,10 @@ public class TestOrinocoLexer extends OrinocoLexer {
 		preprocessedTextCallback.accept(text);
 
 		super.acceptPreProcessedText(text);
+		preprocessorUsed = true;
+	}
+
+	public void assertPreProcessorUsed() {
+		org.junit.Assert.assertTrue("PreProcessor should have been used!", preprocessorUsed);
 	}
 }
