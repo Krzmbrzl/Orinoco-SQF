@@ -246,10 +246,69 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
+	
+	@Test
+	public void multilineDefine() {
+		// This test is for a macro spanning multiple lines
+
+		String[] expected = {"Hello word"};
+		int[] expectedInd = {0};
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define HELLO Hello \\\nworld",
+				"HELLO"
+		};
+
+		lexerFromText(String.join("\n", lines), cb, s -> null);
+
+		lexer.start();
+		lexer.assertPreProcessorUsed();
+	}
+	
+	@Test
+	public void multilineDefine_withSingleLineComment() {
+		// This test is for a macro spanning multiple lines
+		// and containging a single line comment in its body
+
+		String[] expected = {"Hello"};
+		int[] expectedInd = {0};
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define HELLO Hello// comment here\\\nworld",
+				"HELLO"
+		};
+
+		lexerFromText(String.join("\n", lines), cb, s -> null);
+
+		lexer.start();
+		lexer.assertPreProcessorUsed();
+	}
+	
+	@Test
+	public void multilineDefine_withMultiLineComment() {
+		// This test is for a macro spanning multiple lines
+
+		String[] expected = {"Hello world"};
+		int[] expectedInd = {0};
+		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+
+		String[] lines = {
+				"#define HELLO Hello/* Multiline\ncomment here*/\\\nworld",
+				"HELLO"
+		};
+
+		lexerFromText(String.join("\n", lines), cb, s -> null);
+
+		lexer.start();
+		lexer.assertPreProcessorUsed();
+	}
 
 	@Test
 	public void glueInMacroBody() {
 		// This test is for checking glue (##) inside a macro body
+		// and containging a multi line comment in its body
 
 		Consumer<CharSequence> cb = s -> assertEquals("20", s);
 
