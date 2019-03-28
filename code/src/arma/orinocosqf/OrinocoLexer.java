@@ -27,129 +27,141 @@ import java.util.Stack;
  * @since 02/20/2019
  */
 public class OrinocoLexer {
+	private OrinocoLexerContext context;
+
 	public static int getCommandId(@NotNull String command) {
 		return 0; //todo
 	}
 
-	/**
-	 * The current {@link OrinocoReader} instance
-	 */
-	private @NotNull OrinocoReader reader;
-	private final Stack<OrinocoReader> readerStack = new Stack<>();
+	private final Stack<LexerState> stateStack = new Stack<>();
 	private final OrinocoLexerStream lexerStream;
-	/**
-	 * The offset of tokens after preprocessing
-	 */
-	private int preprocessedOffset;
-	private int currentWordLength = 0;
-	private @NotNull LexState state = LexState.Start;
+	private int originalOffset = 0;
+	private int originalLength = 0;
+	private int preprocessedOffset = 0;
+	private int preprocessedLength = 0;
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
-		this.reader = r;
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
+		stateStack.push(new LexerState(r, true));
 	}
 
 	/**
 	 * Starts the lexing process.
 	 */
 	public void start() {
-		while (true) {
+		try {
 			lexCurrentReader();
-			if (readerStack.isEmpty()) {
-				break;
-			}
-
-			this.reader = readerStack.pop();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	private void lexCurrentReader() {
-		char[] buf = new char[256]; //todo make this class level rather than method level because of includes
-		int start = 0;
-		int end = buf.length;
+	private void lexCurrentReader() throws IOException {
+		while (!stateStack.isEmpty()) {
+			LexerState lexState = stateStack.peek();
+			readAllIntoBuffer();
 
-		while (true) {
-			int read;
-			try {
-				read = reader.read(buf, start, end);
-				if (read <= 0) {
-					break;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (lexState.buffEnd == 0) {
+				stateStack.pop();
+				continue;
 			}
-			int i = 0;
-			// initial state
-			boolean readingWord = true;
+			lexState.bufInd = 0;
 
-			for (; i < buf.length; i++) {
-				char c = buf[i];
-				preprocessedOffset++;
-				//todo handle preprocessor commands
-				switch (state) {
-					case Start: {
-						if (Character.isWhitespace(c)) {
-							state = LexState.Whitespace;
-							readingWord = false;
-						} else {
-							state = LexState.FirstChar;
-						}
+			do {
+				@NotNull TokenType expectedTokenType = getTokenType(lexState);
+
+				switch (expectedTokenType) {
+					case Whitespace: {
+						readAllWhitespace(lexState.buffEnd);
 						break;
 					}
-					case FirstChar: {
-						//this state should be resolved outside switch
+					case Text: {
+						readAllOfWord(lexState.buffEnd);
+						break;
+					}
+					case MultilineComment: {
+						break;
+					}
+					case SingleLineComment: {
+						break;
+					}
+					default: {
 						throw new IllegalStateException();
 					}
-					case LocalVar: {
-						if (Character.isWhitespace(c)) {
-							state = LexState.Whitespace;
-							//todo determine what token it is
-						} else {
-							currentWordLength++;
-						}
-						break;
-					}
-					case Word: {
-						if (Character.isWhitespace(c)) {
-							state = LexState.Whitespace;
-							//todo determine what token it is
-						} else {
-							currentWordLength++;
-							//todo binary search
-						}
-						break;
-					}
-					case Whitespace: {
-						if (!Character.isWhitespace(c)) {
-							// todo lexerStream.acceptWhitespace();
-							state = LexState.FirstChar;
-						}
-						break;
-					}
 				}
+			} while (lexState.bufInd < lexState.buffEnd);
+		}
+	}
 
-				if (state != LexState.Whitespace) {
-					readingWord = true;
+	private @NotNull TokenType getTokenType(@NotNull LexerState lexState) {
+		@NotNull TokenType expectedTokenType;
+		char[] buffer = lexState.buffer;
+		if (buffer.length >= 2 && buffer[lexState.bufInd] == '/' && buffer[lexState.bufInd + 1] == '*') {
+			expectedTokenType = TokenType.MultilineComment;
+		} else if (buffer.length >= 2 && buffer[lexState.bufInd] == '/' && buffer[lexState.bufInd + 1] == '/') {
+			expectedTokenType = TokenType.SingleLineComment;
+		} else {
+			expectedTokenType = Character.isWhitespace(buffer[lexState.bufInd]) ? TokenType.Whitespace : TokenType.Text;
+		}
+		return expectedTokenType;
+	}
 
-					if (state == LexState.FirstChar) {
-						if (c == '_') {
-							state = LexState.LocalVar;
-						} else if (c == '#') {
-							// todo preprocessor command?
-							// todo check for newlines
-						} else if (Character.isAlphabetic(c)) {
-							//todo get index of character in command array
-						} else {
-							// todo binary search last index of command array
-						}
-					}
-				}
-			}
-			if (readingWord) {
-				// todo change start and end and System.arraycopy the contents to front of array
+	private void readAllWhitespace(int cap) {
+		LexerState lexState = stateStack.peek();
+		char[] buffer = lexState.buffer;
+		int start = lexState.bufInd;
+		for (; lexState.bufInd < cap; lexState.bufInd++) {
+			char c = buffer[lexState.bufInd];
+			if (!Character.isWhitespace(c)) {
+				lexState.bufInd--;
+				break;
 			}
 		}
+		int read = lexState.bufInd - start;
+		preprocessedLength += read;
+		if (lexState.isFirstState) {
+			originalLength += read;
+		}
+
+		lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+	}
+
+	private void readAllOfWord(int cap) {
+		LexerState lexState = stateStack.peek();
+		char[] buffer = lexState.buffer;
+		int start = lexState.bufInd;
+		for (; lexState.bufInd < cap; lexState.bufInd++) {
+			char c = buffer[lexState.bufInd];
+			if (Character.isWhitespace(c)) {
+				lexState.bufInd--;
+				break;
+			}
+			// todo binary search
+			// todo determine if String
+			// todo operators are also delimeters, not just whitespace (1+1 for example)
+		}
+		int read = lexState.bufInd - start;
+		preprocessedLength += read;
+		if (lexState.isFirstState) {
+			originalLength += read;
+		}
+	}
+
+	private void readAllIntoBuffer() throws IOException {
+		LexerState state = stateStack.peek();
+		int start = 0;
+		int end = state.buffer.length;
+		int read;
+		do {
+			read = state.reader.read(state.buffer, start, end);
+			state.buffEnd = read;
+			if (read > 0) {
+				start = state.buffer.length;
+				state.growBuffer();
+				end = state.buffer.length - start;
+			}
+		} while (read > 0);
 	}
 
 	/**
@@ -168,8 +180,7 @@ public class OrinocoLexer {
 	 * @param reader the reader to immediately begin lexing
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
-		readerStack.push(this.reader);
-		this.reader = reader;
+		stateStack.push(new LexerState(reader));
 	}
 
 	/**
@@ -181,11 +192,35 @@ public class OrinocoLexer {
 		throw new UnsupportedOperationException("Get context not yet implemented!");
 	}
 
-	private enum LexState {
-		Start,
-		FirstChar,
-		Word,
-		LocalVar,
-		Whitespace
+	private enum TokenType {
+		Whitespace,
+		SingleLineComment,
+		MultilineComment,
+		Text;
+	}
+
+	private class LexerState {
+		public char[] buffer = new char[256];
+		public int buffEnd = 0;
+		public int bufInd = 0;
+		@NotNull
+		public final OrinocoReader reader;
+		public final boolean isFirstState;
+
+		private LexerState(@NotNull OrinocoReader reader) {
+			this.reader = reader;
+			this.isFirstState = false;
+		}
+
+		public LexerState(@NotNull OrinocoReader reader, boolean isFirstState) {
+			this.reader = reader;
+			this.isFirstState = isFirstState;
+		}
+
+		public void growBuffer() {
+			char[] newBuffer = new char[buffer.length * 2];
+			System.arraycopy(buffer, 0, newBuffer, 0, newBuffer.length);
+			this.buffer = newBuffer;
+		}
 	}
 }
