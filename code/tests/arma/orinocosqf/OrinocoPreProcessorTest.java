@@ -105,6 +105,23 @@ public class OrinocoPreProcessorTest {
 		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
+	
+	@Test
+	public void noPreProcessing_matchButMissingHashHash() {
+		// this test creates valid defines that get matched, but arma's preprocessor doesn't
+		// allow for replacing text inbetween text unless there is a ##
+		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
+
+		String[] lines = {
+				"#define e a",
+				"#define oo a",
+				"The cow jumped over the moon!"
+		};
+
+		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexer.start();
+		lexer.assertPreProcessorUsed();
+	}
 
 	@Test
 	public void simpleParamMacro() {
@@ -133,23 +150,6 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
-	}
-
-	@Test
-	public void noPreProcessing_matchButMissingHashHash() {
-		// this test creates valid defines that get matched, but arma's preprocessor doesn't
-		// allow for replacing text inbetween text unless there is a ##
-		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-
-		String[] lines = {
-				"#define e a",
-				"#define oo a",
-				"The cow jumped over the moon!"
-		};
-
-		lexerFromText(String.join("\n", lines), cb, s -> null);
-		lexer.start();
-		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
