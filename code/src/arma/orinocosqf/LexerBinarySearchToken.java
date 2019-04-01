@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
  * @since 02/20/2019
  */
 public interface LexerBinarySearchToken extends Comparable<LexerBinarySearchToken> {
-	boolean isWordDelimeter();
+	boolean isWordDelimiter();
 
 	@NotNull String getName();
 

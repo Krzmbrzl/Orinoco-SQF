@@ -86,7 +86,7 @@ public class LexerBinarySearchTokenSetTest {
 		}
 
 		@Override
-		public boolean isWordDelimeter() {
+		public boolean isWordDelimiter() {
 			return isWordDelimeter;
 		}
 

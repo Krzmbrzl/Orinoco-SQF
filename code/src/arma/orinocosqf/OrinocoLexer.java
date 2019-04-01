@@ -185,7 +185,7 @@ public class OrinocoLexer {
 			}
 			// todo binary search
 			// todo determine if String
-			// todo operators are also delimeters, not just whitespace (1+1 for example)
+			// todo operators are also delimiters, not just whitespace (1+1 for example)
 		}
 		int read = lexState.bufInd - start;
 		preprocessedLength += read;

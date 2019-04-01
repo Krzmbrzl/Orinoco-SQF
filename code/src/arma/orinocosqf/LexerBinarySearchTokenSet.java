@@ -16,6 +16,14 @@ public class LexerBinarySearchTokenSet {
 
 	public LexerBinarySearchTokenSet(@NotNull LexerBinarySearchToken[] fixed) {
 		Arrays.sort(fixed);
+
+		/*
+		 * The following code structures the lookup array such that:
+		 * 1. indices 0-25 are for tokens starting with a-z.
+		 * 2. index 26 is for tokens of length 1 ("?","!", etc)
+		 * 3. index 27 is for non alphabetic tokens that aren't of length 1 (">=", "<=", etc)
+		 */
+
 		lookup = new TokenCluster[28];
 		for (int i = 0; i < lookup.length; i++) {
 			lookup[i] = new TokenCluster(fixed.length);
@@ -116,8 +124,8 @@ public class LexerBinarySearchTokenSet {
 		}
 
 		@Override
-		public boolean isWordDelimeter() {
-			return token.isWordDelimeter();
+		public boolean isWordDelimiter() {
+			return token.isWordDelimiter();
 		}
 
 		@Override
