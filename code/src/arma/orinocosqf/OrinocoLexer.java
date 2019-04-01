@@ -39,6 +39,9 @@ public class OrinocoLexer {
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
+	private int lineNumber = 1;
+	private boolean allowPreProcessorCommand = true;
+	private static final char[] NON_WHITESPACE_DELIMS = {'+', '-', '/', '*', '!', '(', ')', '{', '}', '[', ']', '?', '<', '>', '#'};
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
@@ -90,6 +93,7 @@ public class OrinocoLexer {
 						throw new IllegalStateException();
 					}
 				}
+				allowPreProcessorCommand = false;
 			} while (lexState.bufInd < lexState.buffEnd);
 		}
 	}
@@ -113,6 +117,10 @@ public class OrinocoLexer {
 		int start = lexState.bufInd;
 		for (; lexState.bufInd < cap; lexState.bufInd++) {
 			char c = buffer[lexState.bufInd];
+			if (c == '\n') {
+				lineNumber++;
+				allowPreProcessorCommand = true;
+			}
 			if (!Character.isWhitespace(c)) {
 				lexState.bufInd--;
 				break;
@@ -131,11 +139,49 @@ public class OrinocoLexer {
 		LexerState lexState = stateStack.peek();
 		char[] buffer = lexState.buffer;
 		int start = lexState.bufInd;
+		boolean readingPreProcessorCommand = false;
+		boolean maybeComment = false;
 		for (; lexState.bufInd < cap; lexState.bufInd++) {
 			char c = buffer[lexState.bufInd];
-			if (Character.isWhitespace(c)) {
-				lexState.bufInd--;
-				break;
+			if (c == '/') {
+				if (maybeComment) {
+					lexState.bufInd--;
+					break;
+				}
+				maybeComment = true;
+			} else if (c == '*') {
+				if (maybeComment) {
+					if (readingPreProcessorCommand) {
+						//todo read all of comment
+						continue;
+					}
+					lexState.bufInd--;
+					break;
+				}
+				maybeComment = true;
+			} else {
+				if (c == '"') {
+
+				}
+				maybeComment = false;
+			}
+			if (readingPreProcessorCommand) {
+				if (c == '\n') {
+					lexState.bufInd--;
+					break;
+				}
+			} else {
+				if (allowPreProcessorCommand) {
+					if (c == '#') {
+						readingPreProcessorCommand = true;
+						continue;
+					}
+				}
+
+				if (Character.isWhitespace(c)) {
+					lexState.bufInd--;
+					break;
+				}
 			}
 			// todo binary search
 			// todo determine if String
