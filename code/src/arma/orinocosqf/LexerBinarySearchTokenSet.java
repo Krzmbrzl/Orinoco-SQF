@@ -31,15 +31,15 @@ public class LexerBinarySearchTokenSet {
 		int[] indices = new int[lookup.length];
 		for (LexerBinarySearchToken token : fixed) {
 			if (token.getName().length() == 1) {
-				lookup[26].add(indices[26]++, token);
+				lookup[26].set(indices[26]++, token);
 			} else {
 				char firstChar = token.getName().charAt(0);
 				if (Character.isAlphabetic(firstChar)) {
 					char c = Character.toLowerCase(firstChar);
 					int index = c - 'a';
-					lookup[index].add(indices[index]++, token);
+					lookup[index].set(indices[index]++, token);
 				} else {
-					lookup[27].add(indices[27]++, token);
+					lookup[27].set(indices[27]++, token);
 				}
 			}
 		}
@@ -87,7 +87,7 @@ public class LexerBinarySearchTokenSet {
 			this.tokens = new BSTokenHelper[max];
 		}
 
-		public void add(int index, @NotNull LexerBinarySearchToken token) {
+		public void set(int index, @NotNull LexerBinarySearchToken token) {
 			tokens[index] = new BSTokenHelper(token);
 		}
 
