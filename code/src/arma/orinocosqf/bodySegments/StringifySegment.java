@@ -13,26 +13,26 @@ public class StringifySegment extends BodySegment {
 	protected final BodySegment segment;
 
 	/**
-	 * @param segment the segment following the #
+	 * @param segment the segment following the # or <code>null</code> if there's none
 	 */
-	public StringifySegment(@NotNull BodySegment segment) {
+	public StringifySegment(BodySegment segment) {
 		this.segment = segment;
 	}
 
 	@NotNull
 	@Override
 	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
-		return "\"" + segment.applyArguments(args) + "\"";
+		return segment != null ? "\"" + segment.applyArguments(args) + "\"" : "";
 	}
 
 	@Override
 	@NotNull
 	public CharSequence toStringNoPreProcessing() {
-		return segment.toStringNoPreProcessing();
+		return segment != null ? "#" + segment.toStringNoPreProcessing() : "#";
 	}
 
 	@Override
 	public String toString() {
-		return "StringifySegment{" + segment + '}';
+		return "StringifySegment{" + (segment != null ? segment : "Null") + '}';
 	}
 }
