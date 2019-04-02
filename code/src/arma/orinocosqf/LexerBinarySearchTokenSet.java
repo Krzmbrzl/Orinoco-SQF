@@ -85,12 +85,12 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 			if (Character.isAlphabetic(c)) {
 				lookupInd = lower - 'a';
 			} else {
-				BSTokenHelper[] singles = lookup[SINGLES_INDEX].tokens;
-				for (BSTokenHelper helper : singles) {
-					if (Character.toLowerCase(helper.getName().charAt(0)) == lower) {
+				ArrayList<LexerBinarySearchToken> singles = lookup[SINGLES_INDEX].tokens;
+				for (LexerBinarySearchToken token : singles) {
+					if (Character.toLowerCase(token.getName().charAt(0)) == lower) {
 						clusterSelected = true;
 						lookupInd = SINGLES_INDEX;
-						matchedToken = (T) helper.token;
+						matchedToken = (T) token;
 						lastChar = c;
 						advanceCount++;
 						return true;
@@ -108,13 +108,13 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 				lookupInd = NON_ALPHABETIC_INDEX;
 			}
 		}
-		BSTokenHelper[] tokens = lookup[lookupInd].tokens;
+		ArrayList<LexerBinarySearchToken> tokens = lookup[lookupInd].tokens;
 		boolean possibleMatch = false;
 		boolean clusterIndUpdated = false;
 		int i = selectedClusterInd;
-		for (; i < tokens.length; i++) {
-			BSTokenHelper helper = tokens[i];
-			String name = helper.getName();
+		for (; i < tokens.size(); i++) {
+			LexerBinarySearchToken token = tokens.get(i);
+			String name = token.getName();
 			if (advanceCount >= name.length()) {
 				continue;
 			}
@@ -132,9 +132,9 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 					break;
 				}
 				// update i to the index where we can start matching
-				while (i < tokens.length) {
-					helper = tokens[i];
-					name = helper.getName();
+				while (i < tokens.size()) {
+					token = tokens.get(i);
+					name = token.getName();
 					if (Character.toLowerCase(name.charAt(advanceCount)) == lower) {
 						break;
 					}
@@ -146,7 +146,7 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 			}
 
 			if (advanceCount == name.length() - 1) {
-				matchedToken = (T) helper.token;
+				matchedToken = (T) token;
 			}
 		}
 		if (!possibleMatch) {
@@ -166,9 +166,9 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 	protected List<List<String>> copyToStringLists() {
 		List<List<String>> list = new ArrayList<>(lookup.length);
 		for (TokenCluster cluster : lookup) {
-			List<String> items = new ArrayList<>(cluster.tokens.length);
+			List<String> items = new ArrayList<>(cluster.tokens.size());
 			list.add(items);
-			for (BSTokenHelper helper : cluster.tokens) {
+			for (LexerBinarySearchToken helper : cluster.tokens) {
 				items.add(helper.getName());
 			}
 		}
@@ -176,62 +176,29 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 	}
 
 	private static class TokenCluster {
-		private BSTokenHelper[] tokens;
+		private final ArrayList<LexerBinarySearchToken> tokens;
 
 		public TokenCluster(int max) {
-			this.tokens = new BSTokenHelper[max];
+			this.tokens = new ArrayList<>(max);
 		}
 
 		public void set(int index, @NotNull LexerBinarySearchToken token) {
-			tokens[index] = new BSTokenHelper(token);
+			tokens.set(index, token);
 		}
 
 		/**
-		 * This method is meant to shrink the array such that there are no ending nulls.
+		 * This method is meant to shrink the underlying data array such that there are no ending nulls.
 		 */
 		public void shrink() {
-			int end = 0;
-			for (int i = 0; i < tokens.length; i++) {
-				if (tokens[i] == null) {
-					end = i;
-					break;
-				}
-			}
-			BSTokenHelper[] copy = new BSTokenHelper[end];
-			System.arraycopy(tokens, 0, copy, 0, copy.length);
-			this.tokens = copy;
+			tokens.trimToSize();
 		}
 
 		@Override
 		public String toString() {
 			return "TokenCluster{" +
-					"tokens=" + Arrays.toString(tokens) +
+					"tokens=" + tokens +
 					'}';
 		}
 	}
 
-	private static class BSTokenHelper implements LexerBinarySearchToken {
-
-		private final LexerBinarySearchToken token;
-
-		public BSTokenHelper(@NotNull LexerBinarySearchToken token) {
-			this.token = token;
-		}
-
-		@Override
-		public boolean isWordDelimiter() {
-			return token.isWordDelimiter();
-		}
-
-		@Override
-		@NotNull
-		public String getName() {
-			return token.getName();
-		}
-
-		@Override
-		public String toString() {
-			return token.getName();
-		}
-	}
 }
