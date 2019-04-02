@@ -41,7 +41,8 @@ public class OrinocoLexer {
 	private int preprocessedLength = 0;
 	private int lineNumber = 1;
 	private boolean allowPreProcessorCommand = true;
-	private static final char[] NON_WHITESPACE_DELIMS = {'+', '-', '/', '*', '!', '(', ')', '{', '}', '[', ']', '?', '<', '>', '#'};
+	private static final String[] NON_WHITESPACE_DELIMS = {"+", "-", "/", "*", "!", "(", ")", "{", "}", "[", "]", "?", "<", ">", "#",
+			"<=", ">=", "&&", "||"};
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
@@ -62,7 +63,7 @@ public class OrinocoLexer {
 
 	private void lexCurrentReader() throws IOException {
 		while (!stateStack.isEmpty()) {
-			LexerState lexState = stateStack.peek();
+			final LexerState lexState = stateStack.peek();
 			readAllIntoBuffer();
 
 			if (lexState.buffEnd == 0) {
@@ -100,7 +101,7 @@ public class OrinocoLexer {
 
 	private @NotNull TokenType getTokenType(@NotNull LexerState lexState) {
 		@NotNull TokenType expectedTokenType;
-		char[] buffer = lexState.buffer;
+		final char[] buffer = lexState.buffer;
 		if (buffer.length >= 2 && buffer[lexState.bufInd] == '/' && buffer[lexState.bufInd + 1] == '*') {
 			expectedTokenType = TokenType.MultilineComment;
 		} else if (buffer.length >= 2 && buffer[lexState.bufInd] == '/' && buffer[lexState.bufInd + 1] == '/') {
@@ -112,9 +113,9 @@ public class OrinocoLexer {
 	}
 
 	private void readAllWhitespace(int cap) {
-		LexerState lexState = stateStack.peek();
-		char[] buffer = lexState.buffer;
-		int start = lexState.bufInd;
+		final LexerState lexState = stateStack.peek();
+		final char[] buffer = lexState.buffer;
+		final int start = lexState.bufInd;
 		for (; lexState.bufInd < cap; lexState.bufInd++) {
 			char c = buffer[lexState.bufInd];
 			if (c == '\n') {
@@ -136,9 +137,9 @@ public class OrinocoLexer {
 	}
 
 	private void readAllOfWord(int cap) {
-		LexerState lexState = stateStack.peek();
-		char[] buffer = lexState.buffer;
-		int start = lexState.bufInd;
+		final LexerState lexState = stateStack.peek();
+		final char[] buffer = lexState.buffer;
+		final int start = lexState.bufInd;
 		boolean readingPreProcessorCommand = false;
 		boolean maybeComment = false;
 		for (; lexState.bufInd < cap; lexState.bufInd++) {
@@ -161,7 +162,7 @@ public class OrinocoLexer {
 				maybeComment = true;
 			} else {
 				if (c == '"') {
-
+					// todo
 				}
 				maybeComment = false;
 			}
