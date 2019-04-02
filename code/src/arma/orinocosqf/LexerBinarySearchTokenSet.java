@@ -183,7 +183,11 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 		}
 
 		public void set(int index, @NotNull LexerBinarySearchToken token) {
-			tokens.set(index, token);
+			if (index == tokens.size()) {
+				tokens.add(token);
+			} else {
+				tokens.set(index, token);
+			}
 		}
 
 		/**
