@@ -11,10 +11,20 @@ import java.util.List;
  * @author K
  * @since 4/1/19
  */
-public class LexerBinarySearchTokenSet {
+public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 	private final TokenCluster[] lookup;
+	private boolean clusterSelected;
+	private int selectedClusterInd;
+	private char lastChar;
+	private int lookupInd;
+	private int advanceCount;
+	private T matchedToken;
+	private boolean impossibleMatch;
 
-	public LexerBinarySearchTokenSet(@NotNull LexerBinarySearchToken[] fixed) {
+	private static final int SINGLES_INDEX = 26;
+	private static final int NON_ALPHABETIC_INDEX = 27;
+
+	public LexerBinarySearchTokenSet(@NotNull T[] fixed) {
 		Arrays.sort(fixed);
 
 		/*
@@ -29,9 +39,9 @@ public class LexerBinarySearchTokenSet {
 			lookup[i] = new TokenCluster(fixed.length);
 		}
 		int[] indices = new int[lookup.length];
-		for (LexerBinarySearchToken token : fixed) {
+		for (T token : fixed) {
 			if (token.getName().length() == 1) {
-				lookup[26].set(indices[26]++, token);
+				lookup[SINGLES_INDEX].set(indices[SINGLES_INDEX]++, token);
 			} else {
 				char firstChar = token.getName().charAt(0);
 				if (Character.isAlphabetic(firstChar)) {
@@ -39,18 +49,26 @@ public class LexerBinarySearchTokenSet {
 					int index = c - 'a';
 					lookup[index].set(indices[index]++, token);
 				} else {
-					lookup[27].set(indices[27]++, token);
+					lookup[NON_ALPHABETIC_INDEX].set(indices[NON_ALPHABETIC_INDEX]++, token);
 				}
 			}
 		}
 
-		for (int i = 0; i < lookup.length; i++) {
-			lookup[i].shrink();
+		for (TokenCluster cluster : lookup) {
+			cluster.shrink();
 		}
+
+		resetSearch();
 	}
 
 	public void resetSearch() {
-
+		clusterSelected = false;
+		selectedClusterInd = 0;
+		lastChar = '\0';
+		lookupInd = 0;
+		advanceCount = 0;
+		matchedToken = null;
+		impossibleMatch = false;
 	}
 
 	/**
@@ -59,12 +77,89 @@ public class LexerBinarySearchTokenSet {
 	 * @return true if a token has been matched, false otherwise
 	 */
 	public boolean advance(char c) {
-		return false;
+		if (impossibleMatch) {
+			return false;
+		}
+		char lower = Character.toLowerCase(c);
+		if (!clusterSelected) {
+			if (Character.isAlphabetic(c)) {
+				lookupInd = lower - 'a';
+			} else {
+				BSTokenHelper[] singles = lookup[SINGLES_INDEX].tokens;
+				for (BSTokenHelper helper : singles) {
+					if (Character.toLowerCase(helper.getName().charAt(0)) == lower) {
+						clusterSelected = true;
+						lookupInd = SINGLES_INDEX;
+						matchedToken = (T) helper.token;
+						lastChar = c;
+						advanceCount++;
+						return true;
+					}
+				}
+				//if at this point, not a single
+				lookupInd = NON_ALPHABETIC_INDEX;
+			}
+			clusterSelected = true;
+		}
+		if (lookupInd == SINGLES_INDEX) {
+			if (Character.isAlphabetic(lastChar)) {
+				lookupInd = Character.toLowerCase(lastChar) - 'a';
+			} else {
+				lookupInd = NON_ALPHABETIC_INDEX;
+			}
+		}
+		BSTokenHelper[] tokens = lookup[lookupInd].tokens;
+		boolean possibleMatch = false;
+		boolean clusterIndUpdated = false;
+		int i = selectedClusterInd;
+		for (; i < tokens.length; i++) {
+			BSTokenHelper helper = tokens[i];
+			String name = helper.getName();
+			if (advanceCount >= name.length()) {
+				continue;
+			}
+			final char nameCharLower = Character.toLowerCase(name.charAt(advanceCount));
+			if (nameCharLower == lower) {
+				possibleMatch = true;
+				if (!clusterIndUpdated) {
+					clusterIndUpdated = true;
+					selectedClusterInd = i;
+				}
+			} else {
+				if (lower > nameCharLower) {
+					// the inputted char comes after the name char which means there is no point in continuing binary search
+					// because we have already scanned all items that come before name alphabetically
+					break;
+				}
+				// update i to the index where we can start matching
+				while (i < tokens.length) {
+					helper = tokens[i];
+					name = helper.getName();
+					if (Character.toLowerCase(name.charAt(advanceCount)) == lower) {
+						break;
+					}
+					i++;
+				}
+				// subtract one from i as the for loop will add 1 after continue
+				i--;
+				continue;
+			}
+
+			if (advanceCount == name.length() - 1) {
+				matchedToken = (T) helper.token;
+			}
+		}
+		if (!possibleMatch) {
+			impossibleMatch = true;
+		}
+		lastChar = c;
+		advanceCount++;
+		return matchedToken != null;
 	}
 
 	@Nullable
-	public LexerBinarySearchToken getMatched() {
-		return null;
+	public T getMatched() {
+		return matchedToken;
 	}
 
 	@NotNull
