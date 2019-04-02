@@ -44,8 +44,8 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 				lookup[SINGLES_INDEX].set(indices[SINGLES_INDEX]++, token);
 			} else {
 				char firstChar = token.getName().charAt(0);
-				if (Character.isAlphabetic(firstChar)) {
-					char c = Character.toLowerCase(firstChar);
+				if (isAlphabetic(firstChar)) {
+					char c = toLowerCase(firstChar);
 					int index = c - 'a';
 					lookup[index].set(indices[index]++, token);
 				} else {
@@ -80,14 +80,14 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 		if (impossibleMatch) {
 			return false;
 		}
-		char lower = Character.toLowerCase(c);
+		char lower = toLowerCase(c);
 		if (!clusterSelected) {
-			if (Character.isAlphabetic(c)) {
+			if (isAlphabetic(c)) {
 				lookupInd = lower - 'a';
 			} else {
 				ArrayList<LexerBinarySearchToken> singles = lookup[SINGLES_INDEX].tokens;
 				for (LexerBinarySearchToken token : singles) {
-					if (Character.toLowerCase(token.getName().charAt(0)) == lower) {
+					if (toLowerCase(token.getName().charAt(0)) == lower) {
 						clusterSelected = true;
 						lookupInd = SINGLES_INDEX;
 						matchedToken = (T) token;
@@ -102,8 +102,8 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 			clusterSelected = true;
 		}
 		if (lookupInd == SINGLES_INDEX) {
-			if (Character.isAlphabetic(lastChar)) {
-				lookupInd = Character.toLowerCase(lastChar) - 'a';
+			if (isAlphabetic(lastChar)) {
+				lookupInd = toLowerCase(lastChar) - 'a';
 			} else {
 				lookupInd = NON_ALPHABETIC_INDEX;
 			}
@@ -118,7 +118,7 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 			if (advanceCount >= name.length()) {
 				continue;
 			}
-			final char nameCharLower = Character.toLowerCase(name.charAt(advanceCount));
+			final char nameCharLower = toLowerCase(name.charAt(advanceCount));
 			if (nameCharLower == lower) {
 				possibleMatch = true;
 				if (!clusterIndUpdated) {
@@ -135,7 +135,7 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 				while (i < tokens.size()) {
 					token = tokens.get(i);
 					name = token.getName();
-					if (Character.toLowerCase(name.charAt(advanceCount)) == lower) {
+					if (toLowerCase(name.charAt(advanceCount)) == lower) {
 						break;
 					}
 					i++;
@@ -173,6 +173,23 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 			}
 		}
 		return list;
+	}
+
+	/** An optimized toLowerCase method */
+	private static char toLowerCase(char c) {
+		if (c >= 'A' && c <= 'Z') {
+			int i = c - 'A';
+			c = (char) ('a' + i);
+		}
+		return c;
+	}
+
+	/** An optimized isAlphabetic method */
+	private static boolean isAlphabetic(char c) {
+		if (c >= 'A' && c <= 'Z') {
+			return true;
+		}
+		return c >= 'a' && c <= 'z';
 	}
 
 	private static class TokenCluster {
