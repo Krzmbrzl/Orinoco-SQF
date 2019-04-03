@@ -3,6 +3,7 @@ package arma.orinocosqf.bodySegments;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import arma.orinocosqf.PreProcessorMacro;
 
@@ -19,7 +20,7 @@ public class GlueSegment extends BodySegment {
 	 * @param left The segment to the left of this GlueSegment or <code>null</code> if there's none
 	 * @param right The segment to the right of this GlueSegment or <code>null</code> if there's none
 	 */
-	public GlueSegment(BodySegment left, BodySegment right) {
+	public GlueSegment(@Nullable BodySegment left, @Nullable BodySegment right) {
 		this.left = left;
 		this.right = right;
 	}

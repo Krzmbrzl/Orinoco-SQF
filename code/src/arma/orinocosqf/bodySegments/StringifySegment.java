@@ -3,6 +3,7 @@ package arma.orinocosqf.bodySegments;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A segment which has a # in it ("#define MACRO #segment"). When {@link #applyArguments(List)} is invoked, it returns the segment following
@@ -15,7 +16,7 @@ public class StringifySegment extends BodySegment {
 	/**
 	 * @param segment the segment following the # or <code>null</code> if there's none
 	 */
-	public StringifySegment(BodySegment segment) {
+	public StringifySegment(@Nullable BodySegment segment) {
 		this.segment = segment;
 	}
 
