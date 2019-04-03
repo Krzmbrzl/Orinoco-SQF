@@ -2,18 +2,12 @@ package arma.orinocosqf;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-
 import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.bodySegments.BodySegment;
-import arma.orinocosqf.bodySegments.BodySegmentSequence;
+import arma.orinocosqf.bodySegments.BodySegmentParser;
 import arma.orinocosqf.bodySegments.GlueSegment;
-import arma.orinocosqf.bodySegments.MacroArgumentSegment;
-import arma.orinocosqf.bodySegments.ParenSegment;
 import arma.orinocosqf.bodySegments.StringifySegment;
-import arma.orinocosqf.bodySegments.TextSegment;
-import arma.orinocosqf.bodySegments.WordSegment;
 
 /**
  * A {@link OrinocoLexerStream} implementation that fully preprocesses tokens.
@@ -25,11 +19,13 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	private OrinocoLexer lexer;
 	private final OrinocoTokenProcessor processor;
 	protected MacroSet macroSet;
+	protected BodySegmentParser segmentParser;
 
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor p) {
 		this.processor = p;
 
 		macroSet = new MacroSet();
+		segmentParser = new BodySegmentParser();
 	}
 
 	@Override
@@ -244,7 +240,8 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		System.out.println(macroBody.toString());
 
-		BodySegment body = parseSegments(readOnlyBuf, i, remainingLength, params);
+		BodySegment body = segmentParser.parseSegments(readOnlyBuf, i, remainingLength, params,
+				(c, isFirstLetter) -> isMacroNamePart(c, isFirstLetter));
 
 		System.out.println(body);
 		System.out.println(body.toStringNoPreProcessing());
@@ -252,142 +249,6 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		PreProcessorMacro macro = new PreProcessorMacro(getMacroSet(), macroName.toString(), params, body);
 
 		getMacroSet().put(macroName.toString(), macro);
-	}
-
-	protected BodySegment parseSegments(@NotNull char[] readOnlyBuf, int offset, int length, List<String> params) {
-		int maxOffset = offset + length;
-
-		Stack<SegmentList> segmentLists = new Stack<>();
-		segmentLists.push(new SegmentList());
-
-		StringBuilder currentSequence = new StringBuilder();
-
-		boolean inWord = false;
-		boolean inText = false;
-		int parenLevel = 0;
-
-		for (int i = offset; i < maxOffset; i++) {
-			char c = readOnlyBuf[i];
-
-			if (isMacroNamePart(c, currentSequence.length() == 0)) {
-				if (inText) {
-					// text ended here
-					inText = false;
-					segmentLists.peek().add(new TextSegment(currentSequence.toString()));
-					currentSequence.setLength(0);
-				}
-				inWord = true;
-				currentSequence.append(c);
-			} else {
-				if (inWord) {
-					// word was ended here
-					inWord = false;
-
-					// could either be a Word- or a MacroArgumentSegment
-					if (params.contains(currentSequence.toString())) {
-						segmentLists.peek()
-								.add(new MacroArgumentSegment(currentSequence.toString(), params.indexOf(currentSequence.toString())));
-					} else {
-						// its a normal word
-						segmentLists.peek().add(new WordSegment(currentSequence.toString()));
-					}
-
-					currentSequence.setLength(0);
-				}
-
-				if (c == '#' || (parenLevel == 0 && c == '(') || (parenLevel == 1 && (c == ')') || (parenLevel > 0 && c == ','))) {
-					// only allow opening parens to open new ParenSegment outside of a ParenSegment -> No nested ParenSegments
-					// only allow the outermost closing paren to be processed here (to finish off the started ParenSegment
-					// only check for closing paren and comma if inside a parenSegment
-					// only check for comma in a ParenSegment
-					if (inText) {
-						inText = false;
-						segmentLists.peek().add(new TextSegment(currentSequence.toString()));
-						currentSequence.setLength(0);
-					}
-
-					// TODO: watch for Strings in paren-segments -> They can even contain commas, but have to use a balanced number of
-					// quotes. Quote escaping is not supported
-
-					switch (c) {
-						case '#':
-							if (i + 1 < maxOffset && readOnlyBuf[i + 1] == '#') {
-								i++;
-								// glue segment
-								segmentLists.peek().inGlueSegment();
-							} else {
-								// stringify segment
-								segmentLists.peek().inStringifySegment();
-							}
-							break;
-						case '(':
-							// paren-segment start
-							parenLevel++;
-							segmentLists.push(new SegmentList());
-							break;
-						case ')':
-							// paren-segment end
-							parenLevel--;
-							SegmentList list = segmentLists.pop();
-							list.listDone();
-
-							if (i > offset && readOnlyBuf[i - 1] == ',') {
-								// check if character right before was a comma
-								// if yes, an empty "argument" has to be appended to the ParenSegment
-								list.add(new TextSegment(""));
-							}
-
-							segmentLists.peek().add(new ParenSegment(list));
-							break;
-						case ',':
-							// paren-segment separator
-							if (i > offset && (readOnlyBuf[i - 1] == ',' || (parenLevel == 1 && readOnlyBuf[i - 1] == '('))) {
-								// check if character right before was a comma
-								// or if it was an opening paren that opened the ParenSegment (all other ones are considered TextSegments on their own)
-								// if yes, an empty "argument" has to be appended to the ParenSegment
-								segmentLists.peek().add(new TextSegment(""));
-							}
-							break;
-					}
-				} else {
-					if (c == '(') {
-						// nested parens -> Don't create nested paren-Segments but keep track of nesting
-						parenLevel++;
-					} else if (c == ')') {
-						if (parenLevel == 0) {
-							// TODO: error about unopened paren
-							System.err.println("Encountered unopened paren");
-						} else {
-							parenLevel--;
-						}
-					}
-					inText = true;
-					currentSequence.append(c);
-				}
-			}
-		}
-
-		// add last segment
-		if (inText) {
-			segmentLists.peek().add(new TextSegment(currentSequence.toString()));
-		} else if (inWord) {
-			if (params.contains(currentSequence.toString())) {
-				segmentLists.peek().add(new MacroArgumentSegment(currentSequence.toString(), params.indexOf(currentSequence.toString())));
-			} else {
-				segmentLists.peek().add(new WordSegment(currentSequence.toString()));
-			}
-		}
-
-		if (parenLevel > 0) {
-			// TODO: this could also be checked by segmentLists.size() > 1
-			// TODO: Error about unclosed paren (need to be searched first though)
-			System.err.println("Encountered unclosed paren");
-		}
-
-		SegmentList list = segmentLists.pop();
-		list.listDone();
-
-		return new BodySegmentSequence(list);
 	}
 
 	public static class SegmentList extends ArrayList<BodySegment> {
