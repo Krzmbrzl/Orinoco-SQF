@@ -70,10 +70,17 @@ public class BodySegmentParser {
 		public abstract char nextChar();
 
 		/**
-		 * @return The previous character in the input or <code>(char) -1</code> if there is no previous character. A call to this method
-		 *         doesn't affect the state of this reader in any way.
+		 * @return The character in the input to the left of the character that has been read the last time {@link #nextChar()} was called
+		 *         or <code>(char) -1</code> if there is no such character. A call to this method doesn't affect the state of this reader in
+		 *         any way.
 		 */
 		public abstract char previousChar();
+
+		/**
+		 * @return The character {@link #nextChar()} returned the last time it was invoked or <code>(char) -1</code> if there is no such
+		 *         character. A call to this method doesn't affect the state of this reader in any way.
+		 */
+		public abstract char currentChar();
 
 		/**
 		 * @return How many characters are remaining to be read in this reader
@@ -300,6 +307,11 @@ public class BodySegmentParser {
 			// -2 as the pointer is designed to point to the next char already
 			return readCharacters < 2 ? (char) -1 : buf[startOffset + readCharacters - 2];
 		}
+		
+		@Override
+		public char currentChar() {
+			return readCharacters == 0 ? (char) -1 : buf[startOffset + readCharacters - 1];
+		}
 
 	}
 
@@ -345,11 +357,14 @@ public class BodySegmentParser {
 
 		try {
 			while (reader.charsRemaining() > 0) {
+				char prevChar = reader.currentChar();
 				BodySegment segment = nextStandardSegment(reader, currentSegment, params,
 						segmentLists.size() > 1 ? specialCharsInParenSegment : specialChars);
 
 				if (segment != null) {
-					if (segment instanceof TextSegment) {
+					if (segment instanceof TextSegment && !(segmentLists.size() > 1 && prevChar == ',')) {
+						// If the previous segment was a TextSegment as wall and the character before the current segment was not a comma
+						// while being in a ParenSegment
 						List<BodySegment> list = segmentLists.peek();
 						if (list.size() > 0 && list.get(list.size() - 1) instanceof TextSegment) {
 							// merge with previous text-segment
