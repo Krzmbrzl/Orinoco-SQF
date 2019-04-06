@@ -465,7 +465,14 @@ public class BodySegmentParser {
 			segmentLists.peek().add(new BodySegmentSequence(list));
 		}
 
-		return new BodySegmentSequence(segmentLists.pop());
+		List<BodySegment> list = segmentLists.pop();
+
+		if (list.isEmpty()) {
+			// return empty segment
+			return new TextSegment("");
+		} else {
+			return list.size() > 1 ? new BodySegmentSequence(list) : list.get(0);
+		}
 	}
 
 	/**
