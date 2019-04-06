@@ -422,6 +422,11 @@ public class BodySegmentParser {
 
 							if (parenLevel == 0 && segmentLists.size() > 1) {
 								// This one closed the ParenSegment previously opened
+								if (reader.previousChar() == ',') {
+									// add the last empty TextSegment
+									segmentLists.peek().add(new TextSegment(""));
+								}
+								
 								List<BodySegment> list = segmentLists.pop();
 								segmentLists.peek().add(new ParenSegment(list));
 							} else {
