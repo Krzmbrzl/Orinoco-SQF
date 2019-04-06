@@ -298,7 +298,7 @@ public class BodySegmentParser {
 		@Override
 		public char previousChar() {
 			// -2 as the pointer is designed to point to the next char already
-			return readCharacters == 0 ? (char) -1 : buf[startOffset + readCharacters - 2];
+			return readCharacters < 2 ? (char) -1 : buf[startOffset + readCharacters - 2];
 		}
 
 	}
@@ -441,7 +441,12 @@ public class BodySegmentParser {
 								segmentLists.peek().add(new ParenSegment(list));
 							} else {
 								// add paren as normal TextSegment
-								appendText(")", segmentLists.peek());
+								if (reader.previousChar() == ',' && parenLevel > 0) {
+									// Don't append text as the previous element has been finsihed already
+									segmentLists.peek().add(new TextSegment(")"));
+								} else {
+									appendText(")", segmentLists.peek());
+								}
 							}
 							break;
 					}
