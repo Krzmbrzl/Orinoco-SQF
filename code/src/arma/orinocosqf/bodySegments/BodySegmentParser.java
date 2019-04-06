@@ -349,7 +349,17 @@ public class BodySegmentParser {
 						segmentLists.size() > 1 ? specialCharsInParenSegment : specialChars);
 
 				if (segment != null) {
-					segmentLists.peek().add(segment);
+					if (segment instanceof TextSegment) {
+						List<BodySegment> list = segmentLists.peek();
+						if (list.size() > 0 && list.get(list.size() - 1) instanceof TextSegment) {
+							// merge with previous text-segment
+							((TextSegment) list.get(list.size() - 1)).append(((TextSegment) segment).text);
+						} else {
+							list.add(segment);
+						}
+					} else {
+						segmentLists.peek().add(segment);
+					}
 				}
 
 				// check if next char is a special char
@@ -411,7 +421,7 @@ public class BodySegmentParser {
 								segmentLists.push(new ArrayList<>());
 							} else {
 								// add paren as normal TextSegment
-								segmentLists.peek().add(new TextSegment("("));
+								appendText("(", segmentLists.peek());
 							}
 
 							break;
@@ -426,12 +436,12 @@ public class BodySegmentParser {
 									// add the last empty TextSegment
 									segmentLists.peek().add(new TextSegment(""));
 								}
-								
+
 								List<BodySegment> list = segmentLists.pop();
 								segmentLists.peek().add(new ParenSegment(list));
 							} else {
 								// add paren as normal TextSegment
-								segmentLists.peek().add(new TextSegment(")"));
+								appendText(")", segmentLists.peek());
 							}
 							break;
 					}
@@ -477,6 +487,23 @@ public class BodySegmentParser {
 			return new TextSegment("");
 		} else {
 			return list.size() > 1 ? new BodySegmentSequence(list) : list.get(0);
+		}
+	}
+
+	/**
+	 * Appends the given text to the given list of {@link BodySegment}s. If the previous segment in the list is a {@link TextSegment}, the
+	 * text will be appended to it. Otherwise a new TextSegment will be created and added to the list
+	 * 
+	 * @param text The text to add
+	 * @param list The list to add to
+	 */
+	protected void appendText(@NotNull String text, @NotNull List<BodySegment> list) {
+		if (list.size() > 0 && list.get(list.size() - 1) instanceof TextSegment) {
+			// merge with previous TextSegment
+			((TextSegment) list.get(list.size() - 1)).append(text);
+		} else {
+			// add as new segment
+			list.add(new TextSegment(text));
 		}
 	}
 
