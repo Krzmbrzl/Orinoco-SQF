@@ -5,13 +5,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import org.graalvm.compiler.nodes.memory.ReadNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.sun.tools.javac.util.Pair;
-
+/**
+ * A parser that is able to transform macro bodies into a {@link BodySegment}-representation
+ * 
+ * @author Raven
+ *
+ */
 public class BodySegmentParser {
 
+	/**
+	 * Checks whether the given character is contained in the given char-array
+	 * 
+	 * @param c The character to search for
+	 * @param array The array to search in
+	 * @return Whether or not the character is contained
+	 */
 	private static boolean isInCharArray(char c, char[] array) {
 		for (char current : array) {
 			if (current == c) {
@@ -33,15 +44,22 @@ public class BodySegmentParser {
 	}
 
 	/**
-	 * A helper reader-like class that facilitates the extraction of relevant parts
+	 * A helper reader-like class that facilitates the extraction of relevant parts from an input
 	 * 
 	 * @author Raven
 	 *
 	 */
 	protected abstract static class SegmentReader {
-
+		/**
+		 * An implementation of a {@link WordPartDetector} that will be used to determine what characters will be part of a word
+		 */
 		WordPartDetector detector;
 
+
+		/**
+		 * @param detector An implementation of a {@link WordPartDetector} that will be used to determine what characters will be part of a
+		 *        word
+		 */
 		public SegmentReader(@NotNull WordPartDetector detector) {
 			this.detector = detector;
 		}
@@ -182,7 +200,7 @@ public class BodySegmentParser {
 
 			letters++;
 			targetBuf.append(c);
-			
+
 			c = nextChar();
 
 			while (c != stringDelimiter && c != (char) -1) {
@@ -205,12 +223,42 @@ public class BodySegmentParser {
 		}
 	}
 
+	/**
+	 * An implementation of a {@link SegmentReader} that uses a char-array as input
+	 * 
+	 * @author Raven
+	 *
+	 */
 	protected static class CharBuffReader extends SegmentReader {
+		/**
+		 * The input char-array
+		 */
 		char[] buf;
+		/**
+		 * The offset at which the first character (that should be considered) in the char-array is located. All characters before this
+		 * index won't be accessible by this reader
+		 */
 		int startOffset;
+		/**
+		 * The length of the input. All characters after <code>startOffset + length</code> in the char-array won't be accessible by this
+		 * reader
+		 */
 		int length;
+		/**
+		 * The amount of characters that have been read from the input so far
+		 */
 		int readCharacters;
 
+
+		/**
+		 * @param detector An implementation of a {@link WordPartDetector} that will be used to determine what characters will be part of a
+		 *        word
+		 * @param buf The char-array used as an input
+		 * @param startOffset The offset at which the first character (that should be considered) in the char-array is located. All
+		 *        characters before this index won't be accessible by this reader.
+		 * @param length The length of the input. All characters after <code>startOffset + length</code> in the char-array won't be
+		 *        accessible by this reader
+		 */
 		public CharBuffReader(@NotNull WordPartDetector detector, @NotNull char[] buf, int startOffset, int length) {
 			super(detector);
 
@@ -255,11 +303,28 @@ public class BodySegmentParser {
 
 	}
 
+	/**
+	 * Parses the segments of a macro body from a char-array
+	 * 
+	 * @param bufReadOnly The char-array to use as an input
+	 * @param offset The offset inside the given array at which the first character of the macro body is to be found
+	 * @param length The length of the macro body
+	 * @param params A List containing the names of the parameter the macro, whose body should be parsed, takes.
+	 * @param detector An implementation of a {@link WordPartDetector} that will be used to determine what characters will be part of a word
+	 * @return The {@link BodySegment} fully describing the complete macro body
+	 */
 	@NotNull
 	public BodySegment parseSegments(@NotNull char[] bufReadOnly, int offset, int length, List<String> params, WordPartDetector detector) {
 		return doParseSegments(new CharBuffReader(detector, bufReadOnly, offset, length), params);
 	}
 
+	/**
+	 * Performs the actual segment parsing
+	 * 
+	 * @param reader The {@link SegmentReader} that is used to access the input
+	 * @param params A List containing the names of the parameter the macro, whose body should be parsed, takes.
+	 * @return The {@link BodySegment} fully describing the complete macro body
+	 */
 	@NotNull
 	protected BodySegment doParseSegments(SegmentReader reader, List<String> params) {
 		if (reader.charsRemaining() == 0) {
@@ -403,6 +468,21 @@ public class BodySegmentParser {
 		return new BodySegmentSequence(segmentLists.pop());
 	}
 
+	/**
+	 * Reads the next standard segment in the input. A standard segment is either a word or a sequence
+	 * 
+	 * @param reader The reader to use to access the input
+	 * @param buffer The buffer to read into. On a successful match, it will be cleared of its contents.
+	 * @param params A list containing the names of the parameter the currently processed macro takes
+	 * @param breakChars The characters to break a sequence at
+	 * @return The {@link BodySegment} representing the read segment or <code>null</code> if none was read.
+	 * @throws IOException This method itself doesn't throw this exception. The only case such an exception might arise is if the given
+	 *         buffer's append-method throws it.
+	 * 
+	 * @see {@link SegmentReader#readWord(Appendable)}
+	 * @see {@link SegmentReader#readSequence(Appendable, char[])}
+	 */
+	@Nullable
 	protected BodySegment nextStandardSegment(SegmentReader reader, StringBuilder buffer, List<String> params, char[] breakChars)
 			throws IOException {
 		if (reader.readWord(buffer) > 0) {
