@@ -251,93 +251,11 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		getMacroSet().put(macroName.toString(), macro);
 	}
 
-	public static class SegmentList extends ArrayList<BodySegment> {
-
-		private static final long serialVersionUID = -3483333718792570123L;
-		boolean inGlueSegment;
-		boolean inStringifySegment;
-
-
-		@Override
-		public boolean add(BodySegment segment) {
-			if (inGlueSegment) {
-				BodySegment left = this.size() > 0 ? this.remove(this.size() - 1) : null;
-
-				if (inStringifySegment) {
-					// Such a situation could arise from something like this: #define TEST this###test
-					// StringifySegment is right argument of GlueSegment
-					super.add(new GlueSegment(left, new StringifySegment(segment)));
-				} else {
-					super.add(new GlueSegment(left, segment));
-				}
-			} else if (inStringifySegment) {
-				super.add(new StringifySegment(segment));
-			}
-
-			if (!inGlueSegment && !inStringifySegment) {
-				super.add(segment);
-			}
-
-			inStringifySegment = false;
-			inGlueSegment = false;
-
-			return true;
-		}
-
-		/**
-		 * Sets this list to produce a GlueSegment, the next time {@link #add(BodySegment)} is invoked
-		 */
-		public void inGlueSegment() {
-			if (inGlueSegment) {
-				inGlueSegment = false;
-
-				BodySegment left = this.size() > 0 ? this.remove(this.size() - 1) : null;
-				this.add(new GlueSegment(left, null));
-			}
-			if (inStringifySegment) {
-				// This should be unreachable as any consecutive hashtags should result in glue-segments
-				// TODO: issue error -> this is unexpected behaviour
-				throw new IllegalStateException("Unexpected program flow");
-			}
-
-			inGlueSegment = true;
-		}
-
-		/**
-		 * Sets this list to produce a StringifySegment, the next time {@link #add(BodySegment)} is invoked
-		 */
-		public void inStringifySegment() {
-			if (inStringifySegment) {
-				// This should be unreachable as any consecutive hashtags should result in glue-segments
-				// TODO: issue error -> this is unexpected behaviour
-				throw new IllegalStateException("Unexpected program flow");
-			}
-
-			inStringifySegment = true;
-		}
-
-		/**
-		 * If there still is a pending Glue- and/or StringifySegment, this method will create them with null-arguments as there won't be
-		 * another call to {@link #add(BodySegment)}
-		 */
-		public void listDone() {
-			if (inStringifySegment) {
-				super.add(new StringifySegment(null));
-			}
-			if (inGlueSegment) {
-				BodySegment left = this.size() > 0 ? this.remove(this.size() - 1) : null;
-				super.add(new GlueSegment(left, null));
-			}
-			inStringifySegment = false;
-			inGlueSegment = false;
-		}
-	}
-
 	public static void main(String[] args) {
 		OrinocoPreProcessor p = new OrinocoPreProcessor(null);
 
 		// TODO: This should only stringify the opening paren, not the whole ParenSegment
-		String content = "#define myMacro(Some,body)  #(a,(,body,))";
+		String content = "#define myMacro(Some,body)  'Some body I used to know'";
 
 		p.acceptPreProcessorCommand(PreProcessorCommand.Define, content.toCharArray(), 0, content.length());
 	}
