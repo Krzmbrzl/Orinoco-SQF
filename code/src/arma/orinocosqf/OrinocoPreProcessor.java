@@ -133,7 +133,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 * @return Whether or not it can be a macro name part
 	 */
 	protected boolean isMacroNamePart(char c, boolean isFirstLetter) {
-		return Character.isLetter(c) || c == '_' || (!isFirstLetter && Character.isDigit(c));
+		return (c > 'Z' ? c <= 'z' && c >= 'a' : c <= 'Z' && c >= 'A') || c == '_' || (!isFirstLetter && Character.isDigit(c));
 	}
 
 	protected MacroSet getMacroSet() {
