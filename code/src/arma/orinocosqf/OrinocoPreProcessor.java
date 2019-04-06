@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
-import arma.orinocosqf.bodySegments.GlueSegment;
-import arma.orinocosqf.bodySegments.StringifySegment;
 
 /**
  * A {@link OrinocoLexerStream} implementation that fully preprocesses tokens.
@@ -250,15 +248,4 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		getMacroSet().put(macroName.toString(), macro);
 	}
-
-	public static void main(String[] args) {
-		OrinocoPreProcessor p = new OrinocoPreProcessor(null);
-
-		// TODO: This should only stringify the opening paren, not the whole ParenSegment
-		String content = "#define myMacro(Some,body)  'Some body I used to know'";
-
-		p.acceptPreProcessorCommand(PreProcessorCommand.Define, content.toCharArray(), 0, content.length());
-	}
-
-
 }
