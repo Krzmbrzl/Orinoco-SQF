@@ -68,4 +68,47 @@ public class GlueSegment extends BodySegment {
 	public String toString() {
 		return "GlueSegment{left=" + (left != null ? left : "Null") + ",right=" + (right != null ? right : "Null") + '}';
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		GlueSegment other = (GlueSegment) o;
+
+		if (other.left == null) {
+			if (this.left != null) {
+				return false;
+			}
+		} else {
+			if (!other.left.equals(this.left)) {
+				return false;
+			}
+
+			if (other.right == null) {
+				return this.right == null;
+			} else {
+				return other.right.equals(this.right);
+			}
+		}
+
+		if (other.right == null) {
+			if (this.right != null) {
+				return false;
+			}
+		} else {
+			if (!other.right.equals(this.right)) {
+				return false;
+			}
+
+			if (other.left == null) {
+				return this.left == null;
+			} else {
+				return other.left.equals(this.left);
+			}
+		}
+
+		return other.left.equals(this.left) && other.right.equals(this.right);
+	}
 }

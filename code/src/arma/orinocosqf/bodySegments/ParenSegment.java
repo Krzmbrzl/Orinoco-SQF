@@ -110,4 +110,9 @@ public class ParenSegment extends BodySegmentSequence {
 		return b.toString();
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o) && ((ParenSegment) o).wasUsedAsMacroArgument == this.wasUsedAsMacroArgument;
+	}
+
 }

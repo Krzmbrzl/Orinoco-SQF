@@ -50,4 +50,19 @@ public class WordSegment extends BodySegment {
 	public String toString() {
 		return "WordSegment{" + word + '}';
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		WordSegment other = (WordSegment) o;
+
+		if (other.word == null) {
+			return this.word == null;
+		}
+
+		return other.word.equals(this.word);
+	}
 }

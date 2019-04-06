@@ -36,4 +36,19 @@ public class StringifySegment extends BodySegment {
 	public String toString() {
 		return "StringifySegment{" + (segment != null ? segment : "Null") + '}';
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		StringifySegment other = (StringifySegment) o;
+
+		if (other.segment == null) {
+			return this.segment == null;
+		}
+
+		return other.segment.equals(this.segment);
+	}
 }

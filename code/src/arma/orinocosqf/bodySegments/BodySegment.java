@@ -48,4 +48,13 @@ public abstract class BodySegment {
 	 */
 	@NotNull
 	public abstract CharSequence toStringNoPreProcessing();
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || !o.getClass().equals(this.getClass())) {
+			return false;
+		}
+
+		return ((BodySegment) o).ownerMacro == this.ownerMacro;
+	}
 }

@@ -34,4 +34,19 @@ public class TextSegment extends BodySegment {
 	public String toString() {
 		return "TextSegment{" + text + '}';
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		TextSegment other = (TextSegment) o;
+
+		if (other.text == null) {
+			return this.text == null;
+		}
+
+		return other.text.equals(this.text);
+	}
 }

@@ -55,4 +55,19 @@ public class BodySegmentSequence extends BodySegment {
 	public String toString() {
 		return "BodySegmentSequence{" + segments + '}';
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		BodySegmentSequence other = (BodySegmentSequence) o;
+
+		if (other.segments == null) {
+			return this.segments == null;
+		}
+
+		return other.segments.equals(this.segments);
+	}
 }

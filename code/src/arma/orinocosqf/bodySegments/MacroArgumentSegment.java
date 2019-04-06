@@ -58,4 +58,23 @@ public class MacroArgumentSegment extends BodySegment {
 	public String toString() {
 		return "MacroArgumentSegment{" + argumentName + ", index=" + argIndex + '}';
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!super.equals(o)) {
+			return false;
+		}
+
+		MacroArgumentSegment other = (MacroArgumentSegment) o;
+
+		if (other.argumentName == null) {
+			if (this.argumentName != null) {
+				return false;
+			}
+
+			return other.argIndex == this.argIndex;
+		}
+
+		return other.argumentName.equals(this.argumentName) && other.argIndex == this.argIndex;
+	}
 }
