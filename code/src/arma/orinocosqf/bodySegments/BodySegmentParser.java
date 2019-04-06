@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.graalvm.compiler.nodes.memory.ReadNode;
 import org.jetbrains.annotations.NotNull;
+
+import com.sun.tools.javac.util.Pair;
 
 public class BodySegmentParser {
 
@@ -78,7 +81,7 @@ public class BodySegmentParser {
 			boolean isFirstLetter = true;
 			char c = nextChar();
 
-			while (c != -1 && detector.isWordPart(c, isFirstLetter)) {
+			while (c != (char) -1 && detector.isWordPart(c, isFirstLetter)) {
 				targetBuf.append(c);
 				letters++;
 
@@ -108,7 +111,7 @@ public class BodySegmentParser {
 			char c = nextChar();
 
 			// read sequence
-			while (c != -1) {
+			while (c != (char) -1) {
 				if (detector.isWordPart(c, true) || isInCharArray(c, breakChars)) {
 					// exit loop as sequence ends here
 					break;
@@ -143,7 +146,7 @@ public class BodySegmentParser {
 			char c = nextChar();
 			rewindChar();
 
-			if (c == -1) {
+			if (c == (char) -1) {
 				return 0;
 			}
 
@@ -154,6 +157,51 @@ public class BodySegmentParser {
 				// read a sequence
 				return readSequence(targetBuf, breakChars);
 			}
+		}
+
+		/**
+		 * Reads a String delimited by the given character from the input into the given buffer. The String is read into the buffer
+		 * including the quotes. If the character next read by {@link #nextChar()} isn't the starting delimiter, this method doesn't read
+		 * anything.
+		 * 
+		 * @param targetBuf The buffer to read the string into
+		 * @param stringDelimiter The delimiter of the string to read (typically single or double quoteI
+		 * @return The amount of read characters
+		 * @throws IOException This method itself doesn't throw this exception. The only case such an exception might arise is if the given
+		 *         targetBuf's append-method throws it.
+		 */
+		public int readString(@NotNull Appendable targetBuf, char stringDelimiter) throws IOException {
+			int letters = 0;
+
+			char c = nextChar();
+
+			if (c != stringDelimiter) {
+				rewindChar();
+				return 0;
+			}
+
+			letters++;
+			targetBuf.append(c);
+			
+			c = nextChar();
+
+			while (c != stringDelimiter && c != (char) -1) {
+				letters++;
+				targetBuf.append(c);
+
+				c = nextChar();
+			}
+
+			if (c != stringDelimiter) {
+				// unclosed string -> Error
+				// TODO: report error
+				System.err.println("Unclosed string in macro body (delimiter: " + stringDelimiter + ")");
+			} else {
+				targetBuf.append(c);
+				letters++;
+			}
+
+			return letters;
 		}
 	}
 
@@ -178,7 +226,8 @@ public class BodySegmentParser {
 
 		@Override
 		public char nextChar() {
-			if (readCharacters == length) {
+			if (readCharacters >= length) {
+				readCharacters++;
 				// There aren't any more characters
 				return (char) -1;
 			}
@@ -220,9 +269,11 @@ public class BodySegmentParser {
 		Stack<List<BodySegment>> segmentLists = new Stack<>();
 		segmentLists.push(new ArrayList<>());
 
-		char[] specialChars = new char[] { '(', ')', '#', '"', '\'', };
-		char[] specialCharsInParenSegment = new char[] { '(', ')', '#', '"', '\'', ',' };
-		char[] specialArgumentCharsInParenSegment = new char[] { '#', '"', '\'', ',' };
+		// Note that strings wrapped in single quotes are not treated specially (as Strings). The single quotes are treated
+		// as any other character instead. That's why the single-quote doesn't appear in here as special character
+		char[] specialChars = new char[] { '(', ')', '#', '"' };
+		char[] specialCharsInParenSegment = new char[] { '(', ')', '#', '"', ',' };
+		char[] specialArgumentCharsInParenSegment = new char[] { '#', '"', ',' };
 
 		StringBuilder currentSegment = new StringBuilder();
 		int parenLevel = 0;
@@ -242,11 +293,14 @@ public class BodySegmentParser {
 					// general handling -> context insensitive
 					switch (c) {
 						case '"':
-						case '\'':
 							// string matched
-							// TODO
-							throw new UnsupportedOperationException("Strings not yet implemented");
-							// break;
+							// read String as is as no expanding is performed in double-quoted String
+							reader.rewindChar();
+							reader.readString(currentSegment, '"');
+
+							segmentLists.peek().add(new TextSegment(currentSegment.toString()));
+							currentSegment.setLength(0);
+							break;
 						case '#':
 							// check if it's Glue- or a StringifySegment
 							boolean isGlue = reader.nextChar() == '#';
