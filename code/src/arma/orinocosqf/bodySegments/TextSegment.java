@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class TextSegment extends BodySegment {
 
-	protected final String text;
+	protected String text;
 
 	/**
 	 * @param text the text to return in {@link #applyArguments(List)}
@@ -48,5 +48,18 @@ public class TextSegment extends BodySegment {
 		}
 
 		return other.text.equals(this.text);
+	}
+
+	/**
+	 * Appends the given text to the text represented by this segment
+	 * 
+	 * @param text The text to append
+	 */
+	protected void append(String text) {
+		if (this.text != null) {
+			this.text = this.text + text;
+		} else {
+			this.text = text;
+		}
 	}
 }
