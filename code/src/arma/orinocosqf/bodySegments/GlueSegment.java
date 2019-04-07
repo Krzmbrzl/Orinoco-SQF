@@ -77,38 +77,34 @@ public class GlueSegment extends BodySegment {
 
 		GlueSegment other = (GlueSegment) o;
 
+		return leftEquals(other) && rightEquals(other);
+	}
+
+	/**
+	 * Compares the {@link #left} field of the given GlueSegment with this one's
+	 * 
+	 * @param other The segment to compare to
+	 * @return Whether the left-elements of the segments are equal
+	 */
+	protected boolean leftEquals(GlueSegment other) {
 		if (other.left == null) {
-			if (this.left != null) {
-				return false;
-			}
+			return this.left == null;
 		} else {
-			if (!other.left.equals(this.left)) {
-				return false;
-			}
-
-			if (other.right == null) {
-				return this.right == null;
-			} else {
-				return other.right.equals(this.right);
-			}
+			return other.left.equals(this.left);
 		}
+	}
 
+	/**
+	 * Compares the {@link #right} field of the given GlueSegment with this one's
+	 * 
+	 * @param other The segment to compare to
+	 * @return Whether the right-elements of the segments are equal
+	 */
+	protected boolean rightEquals(GlueSegment other) {
 		if (other.right == null) {
-			if (this.right != null) {
-				return false;
-			}
+			return this.right == null;
 		} else {
-			if (!other.right.equals(this.right)) {
-				return false;
-			}
-
-			if (other.left == null) {
-				return this.left == null;
-			} else {
-				return other.left.equals(this.left);
-			}
+			return other.right.equals(this.right);
 		}
-
-		return other.left.equals(this.left) && other.right.equals(this.right);
 	}
 }

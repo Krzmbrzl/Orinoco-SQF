@@ -5,12 +5,15 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
+import arma.orinocosqf.bodySegments.BodySegmentSequence;
 import arma.orinocosqf.bodySegments.ParenSegment;
+import arma.orinocosqf.bodySegments.StringifySegment;
 import arma.orinocosqf.bodySegments.TextSegment;
 import arma.orinocosqf.bodySegments.WordSegment;
 
@@ -28,15 +31,11 @@ public class BodySegmentParserTest {
 		EMPTY = new ArrayList<>();
 	}
 
-	public boolean isMacroNamePart(char c, boolean isFirstLetter) {
-		return true;
-	}
-
-	void assertSegment(String input, BodySegment expected) {
+	void assertSegment(@NotNull String input, @NotNull BodySegment expected) {
 		assertSegment(input, expected, EMPTY);
 	}
 
-	void assertSegment(String input, BodySegment expected, List<String> params) {
+	void assertSegment(@NotNull String input, @NotNull BodySegment expected, @NotNull List<String> params) {
 		BodySegment produced = parser.parseSegments(input.toCharArray(), 0, input.length(), params,
 				(c, isFirstLetter) -> p.isMacroNamePart(c, isFirstLetter));
 
@@ -45,15 +44,15 @@ public class BodySegmentParserTest {
 				produced.toStringNoPreProcessing().toString());
 	}
 
-	void assertSingleWordSegment(String input) {
+	void assertSingleWordSegment(@NotNull String input) {
 		assertSegment(input, new WordSegment(input));
 	}
 
-	void assertSingleTextSegment(String input) {
+	void assertSingleTextSegment(@NotNull String input) {
 		assertSegment(input, new TextSegment(input));
 	}
 
-	void assertSingleParenSegment_onlyWords(String input, String[] words) {
+	void assertSingleParenSegment_onlyWords(@NotNull String input, @NotNull String[] words) {
 		List<BodySegment> segments = new ArrayList<>(words.length);
 		for (String currentWord : words) {
 			segments.add(new WordSegment(currentWord));
@@ -62,13 +61,25 @@ public class BodySegmentParserTest {
 		assertSegment(input, new ParenSegment(segments));
 	}
 
-	void assertSingleParenSegment_onlyText(String input, String[] words) {
+	void assertSingleParenSegment_onlyText(@NotNull String input, @NotNull String[] words) {
 		List<BodySegment> segments = new ArrayList<>(words.length);
 		for (String currentWord : words) {
 			segments.add(new TextSegment(currentWord));
 		}
 
 		assertSegment(input, new ParenSegment(segments));
+	}
+
+	void assertSingleStringifySegmentFollowedByWord(@NotNull String input, String word) {
+		assertSegment(input, new StringifySegment(new WordSegment(word)));
+	}
+
+	void assertSingleStringifySegmentFollowedByText(@NotNull String input, @NotNull String text) {
+		List<BodySegment> list = new ArrayList<>(2);
+		list.add(new StringifySegment(null));
+		list.add(new TextSegment(text));
+
+		assertSegment(input, new BodySegmentSequence(list));
 	}
 
 	@Test
@@ -230,15 +241,49 @@ public class BodySegmentParserTest {
 		assertSingleParenSegment_onlyText("(,,,)", new String[] { "", "", "", "" });
 
 		assertSingleParenSegment_onlyText("(())", new String[] { "()" });
-		
+
 		assertSingleParenSegment_onlyText("(() -*?)", new String[] { "() -*?" });
-		
+
 		assertSingleParenSegment_onlyText("( -*?())", new String[] { " -*?()" });
-		
+
 		assertSingleParenSegment_onlyText("(( -*?))", new String[] { "( -*?)" });
-		
+
 		assertSingleParenSegment_onlyText("((,,))", new String[] { "(", "", ")" });
-		
+
 		assertSingleParenSegment_onlyText("((, ,))", new String[] { "(", " ", ")" });
+	}
+
+	@Test
+	public void singleStringifySegment() {
+		assertSegment("#", new StringifySegment(null));
+
+		assertSingleStringifySegmentFollowedByWord("#bla", "bla");
+
+		assertSingleStringifySegmentFollowedByWord("#_", "_");
+
+		assertSingleStringifySegmentFollowedByWord("#bla123", "bla123");
+
+		assertSingleStringifySegmentFollowedByWord("#bl34a", "bl34a");
+
+		assertSingleStringifySegmentFollowedByWord("#bl_a", "bl_a");
+
+		assertSingleStringifySegmentFollowedByWord("#__bla", "__bla");
+	}
+
+	@Test
+	public void stringifyOperatorFollowedByText() {
+		assertSingleStringifySegmentFollowedByText("#3", "3");
+
+		assertSingleStringifySegmentFollowedByText("#,", ",");
+
+		assertSingleStringifySegmentFollowedByText("#-", "-");
+
+		assertSingleStringifySegmentFollowedByText("#\\", "\\");
+
+		assertSingleStringifySegmentFollowedByText("#)", ")");
+
+		assertSingleStringifySegmentFollowedByText("#{", "{");
+
+		assertSingleStringifySegmentFollowedByText("#335,87!§$", "335,87!§$");
 	}
 }
