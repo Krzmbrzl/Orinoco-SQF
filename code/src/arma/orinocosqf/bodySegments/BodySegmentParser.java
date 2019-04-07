@@ -307,7 +307,7 @@ public class BodySegmentParser {
 			// -2 as the pointer is designed to point to the next char already
 			return readCharacters < 2 ? (char) -1 : buf[startOffset + readCharacters - 2];
 		}
-		
+
 		@Override
 		public char currentChar() {
 			return readCharacters == 0 ? (char) -1 : buf[startOffset + readCharacters - 1];
@@ -414,18 +414,16 @@ public class BodySegmentParser {
 								segmentLists.peek().add(new GlueSegment(left, right));
 							} else {
 								// it's a StringifySegment
-								if (right == null) {
-									char nextC = reader.nextChar();
-									if (isInCharArray(nextC, segmentLists.size() > 1 ? specialCharsInParenSegment : specialChars)) {
-										// add the next "special character" as TextSegment to the StringificationSegment as it isn't special
-										// in this context
-										right = new TextSegment(String.valueOf(nextC));
-									} else {
-										reader.rewindChar();
+								if (right instanceof WordSegment || right instanceof MacroArgumentSegment) {
+									// only words + MacroArguments can be stringified
+									segmentLists.peek().add(new StringifySegment(right));
+								} else {
+									segmentLists.peek().add(new StringifySegment(null));
+
+									if (right != null) {
+										segmentLists.peek().add(right);
 									}
 								}
-
-								segmentLists.peek().add(new StringifySegment(right));
 							}
 							break;
 						case '(':
