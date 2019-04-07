@@ -12,6 +12,7 @@ import org.junit.Test;
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
 import arma.orinocosqf.bodySegments.BodySegmentSequence;
+import arma.orinocosqf.bodySegments.GlueSegment;
 import arma.orinocosqf.bodySegments.ParenSegment;
 import arma.orinocosqf.bodySegments.StringifySegment;
 import arma.orinocosqf.bodySegments.TextSegment;
@@ -80,6 +81,10 @@ public class BodySegmentParserTest {
 		list.add(new TextSegment(text));
 
 		assertSegment(input, new BodySegmentSequence(list));
+	}
+
+	void assertSingleGlueSegment(@NotNull String input, BodySegment left, BodySegment right) {
+		assertSegment(input, new GlueSegment(left, right));
 	}
 
 	@Test
@@ -285,5 +290,20 @@ public class BodySegmentParserTest {
 		assertSingleStringifySegmentFollowedByText("#{", "{");
 
 		assertSingleStringifySegmentFollowedByText("#335,87!§$", "335,87!§$");
+	}
+
+	@Test
+	public void singleGlueSegment() {
+		assertSingleGlueSegment("##", null, null);
+
+		assertSingleGlueSegment("a##", new WordSegment("a"), null);
+
+		assertSingleGlueSegment("##b", null, new WordSegment("b"));
+
+		assertSingleGlueSegment("a##b", new WordSegment("a"), new WordSegment("b"));
+		
+		assertSingleGlueSegment("some##word", new WordSegment("some"), new WordSegment("word"));
+		
+		assertSingleGlueSegment("_someTest##word23", new WordSegment("_someTest"), new WordSegment("word23"));
 	}
 }
