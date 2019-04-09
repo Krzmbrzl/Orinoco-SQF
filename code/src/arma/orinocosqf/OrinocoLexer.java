@@ -197,7 +197,7 @@ public class OrinocoLexer {
 
 		@Override
 		@NotNull
-		public OrinocoLexer.TokenNode accept(char c) {
+		public TokenNode accept(char c) {
 			if (Character.isWhitespace(c)) {
 				working = true;
 			} else {
@@ -245,7 +245,7 @@ public class OrinocoLexer {
 
 		@NotNull
 		@Override
-		public OrinocoLexer.TokenNode accept(char c) {
+		public TokenNode accept(char c) {
 			switch (state) {
 				case STATE1_NEED_SLASH: {
 					if (c == '/') {
@@ -308,7 +308,7 @@ public class OrinocoLexer {
 
 		@NotNull
 		@Override
-		public OrinocoLexer.TokenNode accept(char c) {
+		public TokenNode accept(char c) {
 			switch (state) {
 				case STATE1_NEED_SLASH: {
 					if (c == '/') {
@@ -371,7 +371,7 @@ public class OrinocoLexer {
 		public abstract boolean isPreProcessing();
 
 		@NotNull
-		public abstract OrinocoLexer.TokenNode accept(char c);
+		public abstract TokenNode accept(char c);
 
 		public abstract boolean isDone();
 
@@ -383,6 +383,7 @@ public class OrinocoLexer {
 
 		@NotNull
 		public final ArrayList<TokenNode> children = new ArrayList<>();
+		private boolean childMatched = false;
 
 		public RootTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
@@ -399,6 +400,7 @@ public class OrinocoLexer {
 			for (TokenNode child : children) {
 				TokenNode accept = child.accept(c);
 				if (accept != child) {
+					childMatched = true;
 					return accept;
 				}
 			}
@@ -407,12 +409,15 @@ public class OrinocoLexer {
 
 		@Override
 		public boolean isDone() {
-			return false;
+			return childMatched;
 		}
 
 		@Override
 		public void finish() {
-
+			if (!childMatched) {
+				throw new IllegalStateException();
+			}
+			childMatched = false;
 		}
 	}
 
@@ -490,7 +495,7 @@ public class OrinocoLexer {
 		}
 
 		public LexerState(@NotNull OrinocoReader reader, boolean isFirstState) {
-			this.reader = new BufferedReader(reader, 256);
+			this.reader = new BufferedReader(reader);
 			this.isFirstState = isFirstState;
 		}
 	}
