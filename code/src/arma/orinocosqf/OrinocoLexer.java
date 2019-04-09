@@ -36,7 +36,7 @@ public class OrinocoLexer {
 	}
 
 	private final OrinocoCharStream ocs = new OrinocoCharStream();
-	private final CharGraph charGraph = new CharGraph(this);
+	private final RootTokenNode rootTokenNode = new RootTokenNode(this);
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
 	private int originalLength = 0;
@@ -57,14 +57,14 @@ public class OrinocoLexer {
 	 * Starts the lexing process.
 	 */
 	public void start() {
-		charGraph.root.children.add(new MultilineCommentTokenNode(this));
-		charGraph.root.children.add(new SingleLineCommentTokenNode(this));
-		charGraph.root.children.add(new WhitespaceTokenNode(this, true));
-		charGraph.root.children.add(new PreProcessorCommandTokenNode(this));
+		rootTokenNode.children.add(new MultilineCommentTokenNode(this));
+		rootTokenNode.children.add(new SingleLineCommentTokenNode(this));
+		rootTokenNode.children.add(new WhitespaceTokenNode(this, true));
+		rootTokenNode.children.add(new PreProcessorCommandTokenNode(this));
 
-		charGraph.trimToSize();
+		rootTokenNode.children.trimToSize();
 
-		TokenNode cursor = charGraph.root;
+		TokenNode cursor = rootTokenNode;
 		while (ocs.hasAvailable()) {
 			char read = ocs.read();
 			if (read == '\n') {
@@ -113,14 +113,17 @@ public class OrinocoLexer {
 
 	private void makeCommand() {
 		//lexerStream.acceptGlobalVariable();
+		updateOffsetsAfterMake();
 	}
 
 	private void makePreProcessorCommand() {
 		//lexerStream.acceptPreProcessorCommand();
+		updateOffsetsAfterMake();
 	}
 
 	private void makePreProcessedText() {
 		//lexerStream.preProcessToken();
+		updateOffsetsAfterMake();
 	}
 
 	/**
@@ -301,7 +304,7 @@ public class OrinocoLexer {
 			return false;
 		}
 
-		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer, @NotNull OrinocoLexer.TokenNode gotoWhenCommentMade) {
+		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer, @NotNull TokenNode gotoWhenCommentMade) {
 			super(lexer);
 			this.gotoWhenCommentMade = gotoWhenCommentMade;
 		}
@@ -399,9 +402,11 @@ public class OrinocoLexer {
 		public TokenNode accept(char c) {
 			for (TokenNode child : children) {
 				TokenNode accept = child.accept(c);
-				if (accept != child) {
+				if (child.isDone()) {
 					childMatched = true;
-					return accept;
+					if (accept != child) {
+						return accept;
+					}
 				}
 			}
 			return this;
@@ -418,18 +423,6 @@ public class OrinocoLexer {
 				throw new IllegalStateException();
 			}
 			childMatched = false;
-		}
-	}
-
-	private static class CharGraph {
-		public final RootTokenNode root;
-
-		public CharGraph(@NotNull OrinocoLexer lexer) {
-			root = new RootTokenNode(lexer);
-		}
-
-		public void trimToSize() {
-			root.children.trimToSize();
 		}
 	}
 
