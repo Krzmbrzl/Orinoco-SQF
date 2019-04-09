@@ -2,6 +2,7 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -441,8 +442,11 @@ public class OrinocoLexer {
 
 				do {
 					LexerState peek = stateStack.peek();
-					if (peek.bufInd >= peek.buffEnd) {
-						stateStack.pop();
+					try {
+						if (!peek.reader.ready()) {
+							stateStack.pop();
+						}
+					} catch (IOException ignore) {
 					}
 				} while (!stateStack.isEmpty());
 			}
@@ -450,7 +454,11 @@ public class OrinocoLexer {
 				return false;
 			}
 			LexerState peek = stateStack.peek();
-			return peek.bufInd < peek.buffEnd;
+			try {
+				return peek.reader.ready();
+			} catch (IOException ignore) {
+			}
+			return false;
 		}
 
 		public char read() {
@@ -459,7 +467,12 @@ public class OrinocoLexer {
 			}
 			final LexerState lexState = stateStack.peek();
 
-			return lexState.sb.charAt(lexState.bufInd++);
+			try {
+				return (char) lexState.reader.read();
+			} catch (IOException ignore) {
+
+			}
+			throw new IllegalStateException();
 		}
 
 		public void acceptIncludedReader(@NotNull OrinocoReader reader) {
@@ -468,41 +481,17 @@ public class OrinocoLexer {
 	}
 
 	private static class LexerState {
-		private final StringBuilder sb = new StringBuilder(256);
-		public int buffEnd = 0;
-		public int bufInd = 0;
 		@NotNull
-		public final OrinocoReader reader;
+		public final BufferedReader reader;
 		public final boolean isFirstState;
 
 		private LexerState(@NotNull OrinocoReader reader) {
-			this.reader = reader;
-			this.isFirstState = false;
-			try {
-				readAllIntoBuffer();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			this(reader, false);
 		}
 
 		public LexerState(@NotNull OrinocoReader reader, boolean isFirstState) {
-			this.reader = reader;
+			this.reader = new BufferedReader(reader, 256);
 			this.isFirstState = isFirstState;
-			try {
-				readAllIntoBuffer();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-
-		private void readAllIntoBuffer() throws IOException {
-			int read;
-			char[] buffer = new char[256];
-			do {
-				read = this.reader.read(buffer);
-				sb.append(buffer);
-			} while (read > 0);
 		}
 	}
 
