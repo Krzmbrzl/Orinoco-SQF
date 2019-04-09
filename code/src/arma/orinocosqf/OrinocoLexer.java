@@ -3,6 +3,7 @@ package arma.orinocosqf;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
@@ -33,182 +34,92 @@ public class OrinocoLexer {
 		return 0; //todo
 	}
 
-	private final Stack<LexerState> stateStack = new Stack<>();
+	private final OrinocoCharStream ocs = new OrinocoCharStream();
+	private final CharGraph charGraph = new CharGraph(this);
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
 	private int lineNumber = 1;
-	private boolean allowPreProcessorCommand = true;
+	private final StringBuilder currentToken = new StringBuilder();
 	private static final String[] NON_WHITESPACE_DELIMS = {"+", "-", "/", "*", "!", "(", ")", "{", "}", "[", "]", "?", "<", ">", "#",
 			"<=", ">=", "&&", "||"};
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
-		stateStack.push(new LexerState(r, true));
+		ocs.stateStack.push(new LexerState(r, true));
 	}
 
 	/**
 	 * Starts the lexing process.
 	 */
 	public void start() {
-		try {
-			lexCurrentReader();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+		charGraph.root.children.add(new MultilineCommentTokenNode(this));
+		charGraph.root.children.add(new SingleLineCommentTokenNode(this));
+		charGraph.root.children.add(new WhitespaceTokenNode(this, true));
+		charGraph.root.children.add(new PreProcessorCommandTokenNode(this));
 
-	private void lexCurrentReader() throws IOException {
-		while (!stateStack.isEmpty()) {
-			final LexerState lexState = stateStack.peek();
-			readAllIntoBuffer();
+		charGraph.trimToSize();
 
-			if (lexState.buffEnd == 0) {
-				stateStack.pop();
-				continue;
-			}
-			lexState.bufInd = 0;
-
-			do {
-				@NotNull TokenType expectedTokenType = getTokenType(lexState);
-
-				switch (expectedTokenType) {
-					case Whitespace: {
-						readAllWhitespace(lexState.buffEnd);
-						break;
-					}
-					case Text: {
-						readAllOfWord(lexState.buffEnd);
-						break;
-					}
-					case MultilineComment: {
-						break;
-					}
-					case SingleLineComment: {
-						break;
-					}
-					default: {
-						throw new IllegalStateException();
-					}
-				}
-				allowPreProcessorCommand = false;
-			} while (lexState.bufInd < lexState.buffEnd);
-		}
-	}
-
-	private @NotNull TokenType getTokenType(@NotNull LexerState lexState) {
-		@NotNull TokenType expectedTokenType;
-		final char[] buffer = lexState.buffer;
-		if (buffer.length >= 2 && buffer[lexState.bufInd] == '/' && buffer[lexState.bufInd + 1] == '*') {
-			expectedTokenType = TokenType.MultilineComment;
-		} else if (buffer.length >= 2 && buffer[lexState.bufInd] == '/' && buffer[lexState.bufInd + 1] == '/') {
-			expectedTokenType = TokenType.SingleLineComment;
-		} else {
-			expectedTokenType = Character.isWhitespace(buffer[lexState.bufInd]) ? TokenType.Whitespace : TokenType.Text;
-		}
-		return expectedTokenType;
-	}
-
-	private void readAllWhitespace(int cap) {
-		final LexerState lexState = stateStack.peek();
-		final char[] buffer = lexState.buffer;
-		final int start = lexState.bufInd;
-		for (; lexState.bufInd < cap; lexState.bufInd++) {
-			char c = buffer[lexState.bufInd];
-			if (c == '\n') {
+		TokenNode cursor = charGraph.root;
+		while (ocs.hasAvailable()) {
+			char read = ocs.read();
+			if (read == '\n') {
 				lineNumber++;
-				allowPreProcessorCommand = true;
 			}
-			if (!Character.isWhitespace(c)) {
-				lexState.bufInd--;
-				break;
+			TokenNode next = cursor.accept(read);
+			if (!cursor.isPreProcessing()) {
+				originalLength++;
+			}
+			currentToken.append(read);
+			preprocessedOffset++;
+			if (cursor.isDone()) {
+				cursor.finish();
+				cursor = next;
+				currentToken.setLength(0);
 			}
 		}
-		int read = lexState.bufInd - start;
-		preprocessedLength += read;
-		if (lexState.isFirstState) {
-			originalLength += read;
-		}
+	}
 
+	private void updateOffsetsAfterMake() {
+		originalOffset += originalLength;
+		originalLength = 0;
+		preprocessedOffset += preprocessedLength;
+		preprocessedLength = 0;
+	}
+
+	private void makeWhitespace() {
 		lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		updateOffsetsAfterMake();
 	}
 
-	private void readAllOfWord(int cap) {
-		final LexerState lexState = stateStack.peek();
-		final char[] buffer = lexState.buffer;
-		final int start = lexState.bufInd;
-		boolean readingPreProcessorCommand = false;
-		boolean maybeComment = false;
-		for (; lexState.bufInd < cap; lexState.bufInd++) {
-			char c = buffer[lexState.bufInd];
-			if (c == '/') {
-				if (maybeComment) {
-					lexState.bufInd--;
-					break;
-				}
-				maybeComment = true;
-			} else if (c == '*') {
-				if (maybeComment) {
-					if (readingPreProcessorCommand) {
-						//todo read all of comment
-						continue;
-					}
-					lexState.bufInd--;
-					break;
-				}
-				maybeComment = true;
-			} else {
-				if (c == '"') {
-					// todo
-				}
-				maybeComment = false;
-			}
-			if (readingPreProcessorCommand) {
-				if (c == '\n') {
-					lexState.bufInd--;
-					break;
-				}
-			} else {
-				if (allowPreProcessorCommand) {
-					if (c == '#') {
-						readingPreProcessorCommand = true;
-						continue;
-					}
-				}
-
-				if (Character.isWhitespace(c)) {
-					lexState.bufInd--;
-					break;
-				}
-			}
-			// todo binary search
-			// todo determine if String
-			// todo operators are also delimiters, not just whitespace (1+1 for example)
-		}
-		int read = lexState.bufInd - start;
-		preprocessedLength += read;
-		if (lexState.isFirstState) {
-			originalLength += read;
-		}
+	private void makeComment() {
+		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		updateOffsetsAfterMake();
 	}
 
-	private void readAllIntoBuffer() throws IOException {
-		LexerState state = stateStack.peek();
-		int start = 0;
-		int end = state.buffer.length;
-		int read;
-		do {
-			read = state.reader.read(state.buffer, start, end);
-			state.buffEnd = read;
-			if (read > 0) {
-				start = state.buffer.length;
-				state.growBuffer();
-				end = state.buffer.length - start;
-			}
-		} while (read > 0);
+	private void makeLocalVariable() {
+		//lexerStream.acceptLocalVariable();
+		updateOffsetsAfterMake();
+	}
+
+	private void makeGlobalVariable() {
+		//lexerStream.acceptGlobalVariable();
+		updateOffsetsAfterMake();
+	}
+
+	private void makeCommand() {
+		//lexerStream.acceptGlobalVariable();
+	}
+
+	private void makePreProcessorCommand() {
+		//lexerStream.acceptPreProcessorCommand();
+	}
+
+	private void makePreProcessedText() {
+		//lexerStream.preProcessToken();
 	}
 
 	/**
@@ -227,7 +138,7 @@ public class OrinocoLexer {
 	 * @param reader the reader to immediately begin lexing
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
-		stateStack.push(new LexerState(reader));
+		ocs.acceptIncludedReader(reader);
 	}
 
 	/**
@@ -239,15 +150,325 @@ public class OrinocoLexer {
 		throw new UnsupportedOperationException("Get context not yet implemented!");
 	}
 
-	private enum TokenType {
-		Whitespace,
-		SingleLineComment,
-		MultilineComment,
-		Text;
+	private static class PreProcessorCommandTokenNode extends TokenNode {
+		private boolean preprocessing = false;
+
+		public PreProcessorCommandTokenNode(@NotNull OrinocoLexer lexer) {
+			super(lexer);
+		}
+
+		@Override
+		public boolean isPreProcessing() {
+			return preprocessing;
+		}
+
+		@Override
+		@NotNull
+		public TokenNode accept(char c) {
+			return null;
+		}
+
+		@Override
+		public boolean isDone() {
+			return false;
+		}
+
+		@Override
+		public void finish() {
+
+		}
 	}
 
-	private class LexerState {
-		public char[] buffer = new char[256];
+	private static class WhitespaceTokenNode extends TokenNode {
+		private final boolean makeWhitespaceToken;
+		private boolean working = false;
+		private boolean done = false;
+
+		public WhitespaceTokenNode(@NotNull OrinocoLexer lexer, boolean makeWhitespaceToken) {
+			super(lexer);
+			this.makeWhitespaceToken = makeWhitespaceToken;
+		}
+
+		@Override
+		public boolean isPreProcessing() {
+			return false;
+		}
+
+		@Override
+		@NotNull
+		public OrinocoLexer.TokenNode accept(char c) {
+			if (Character.isWhitespace(c)) {
+				working = true;
+			} else {
+				if (working) {
+					working = false;
+					done = true;
+				}
+			}
+			return this;
+		}
+
+		@Override
+		public boolean isDone() {
+			return done;
+		}
+
+		@Override
+		public void finish() {
+			if (!done) {
+				throw new IllegalStateException();
+			}
+			done = false;
+			if (makeWhitespaceToken) {
+				lexer.makeWhitespace();
+			}
+		}
+	}
+
+	private static class SingleLineCommentTokenNode extends TokenNode {
+
+		private final int STATE1_NEED_SLASH = 0;
+		private final int STATE2_NEED_SECOND_SLASH = 1;
+		private final int STATE3_MADE_COMMENT = 2;
+
+		private int state = STATE1_NEED_SLASH;
+
+		public SingleLineCommentTokenNode(@NotNull OrinocoLexer lexer) {
+			super(lexer);
+		}
+
+		@Override
+		public boolean isPreProcessing() {
+			return false;
+		}
+
+		@NotNull
+		@Override
+		public OrinocoLexer.TokenNode accept(char c) {
+			switch (state) {
+				case STATE1_NEED_SLASH: {
+					if (c == '/') {
+						state = STATE2_NEED_SECOND_SLASH;
+					}
+					break;
+				}
+				case STATE2_NEED_SECOND_SLASH: {
+					if (c == '/') {
+						state = STATE3_MADE_COMMENT;
+					} else {
+						state = STATE1_NEED_SLASH;
+					}
+					break;
+				}
+			}
+			return this;
+		}
+
+		@Override
+		public boolean isDone() {
+			return state == STATE3_MADE_COMMENT;
+		}
+
+		@Override
+		public void finish() {
+			if (state != STATE3_MADE_COMMENT) {
+				throw new IllegalStateException();
+			}
+			state = STATE1_NEED_SLASH;
+			this.lexer.makeComment();
+		}
+	}
+
+	private static class MultilineCommentTokenNode extends TokenNode {
+
+		private final int STATE1_NEED_SLASH = 0;
+		private final int STATE2_NEED_STAR = 1;
+		private final int STATE3_NEED_SECOND_STAR = 2;
+		private final int STATE4_NEED_SECOND_SLASH = 3;
+		private final int STATE5_MADE_COMMENT = 4;
+		private final TokenNode gotoWhenCommentMade;
+
+		private int state = STATE1_NEED_SLASH;
+
+		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer) {
+			super(lexer);
+			gotoWhenCommentMade = this;
+		}
+
+		@Override
+		public boolean isPreProcessing() {
+			return false;
+		}
+
+		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer, @NotNull OrinocoLexer.TokenNode gotoWhenCommentMade) {
+			super(lexer);
+			this.gotoWhenCommentMade = gotoWhenCommentMade;
+		}
+
+		@NotNull
+		@Override
+		public OrinocoLexer.TokenNode accept(char c) {
+			switch (state) {
+				case STATE1_NEED_SLASH: {
+					if (c == '/') {
+						state = STATE2_NEED_STAR;
+					}
+					break;
+				}
+				case STATE2_NEED_STAR: {
+					if (c == '*') {
+						state = STATE3_NEED_SECOND_STAR;
+					} else {
+						state = STATE1_NEED_SLASH;
+					}
+					break;
+				}
+				case STATE3_NEED_SECOND_STAR: {
+					if (c == '*') {
+						state = STATE4_NEED_SECOND_SLASH;
+					}
+					break;
+				}
+				case STATE4_NEED_SECOND_SLASH: {
+					if (c == '/') {
+						state = STATE5_MADE_COMMENT;
+					} else {
+						state = STATE1_NEED_SLASH;
+					}
+					break;
+				}
+				default: {
+
+				}
+			}
+			return gotoWhenCommentMade;
+		}
+
+		@Override
+		public boolean isDone() {
+			return state == STATE5_MADE_COMMENT;
+		}
+
+		@Override
+		public void finish() {
+			if (state != STATE5_MADE_COMMENT) {
+				throw new IllegalStateException();
+			}
+			state = STATE1_NEED_SLASH;
+			this.lexer.makeComment();
+		}
+	}
+
+	private abstract static class TokenNode {
+
+		protected final OrinocoLexer lexer;
+
+		public TokenNode(@NotNull OrinocoLexer lexer) {
+			this.lexer = lexer;
+		}
+
+		public abstract boolean isPreProcessing();
+
+		@NotNull
+		public abstract OrinocoLexer.TokenNode accept(char c);
+
+		public abstract boolean isDone();
+
+		public abstract void finish();
+
+	}
+
+	private static class RootTokenNode extends TokenNode {
+
+		@NotNull
+		public final ArrayList<TokenNode> children = new ArrayList<>();
+
+		public RootTokenNode(@NotNull OrinocoLexer lexer) {
+			super(lexer);
+		}
+
+		@Override
+		public boolean isPreProcessing() {
+			return false;
+		}
+
+		@NotNull
+		@Override
+		public TokenNode accept(char c) {
+			for (TokenNode child : children) {
+				TokenNode accept = child.accept(c);
+				if (accept != child) {
+					return accept;
+				}
+			}
+			return this;
+		}
+
+		@Override
+		public boolean isDone() {
+			return false;
+		}
+
+		@Override
+		public void finish() {
+
+		}
+	}
+
+	private static class CharGraph {
+		public final RootTokenNode root;
+
+		public CharGraph(@NotNull OrinocoLexer lexer) {
+			root = new RootTokenNode(lexer);
+		}
+
+		public void trimToSize() {
+			root.children.trimToSize();
+		}
+	}
+
+	private static class OrinocoCharStream {
+
+		private final Stack<LexerState> stateStack = new Stack<>();
+		private boolean checked = false;
+
+		public OrinocoCharStream() {
+		}
+
+		public boolean hasAvailable() {
+			if (!checked) {
+				checked = true;
+
+				do {
+					LexerState peek = stateStack.peek();
+					if (peek.bufInd >= peek.buffEnd) {
+						stateStack.pop();
+					}
+				} while (!stateStack.isEmpty());
+			}
+			if (stateStack.isEmpty()) {
+				return false;
+			}
+			LexerState peek = stateStack.peek();
+			return peek.bufInd < peek.buffEnd;
+		}
+
+		public char read() {
+			if (!hasAvailable()) {
+				throw new IllegalStateException();
+			}
+			final LexerState lexState = stateStack.peek();
+
+			return lexState.sb.charAt(lexState.bufInd++);
+		}
+
+		public void acceptIncludedReader(@NotNull OrinocoReader reader) {
+			stateStack.push(new LexerState(reader));
+		}
+	}
+
+	private static class LexerState {
+		private final StringBuilder sb = new StringBuilder(256);
 		public int buffEnd = 0;
 		public int bufInd = 0;
 		@NotNull
@@ -257,17 +478,32 @@ public class OrinocoLexer {
 		private LexerState(@NotNull OrinocoReader reader) {
 			this.reader = reader;
 			this.isFirstState = false;
+			try {
+				readAllIntoBuffer();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		public LexerState(@NotNull OrinocoReader reader, boolean isFirstState) {
 			this.reader = reader;
 			this.isFirstState = isFirstState;
+			try {
+				readAllIntoBuffer();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
-		public void growBuffer() {
-			char[] newBuffer = new char[buffer.length * 2];
-			System.arraycopy(buffer, 0, newBuffer, 0, newBuffer.length);
-			this.buffer = newBuffer;
+
+		private void readAllIntoBuffer() throws IOException {
+			int read;
+			char[] buffer = new char[256];
+			do {
+				read = this.reader.read(buffer);
+				sb.append(buffer);
+			} while (read > 0);
 		}
 	}
+
 }
