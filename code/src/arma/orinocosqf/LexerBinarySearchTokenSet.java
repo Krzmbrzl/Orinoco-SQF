@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static arma.orinocosqf.ASCIITextHelper.isAlphabetic;
+import static arma.orinocosqf.ASCIITextHelper.toLowerCase;
+
 /**
  * @author K
  * @since 4/1/19
@@ -173,25 +176,6 @@ public class LexerBinarySearchTokenSet<T extends LexerBinarySearchToken> {
 			}
 		}
 		return list;
-	}
-
-	/**
-	 * An optimized toLowerCase method. This method assumes no non-ASCII characters are to be submitted to this method
-	 */
-	private static char toLowerCase(char c) {
-		if (c >= 'A' && c <= 'Z') {
-			int i = c - 'A';
-			c = (char) ('a' + i);
-		}
-		return c;
-	}
-
-	/** An optimized isAlphabetic method. This method assumes no non-ASCII characters are to be submitted to this method */
-	private static boolean isAlphabetic(char c) {
-		if (c >= 'A' && c <= 'Z') {
-			return true;
-		}
-		return c >= 'a' && c <= 'z';
 	}
 
 	private static class TokenCluster {

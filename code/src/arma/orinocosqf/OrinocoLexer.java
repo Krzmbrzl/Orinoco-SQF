@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import static arma.orinocosqf.ASCIITextHelper.toLowerCase;
+
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
  * cyclic dependency on a preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that each token may have a macro inside
@@ -71,11 +73,11 @@ public class OrinocoLexer {
 				lineNumber++;
 			}
 			TokenNode next = cursor.accept(read);
-			if (!cursor.isPreProcessing()) {
-				originalLength++;
-			}
 			currentToken.append(read);
 			preprocessedOffset++;
+			if (ocs.isUsingOriginalReader()) {
+				originalLength++;
+			}
 			if (cursor.isDone()) {
 				cursor.finish();
 				cursor = next;
@@ -116,7 +118,7 @@ public class OrinocoLexer {
 		updateOffsetsAfterMake();
 	}
 
-	private void makePreProcessorCommand() {
+	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {
 		//lexerStream.acceptPreProcessorCommand();
 		updateOffsetsAfterMake();
 	}
@@ -155,31 +157,119 @@ public class OrinocoLexer {
 	}
 
 	private static class PreProcessorCommandTokenNode extends TokenNode {
-		private boolean preprocessing = false;
+		private final int STATE1_NEED_HASH = 0;
+		private final int STATE2_WORD = 1;
+		private final int STATE3_WHITESPACE = 4;
+		private final int STATE4_BODY = 5;
+		private final int STATE5_DONE = 6;
+		private final int STATE5_NEXT_LINE = 7; //used when \ is encountered in body
+		private int state = STATE1_NEED_HASH;
+		private final MultilineCommentTokenNode commentNode;
+		private boolean inComment = false;
+		private PreProcessorCommand command = null;
+		private final StringBuilder commandName = new StringBuilder();
 
 		public PreProcessorCommandTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
-		}
-
-		@Override
-		public boolean isPreProcessing() {
-			return preprocessing;
+			commentNode = new MultilineCommentTokenNode(lexer);
 		}
 
 		@Override
 		@NotNull
 		public TokenNode accept(char c) {
-			return null;
+			// #word body
+			// or
+			// #word body \
+			// more body
+			switch (state) {
+				case STATE1_NEED_HASH: {
+					if (c == '#') {
+						state = STATE2_WORD;
+					}
+					break;
+				}
+				case STATE2_WORD: {
+					if (Character.isWhitespace(c)) {
+						state = STATE3_WHITESPACE;
+						for (PreProcessorCommand command : PreProcessorCommand.values()) {
+							if (commandName.length() != command.name().length()) {
+								continue;
+							}
+							boolean match = true;
+							for (int i = 0; i < commandName.length(); i++) {
+								char cn = toLowerCase(commandName.charAt(i));
+								if (cn != toLowerCase(command.name().charAt(i))) {
+									match = false;
+									break;
+								}
+							}
+							if (match) {
+								this.command = command;
+							} else {
+								state = STATE1_NEED_HASH;
+							}
+						}
+						break;
+					}
+					commandName.append(c);
+					break;
+				}
+				case STATE3_WHITESPACE: {
+					if (!Character.isWhitespace(c)) {
+						state = STATE4_BODY;
+					}
+					break;
+				}
+				case STATE4_BODY: {
+					commentNode.accept(c);
+					if (commentNode.isInBodyOfComment()) {
+						inComment = true;
+						break;
+					}
+					if (inComment) {
+						if (commentNode.isDone()) {
+							inComment = false;
+						}
+						break;
+					}
+
+					if (c == '\\') {
+						state = STATE5_NEXT_LINE;
+						break;
+					}
+					if (c == '\n') {
+						state = STATE5_DONE;
+					}
+
+					break;
+				}
+				case STATE5_NEXT_LINE: {
+					if (c == '\n') {
+						state = STATE4_BODY;
+					}
+					break;
+				}
+			}
+			return this;
 		}
 
 		@Override
 		public boolean isDone() {
-			return false;
+			return state == STATE5_DONE;
 		}
 
 		@Override
 		public void finish() {
-
+			if (state != STATE5_DONE) {
+				throw new IllegalStateException();
+			}
+			if (command == null) {
+				throw new IllegalStateException();
+			}
+			state = STATE1_NEED_HASH;
+			commandName.setLength(0);
+			lexer.makePreProcessorCommand(command);
+			command = null;
 		}
 	}
 
@@ -191,11 +281,6 @@ public class OrinocoLexer {
 		public WhitespaceTokenNode(@NotNull OrinocoLexer lexer, boolean makeWhitespaceToken) {
 			super(lexer);
 			this.makeWhitespaceToken = makeWhitespaceToken;
-		}
-
-		@Override
-		public boolean isPreProcessing() {
-			return false;
 		}
 
 		@Override
@@ -239,11 +324,6 @@ public class OrinocoLexer {
 
 		public SingleLineCommentTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
-		}
-
-		@Override
-		public boolean isPreProcessing() {
-			return false;
 		}
 
 		@NotNull
@@ -299,11 +379,6 @@ public class OrinocoLexer {
 			gotoWhenCommentMade = this;
 		}
 
-		@Override
-		public boolean isPreProcessing() {
-			return false;
-		}
-
 		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer, @NotNull TokenNode gotoWhenCommentMade) {
 			super(lexer);
 			this.gotoWhenCommentMade = gotoWhenCommentMade;
@@ -341,9 +416,6 @@ public class OrinocoLexer {
 					}
 					break;
 				}
-				default: {
-
-				}
 			}
 			return gotoWhenCommentMade;
 		}
@@ -361,6 +433,10 @@ public class OrinocoLexer {
 			state = STATE1_NEED_SLASH;
 			this.lexer.makeComment();
 		}
+
+		boolean isInBodyOfComment() {
+			return state == STATE3_NEED_SECOND_STAR || state == STATE4_NEED_SECOND_SLASH;
+		}
 	}
 
 	private abstract static class TokenNode {
@@ -370,8 +446,6 @@ public class OrinocoLexer {
 		public TokenNode(@NotNull OrinocoLexer lexer) {
 			this.lexer = lexer;
 		}
-
-		public abstract boolean isPreProcessing();
 
 		@NotNull
 		public abstract TokenNode accept(char c);
@@ -390,11 +464,6 @@ public class OrinocoLexer {
 
 		public RootTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
-		}
-
-		@Override
-		public boolean isPreProcessing() {
-			return false;
 		}
 
 		@NotNull
@@ -475,6 +544,10 @@ public class OrinocoLexer {
 
 		public void acceptIncludedReader(@NotNull OrinocoReader reader) {
 			stateStack.push(new LexerState(reader));
+		}
+
+		public boolean isUsingOriginalReader() {
+			return stateStack.size() == 1;
 		}
 	}
 
