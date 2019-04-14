@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import static arma.orinocosqf.ASCIITextHelper.toLowerCase;
@@ -127,8 +128,29 @@ public class OrinocoLexer {
 		updateOffsetsAfterMake();
 	}
 
-	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {
-		//lexerStream.acceptPreProcessorCommand();
+	private void makePreProcessorCommand(@NotNull PreProcessorCommand command, @NotNull List<Integer> tokenRanges) {
+		if (tokenRanges.size() < 2 || tokenRanges.size() % 2 != 0) {
+			throw new IllegalArgumentException();
+		}
+
+		char[] bodyWithNoComments;
+		{ //remove comments from the currentToken
+			int length = 0;
+			for (int i = 0; i < tokenRanges.size(); i += 2) {
+				length += tokenRanges.get(i + 1) - tokenRanges.get(i);
+			}
+			char[] chars = new char[length];
+
+			int ci = 0;
+			for (int tr = 0; tr < tokenRanges.size(); tr += 2) {
+				for (int i = tokenRanges.get(tr); i < tokenRanges.get(tr + 1); i++) {
+					chars[ci++] = currentToken.charAt(i);
+				}
+			}
+			bodyWithNoComments = chars;
+		}
+
+		lexerStream.acceptPreProcessorCommand(command, bodyWithNoComments, 0, bodyWithNoComments.length);
 		updateOffsetsAfterMake();
 	}
 
@@ -171,16 +193,20 @@ public class OrinocoLexer {
 		private final int STATE3_WHITESPACE = 2;
 		private final int STATE4_BODY = 3;
 		private final int STATE5_NEXT_LINE = 4; //used when \ is encountered in body
-		private final int STATE5_DONE = 5;
+		private final int STATE6_DONE = 5;
 		private int state = STATE1_NEED_HASH;
 		private final MultilineCommentTokenNode commentNode;
 		private boolean inComment = false;
 		private PreProcessorCommand command = null;
 		private final StringBuilder commandName = new StringBuilder();
+		private final List<Integer> tokenRanges = new ArrayList<>();
+		private int currentIndex;
+		private int endIndexOfLastComment;
 
 		public PreProcessorCommandTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
 			commentNode = new MultilineCommentTokenNode(lexer);
+			reset();
 		}
 
 		@Override
@@ -214,7 +240,7 @@ public class OrinocoLexer {
 							if (match) {
 								this.command = command;
 							} else {
-								state = STATE1_NEED_HASH;
+								reset();
 							}
 						}
 						break;
@@ -231,12 +257,22 @@ public class OrinocoLexer {
 				case STATE4_BODY: {
 					commentNode.accept(c);
 					if (commentNode.isActive()) {
+						if (!inComment) {
+							if (endIndexOfLastComment == -1) {
+								tokenRanges.add(0);
+								tokenRanges.add(currentIndex);
+							} else {
+								tokenRanges.add(endIndexOfLastComment + 1);
+								tokenRanges.add(currentIndex);
+							}
+						}
 						inComment = true;
 						break;
 					}
 					if (inComment) {
 						if (commentNode.hasCompletedWork()) {
 							inComment = false;
+							endIndexOfLastComment = currentIndex;
 						}
 						break;
 					}
@@ -246,7 +282,7 @@ public class OrinocoLexer {
 						break;
 					}
 					if (c == '\n') {
-						state = STATE5_DONE;
+						state = STATE6_DONE;
 					}
 
 					break;
@@ -258,27 +294,34 @@ public class OrinocoLexer {
 					break;
 				}
 			}
+			currentIndex++;
 		}
 
 		@Override
 		public boolean isActive() {
-			return state > STATE1_NEED_HASH && state < STATE5_DONE;
+			return state > STATE1_NEED_HASH && state < STATE6_DONE;
 		}
 
 		@Override
 		public boolean hasCompletedWork() {
-			return state == STATE5_DONE;
+			return state == STATE6_DONE;
 		}
 
 		@Override
 		public void submitWork() {
-			if (state != STATE5_DONE) {
+			if (state != STATE6_DONE) {
 				throw new IllegalStateException();
 			}
 			if (command == null) {
 				throw new IllegalStateException();
 			}
-			lexer.makePreProcessorCommand(command);
+			if (tokenRanges.size() == 0) {
+				tokenRanges.add(0);
+				tokenRanges.add(currentIndex);
+			} else if (tokenRanges.size() % 2 != 0) {
+				tokenRanges.add(currentIndex);
+			}
+			lexer.makePreProcessorCommand(command, tokenRanges);
 			reset();
 		}
 
@@ -287,6 +330,9 @@ public class OrinocoLexer {
 			state = STATE1_NEED_HASH;
 			commandName.setLength(0);
 			command = null;
+			currentIndex = 0;
+			tokenRanges.clear();
+			endIndexOfLastComment = -1;
 		}
 
 		@Override
@@ -335,6 +381,7 @@ public class OrinocoLexer {
 			if (makeWhitespaceToken) {
 				lexer.makeWhitespace();
 			}
+			reset();
 		}
 
 		@Override
@@ -374,7 +421,7 @@ public class OrinocoLexer {
 					if (c == '/') {
 						state = STATE3_NEED_NEWLINE;
 					} else {
-						state = STATE1_NEED_SLASH;
+						reset();
 					}
 					break;
 				}
