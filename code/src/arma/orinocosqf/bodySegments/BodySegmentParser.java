@@ -3,7 +3,6 @@ package arma.orinocosqf.bodySegments;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
  *
  */
 public class BodySegmentParser {
+
+	protected static final BodySegment EMPTY_SEGMENT = new TextSegment("");
 
 	/**
 	 * Checks whether the given character is contained in the given char-array
@@ -315,6 +316,14 @@ public class BodySegmentParser {
 
 	}
 
+	protected char[] textDelimiters;
+	protected char[] textDelimitersInParenexpressions;
+
+	public BodySegmentParser() {
+		textDelimiters = new char[] { '(', ')', '#', '"' };
+		textDelimitersInParenexpressions = new char[] { '(', ')', '#', '"', ',' };
+	}
+
 	/**
 	 * Parses the segments of a macro body from a char-array
 	 * 
@@ -327,185 +336,161 @@ public class BodySegmentParser {
 	 */
 	@NotNull
 	public BodySegment parseSegments(@NotNull char[] bufReadOnly, int offset, int length, List<String> params, WordPartDetector detector) {
-		return doParseSegments(new CharBuffReader(detector, bufReadOnly, offset, length), params);
+		return doParseSegments(new CharBuffReader(detector, bufReadOnly, offset, length), params, false);
 	}
 
 	/**
-	 * Performs the actual segment parsing
+	 * Performs the actual segment parsing by looping and recursive calling this function again.
 	 * 
 	 * @param reader The {@link SegmentReader} that is used to access the input
 	 * @param params A List containing the names of the parameter the macro, whose body should be parsed, takes.
+	 * @param insideParenSegment Whether the inside of a {@link ParenSegment} is currently processed. If in doubt, set to <code>false</code>
 	 * @return The {@link BodySegment} fully describing the complete macro body
 	 */
 	@NotNull
-	protected BodySegment doParseSegments(SegmentReader reader, List<String> params) {
+	protected BodySegment doParseSegments(@NotNull SegmentReader reader, @NotNull List<String> params, boolean inParenExpression) {
 		if (reader.charsRemaining() == 0) {
-			return new TextSegment("");
+			return EMPTY_SEGMENT;
 		}
 
-		Stack<List<BodySegment>> segmentLists = new Stack<>();
-		segmentLists.push(new ArrayList<>());
+		List<BodySegment> segmentContainer = new ArrayList<>();
 
-		// Note that strings wrapped in single quotes are not treated specially (as Strings). The single quotes are treated
-		// as any other character instead. That's why the single-quote doesn't appear in here as special character
-		char[] specialChars = new char[] { '(', ')', '#', '"' };
-		char[] specialCharsInParenSegment = new char[] { '(', ')', '#', '"', ',' };
-		char[] specialArgumentCharsInParenSegment = new char[] { '#', '"', ',' };
+		while (reader.charsRemaining() > 0) {
+			parseSegmentSequence(reader, segmentContainer, params, inParenExpression ? textDelimitersInParenexpressions : textDelimiters);
 
-		StringBuilder currentSegment = new StringBuilder();
-		int parenLevel = 0;
-
-		try {
-			while (reader.charsRemaining() > 0) {
-				char prevChar = reader.currentChar();
-				BodySegment segment = nextStandardSegment(reader, currentSegment, params,
-						segmentLists.size() > 1 ? specialCharsInParenSegment : specialChars);
-
-				if (segment != null) {
-					if (segment instanceof TextSegment && !(segmentLists.size() > 1 && prevChar == ',')) {
-						// If the previous segment was a TextSegment as wall and the character before the current segment was not a comma
-						// while being in a ParenSegment
-						List<BodySegment> list = segmentLists.peek();
-						if (list.size() > 0 && list.get(list.size() - 1) instanceof TextSegment) {
-							// merge with previous text-segment
-							((TextSegment) list.get(list.size() - 1)).append(((TextSegment) segment).text);
-						} else {
-							list.add(segment);
-						}
-					} else {
-						segmentLists.peek().add(segment);
-					}
-				}
-
-				// check if next char is a special char
+			try {
 				char c = reader.nextChar();
-				if (isInCharArray(c, segmentLists.size() > 1 ? specialCharsInParenSegment : specialChars)) {
-					// general handling -> context insensitive
-					switch (c) {
-						case '"':
-							// string matched
-							// read String as is as no expanding is performed in double-quoted String
+
+				switch (c) {
+					case '(':
+						// create new paren-expression
+						List<BodySegment> parenSegments = new ArrayList<>();
+
+						BodySegment nextSegment = doParseSegments(reader, params, true);
+						if (reader.nextChar() == ')' && nextSegment == EMPTY_SEGMENT) {
+							// special case for empty parens
+							segmentContainer.add(new ParenSegment(parenSegments));
+							break;
+						} else {
 							reader.rewindChar();
-							reader.readString(currentSegment, '"');
-
-							segmentLists.peek().add(new TextSegment(currentSegment.toString()));
-							currentSegment.setLength(0);
-							break;
-						case '#':
-							// check if it's Glue- or a StringifySegment
-							boolean isGlue = reader.nextChar() == '#';
-							if (!isGlue) {
-								reader.rewindChar();
-							}
-
-							// get the right argument of the segment to be created
-							BodySegment right = nextStandardSegment(reader, currentSegment, params,
-									segmentLists.size() > 1 ? specialArgumentCharsInParenSegment : specialChars);
-							char prevC = reader.previousChar();
-
-							if (isGlue) {
-								// it's a GlueSegment
-								// get its potential left argument
-								boolean prevWasEmptyParenArg = segmentLists.size() > 1 && prevC == ',';
-								BodySegment left = segmentLists.peek().size() > 0 && !prevWasEmptyParenArg
-										? segmentLists.peek().remove(segmentLists.peek().size() - 1)
-										: null;
-
-								segmentLists.peek().add(new GlueSegment(left, right));
-							} else {
-								// it's a StringifySegment
-								if (right instanceof WordSegment || right instanceof MacroArgumentSegment) {
-									// only words + MacroArguments can be stringified
-									segmentLists.peek().add(new StringifySegment(right));
-								} else {
-									segmentLists.peek().add(new StringifySegment(null));
-
-									if (right != null) {
-										segmentLists.peek().add(right);
-									}
-								}
-							}
-							break;
-						case '(':
-							parenLevel++;
-
-							if (parenLevel == 1) {
-								// this opens a new ParenSegment
-								segmentLists.push(new ArrayList<>());
-							} else {
-								// add paren as normal TextSegment
-								appendText("(", segmentLists.peek());
-							}
-
-							break;
-						case ')':
-							if (parenLevel > 0) {
-								parenLevel--;
-							}
-
-							if (parenLevel == 0 && segmentLists.size() > 1) {
-								// This one closed the ParenSegment previously opened
-								if (reader.previousChar() == ',') {
-									// add the last empty TextSegment
-									segmentLists.peek().add(new TextSegment(""));
-								}
-
-								List<BodySegment> list = segmentLists.pop();
-								segmentLists.peek().add(new ParenSegment(list));
-							} else {
-								// add paren as normal TextSegment
-								if (reader.previousChar() == ',' && parenLevel > 0) {
-									// Don't append text as the previous element has been finsihed already
-									segmentLists.peek().add(new TextSegment(")"));
-								} else {
-									appendText(")", segmentLists.peek());
-								}
-							}
-							break;
-					}
-
-					if (segmentLists.size() > 1) {
-						// special treatment inside ParenSegments
-						switch (c) {
-							case ',':
-								// check if there is any character between this comma, a previous comma or the opening paren that opened the
-								// current ParenSegmetn -> if yes: Add empty TextSegment
-								char prevC = reader.previousChar();
-
-								if (prevC == ',' || (prevC == '(' && segmentLists.peek().size() == 0)) {
-									segmentLists.peek().add(new TextSegment(""));
-								}
-								break;
 						}
-					} else {
-						// special treatment outside ParenSegments
-						switch (c) {
+
+						parenSegments.add(nextSegment);
+
+						char nextC = reader.nextChar();
+
+						while (nextC == ',') {
+							// further elements in the list
+							parenSegments.add(doParseSegments(reader, params, true));
+
+							nextC = reader.nextChar();
 						}
-					}
-				} else {
-					reader.rewindChar();
+
+						if (nextC != ')') {
+							// TODO: improve error handling
+							throw new IllegalStateException("Unclosed paren-Expression");
+						}
+
+						segmentContainer.add(new ParenSegment(parenSegments));
+						break;
+
+					case '#':
+						nextC = reader.nextChar();
+
+						if (nextC != '#') {
+							// read char back, so that nextStandardSegment can account for it
+							reader.rewindChar();
+						}
+
+						StringBuilder segmentBuilder = new StringBuilder();
+						nextSegment = nextStandardSegment(reader, segmentBuilder, params,
+								inParenExpression ? textDelimitersInParenexpressions : textDelimiters);
+
+						if (nextC == '#') {
+							// glue segment
+							BodySegment leftArg = segmentContainer.size() > 0 ? segmentContainer.remove(segmentContainer.size() - 1) : null;
+							segmentContainer.add(new GlueSegment(leftArg, nextSegment));
+						} else {
+							// stringify segment
+							if (nextSegment instanceof TextSegment) {
+								// text-segments can't be stringified
+								segmentContainer.add(new StringifySegment(null));
+								segmentContainer.add(nextSegment);
+							} else {
+								segmentContainer.add(new StringifySegment(nextSegment));
+							}
+						}
+						break;
+
+					case ')':
+					case ',':
+						if (inParenExpression) {
+							// the current paren-element is terminated -> the creation of this ParenSegemnt is done higher in the recursion
+							// hierarchy
+							reader.rewindChar();
+							if (segmentContainer.size() == 0) {
+								return EMPTY_SEGMENT;
+							} else {
+								return segmentContainer.size() > 1 ? new BodySegmentSequence(segmentContainer) : segmentContainer.get(0);
+							}
+						} else {
+							// this is to be treated as normal text
+							appendText(String.valueOf(c), segmentContainer);
+						}
+						break;
+
+					case (char) -1:
+						// EOI
+						break;
+
+					default:
+						// TODO: improve error handling
+						throw new IllegalStateException("Encountered unexpected character '" + c + "'");
 				}
+			} catch (IOException e) {
+				// Should be unreachable
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// This should be unreachable as StringBuilder's append-methods doesn't throw this methods
-			e.printStackTrace();
 		}
 
-		while (segmentLists.size() > 1) {
-			// There are unfinished ParenSegments - This means unclosed parenthesis
-			// It is the lexer's job to error on those though
-			List<BodySegment> list = segmentLists.pop();
-			segmentLists.peek().add(new BodySegmentSequence(list));
-		}
-
-		List<BodySegment> list = segmentLists.pop();
-
-		if (list.isEmpty()) {
-			// return empty segment
-			return new TextSegment("");
+		if (inParenExpression) {
+			return new ParenSegment(segmentContainer);
 		} else {
-			return list.size() > 1 ? new BodySegmentSequence(list) : list.get(0);
+			if (segmentContainer.size() == 0) {
+				// TODO: improve error handling
+				throw new IllegalStateException("Trying to return empty element");
+			}
+			return segmentContainer.size() > 1 ? new BodySegmentSequence(segmentContainer) : segmentContainer.get(0);
 		}
+	}
+
+	/**
+	 * Parses a sequence of standard segments. If there are no such segments at the current input position, the method returns without doing
+	 * anything.
+	 * 
+	 * @param reader The {@link SegmentReader} that is used to access the input
+	 * @param segmentContainer The list to add the parsed segments to
+	 * @param params A List containing the names of the parameter the macro, whose body should be parsed, takes.
+	 * @param textDelimiters The characters delimiting text-segments
+	 */
+	protected void parseSegmentSequence(@NotNull SegmentReader reader, @NotNull List<BodySegment> segmentContainer,
+			@NotNull List<String> params, @NotNull char[] textDelimiters) {
+		BodySegment currentSegment = null;
+
+		StringBuilder segmentBuilder = new StringBuilder();
+
+		do {
+			try {
+				currentSegment = nextStandardSegment(reader, segmentBuilder, params, textDelimiters);
+
+				if (currentSegment != null) {
+					segmentContainer.add(currentSegment);
+				}
+			} catch (IOException e) {
+				// Should be unreachable
+				e.printStackTrace();
+			}
+		} while (currentSegment != null);
 	}
 
 	/**
