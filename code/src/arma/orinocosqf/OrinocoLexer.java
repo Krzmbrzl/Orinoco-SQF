@@ -278,10 +278,20 @@ public class OrinocoLexer {
 			if (command == null) {
 				throw new IllegalStateException();
 			}
+			lexer.makePreProcessorCommand(command);
+			reset();
+		}
+
+		@Override
+		public void reset() {
 			state = STATE1_NEED_HASH;
 			commandName.setLength(0);
-			lexer.makePreProcessorCommand(command);
 			command = null;
+		}
+
+		@Override
+		public void errorIncompleteState() {
+			// todo
 		}
 	}
 
@@ -322,10 +332,19 @@ public class OrinocoLexer {
 			if (!done) {
 				throw new IllegalStateException();
 			}
-			done = false;
 			if (makeWhitespaceToken) {
 				lexer.makeWhitespace();
 			}
+		}
+
+		@Override
+		public void reset() {
+			done = false;
+		}
+
+		@Override
+		public void errorIncompleteState() {
+			// do nothing because there is no incomplete state for this
 		}
 	}
 
@@ -333,7 +352,8 @@ public class OrinocoLexer {
 
 		private final int STATE1_NEED_SLASH = 0;
 		private final int STATE2_NEED_SECOND_SLASH = 1;
-		private final int STATE3_MADE_COMMENT = 2;
+		private final int STATE3_NEED_NEWLINE = 2;
+		private final int STATE4_MADE_COMMENT = 3;
 
 		private int state = STATE1_NEED_SLASH;
 
@@ -352,9 +372,15 @@ public class OrinocoLexer {
 				}
 				case STATE2_NEED_SECOND_SLASH: {
 					if (c == '/') {
-						state = STATE3_MADE_COMMENT;
+						state = STATE3_NEED_NEWLINE;
 					} else {
 						state = STATE1_NEED_SLASH;
+					}
+					break;
+				}
+				case STATE3_NEED_NEWLINE: {
+					if (c == '\n') {
+						state = STATE4_MADE_COMMENT;
 					}
 					break;
 				}
@@ -363,21 +389,31 @@ public class OrinocoLexer {
 
 		@Override
 		public boolean isActive() {
-			return state > STATE1_NEED_SLASH && state < STATE3_MADE_COMMENT;
+			return state > STATE1_NEED_SLASH && state < STATE4_MADE_COMMENT;
 		}
 
 		@Override
 		public boolean hasCompletedWork() {
-			return state == STATE3_MADE_COMMENT;
+			return state == STATE4_MADE_COMMENT;
 		}
 
 		@Override
 		public void submitWork() {
-			if (state != STATE3_MADE_COMMENT) {
+			if (state != STATE4_MADE_COMMENT) {
 				throw new IllegalStateException();
 			}
-			state = STATE1_NEED_SLASH;
+			reset();
 			this.lexer.makeComment();
+		}
+
+		@Override
+		public void reset() {
+			state = STATE1_NEED_SLASH;
+		}
+
+		@Override
+		public void errorIncompleteState() {
+			// todo tell lexer what is missing to complete a comment
 		}
 	}
 
@@ -439,8 +475,18 @@ public class OrinocoLexer {
 			if (state != STATE5_MADE_COMMENT) {
 				throw new IllegalStateException();
 			}
+			reset();
+		}
+
+		@Override
+		public void reset() {
 			state = STATE1_NEED_SLASH;
 			this.lexer.makeComment();
+		}
+
+		@Override
+		public void errorIncompleteState() {
+			// todo tell lexer what is missing to complete a comment
 		}
 
 		@Override
@@ -464,9 +510,23 @@ public class OrinocoLexer {
 		 */
 		public abstract boolean isActive();
 
+		/** @return true if the node is not active ({@link #isActive()}) but has work to be submitted */
 		public abstract boolean hasCompletedWork();
 
+		/** Submit the work to the lexer or whatever */
 		public abstract void submitWork();
+
+		/**
+		 * Invoke this method when there is no more chars to accept, no {@link TokenNode} has finished work ({@link #hasCompletedWork()}),
+		 * and at least 1 {@link TokenNode} is active ({@link #isActive()})
+		 */
+		public abstract void errorIncompleteState();
+
+		/**
+		 * Invoked after a {@link #errorIncompleteState()} has been called on any {@link TokenNode} in the lexer. This method should reset
+		 * the node as if no characters have been accepted
+		 */
+		public abstract void reset();
 
 	}
 
@@ -520,17 +580,38 @@ public class OrinocoLexer {
 			if (!childMatched) {
 				throw new IllegalStateException();
 			}
+			reset();
+		}
+
+		@Override
+		public void reset() {
 			childMatched = false;
 		}
 
-		public void noMoreTokens() {
-			if (isActive()) {
-				for (TokenNode child : children) {
-					if (child.hasCompletedWork()) {
-						child.submitWork();
-						break;
-					}
+		@Override
+		public void errorIncompleteState() {
+			for (TokenNode child : children) {
+				if (child.isActive()) {
+					child.errorIncompleteState();
+					break;
 				}
+			}
+		}
+
+		public void noMoreTokens() {
+			if (!isActive()) {
+				return;
+			}
+			boolean didSomething = false;
+			for (TokenNode child : children) {
+				if (child.hasCompletedWork()) {
+					child.submitWork();
+					didSomething = true;
+					break;
+				}
+			}
+			if (!didSomething) {
+				errorIncompleteState();
 			}
 		}
 	}
