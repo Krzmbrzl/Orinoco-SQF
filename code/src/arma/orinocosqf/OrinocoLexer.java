@@ -256,6 +256,7 @@ public class OrinocoLexer {
 				}
 				case STATE4_BODY: {
 					commentNode.accept(c);
+					// todo handle single line comments
 					if (commentNode.isActive()) {
 						if (!inComment) {
 							if (endIndexOfLastComment == -1) {
