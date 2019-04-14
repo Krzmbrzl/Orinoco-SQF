@@ -66,24 +66,33 @@ public class OrinocoLexer {
 
 		rootTokenNode.children.trimToSize();
 
-		TokenNode cursor = rootTokenNode;
+		// todo :backtrack
+		/*
+			Instead of clearing currentToken, have a parameter that marks what parts have been used. if currentToken hasn't had
+			all characters used, the while(ocs.hasAvailable()) will be swapped with reading from the currentToken and re-applying the chars
+			to the tokenNodes
+		*/
 		while (ocs.hasAvailable()) {
 			char read = ocs.read();
 			if (read == '\n') {
 				lineNumber++;
 			}
-			TokenNode next = cursor.accept(read);
+			rootTokenNode.accept(read);
 			currentToken.append(read);
 			preprocessedOffset++;
 			if (ocs.isUsingOriginalReader()) {
 				originalLength++;
 			}
-			if (cursor.isDone()) {
-				cursor.finish();
-				cursor = next;
+			if (rootTokenNode.hasCompletedWork()) {
+				rootTokenNode.submitWork();
 				currentToken.setLength(0);
 			}
 		}
+		rootTokenNode.noMoreTokens();
+	}
+
+	public void backtrack(int charCount) {
+		//todo :backtrack
 	}
 
 	private void updateOffsetsAfterMake() {
@@ -159,10 +168,10 @@ public class OrinocoLexer {
 	private static class PreProcessorCommandTokenNode extends TokenNode {
 		private final int STATE1_NEED_HASH = 0;
 		private final int STATE2_WORD = 1;
-		private final int STATE3_WHITESPACE = 4;
-		private final int STATE4_BODY = 5;
-		private final int STATE5_DONE = 6;
-		private final int STATE5_NEXT_LINE = 7; //used when \ is encountered in body
+		private final int STATE3_WHITESPACE = 2;
+		private final int STATE4_BODY = 3;
+		private final int STATE5_NEXT_LINE = 4; //used when \ is encountered in body
+		private final int STATE5_DONE = 5;
 		private int state = STATE1_NEED_HASH;
 		private final MultilineCommentTokenNode commentNode;
 		private boolean inComment = false;
@@ -175,8 +184,7 @@ public class OrinocoLexer {
 		}
 
 		@Override
-		@NotNull
-		public TokenNode accept(char c) {
+		public void accept(char c) {
 			// #word body
 			// or
 			// #word body \
@@ -222,12 +230,12 @@ public class OrinocoLexer {
 				}
 				case STATE4_BODY: {
 					commentNode.accept(c);
-					if (commentNode.isInBodyOfComment()) {
+					if (commentNode.isActive()) {
 						inComment = true;
 						break;
 					}
 					if (inComment) {
-						if (commentNode.isDone()) {
+						if (commentNode.hasCompletedWork()) {
 							inComment = false;
 						}
 						break;
@@ -250,16 +258,20 @@ public class OrinocoLexer {
 					break;
 				}
 			}
-			return this;
 		}
 
 		@Override
-		public boolean isDone() {
+		public boolean isActive() {
+			return state > STATE1_NEED_HASH && state < STATE5_DONE;
+		}
+
+		@Override
+		public boolean hasCompletedWork() {
 			return state == STATE5_DONE;
 		}
 
 		@Override
-		public void finish() {
+		public void submitWork() {
 			if (state != STATE5_DONE) {
 				throw new IllegalStateException();
 			}
@@ -284,8 +296,7 @@ public class OrinocoLexer {
 		}
 
 		@Override
-		@NotNull
-		public TokenNode accept(char c) {
+		public void accept(char c) {
 			if (Character.isWhitespace(c)) {
 				working = true;
 			} else {
@@ -294,16 +305,20 @@ public class OrinocoLexer {
 					done = true;
 				}
 			}
-			return this;
 		}
 
 		@Override
-		public boolean isDone() {
+		public boolean isActive() {
+			return working;
+		}
+
+		@Override
+		public boolean hasCompletedWork() {
 			return done;
 		}
 
 		@Override
-		public void finish() {
+		public void submitWork() {
 			if (!done) {
 				throw new IllegalStateException();
 			}
@@ -326,9 +341,8 @@ public class OrinocoLexer {
 			super(lexer);
 		}
 
-		@NotNull
 		@Override
-		public TokenNode accept(char c) {
+		public void accept(char c) {
 			switch (state) {
 				case STATE1_NEED_SLASH: {
 					if (c == '/') {
@@ -345,16 +359,20 @@ public class OrinocoLexer {
 					break;
 				}
 			}
-			return this;
 		}
 
 		@Override
-		public boolean isDone() {
+		public boolean isActive() {
+			return state > STATE1_NEED_SLASH && state < STATE3_MADE_COMMENT;
+		}
+
+		@Override
+		public boolean hasCompletedWork() {
 			return state == STATE3_MADE_COMMENT;
 		}
 
 		@Override
-		public void finish() {
+		public void submitWork() {
 			if (state != STATE3_MADE_COMMENT) {
 				throw new IllegalStateException();
 			}
@@ -370,23 +388,15 @@ public class OrinocoLexer {
 		private final int STATE3_NEED_SECOND_STAR = 2;
 		private final int STATE4_NEED_SECOND_SLASH = 3;
 		private final int STATE5_MADE_COMMENT = 4;
-		private final TokenNode gotoWhenCommentMade;
 
 		private int state = STATE1_NEED_SLASH;
 
 		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
-			gotoWhenCommentMade = this;
 		}
 
-		public MultilineCommentTokenNode(@NotNull OrinocoLexer lexer, @NotNull TokenNode gotoWhenCommentMade) {
-			super(lexer);
-			this.gotoWhenCommentMade = gotoWhenCommentMade;
-		}
-
-		@NotNull
 		@Override
-		public TokenNode accept(char c) {
+		public void accept(char c) {
 			switch (state) {
 				case STATE1_NEED_SLASH: {
 					if (c == '/') {
@@ -417,16 +427,15 @@ public class OrinocoLexer {
 					break;
 				}
 			}
-			return gotoWhenCommentMade;
 		}
 
 		@Override
-		public boolean isDone() {
+		public boolean hasCompletedWork() {
 			return state == STATE5_MADE_COMMENT;
 		}
 
 		@Override
-		public void finish() {
+		public void submitWork() {
 			if (state != STATE5_MADE_COMMENT) {
 				throw new IllegalStateException();
 			}
@@ -434,8 +443,9 @@ public class OrinocoLexer {
 			this.lexer.makeComment();
 		}
 
-		boolean isInBodyOfComment() {
-			return state == STATE3_NEED_SECOND_STAR || state == STATE4_NEED_SECOND_SLASH;
+		@Override
+		public boolean isActive() {
+			return state > STATE1_NEED_SLASH && state < STATE5_MADE_COMMENT;
 		}
 	}
 
@@ -447,12 +457,16 @@ public class OrinocoLexer {
 			this.lexer = lexer;
 		}
 
-		@NotNull
-		public abstract TokenNode accept(char c);
+		public abstract void accept(char c);
 
-		public abstract boolean isDone();
+		/**
+		 * @return true if the node is both NOT done but is in a state that is still valid. Return false if done or in invalid state
+		 */
+		public abstract boolean isActive();
 
-		public abstract void finish();
+		public abstract boolean hasCompletedWork();
+
+		public abstract void submitWork();
 
 	}
 
@@ -466,32 +480,58 @@ public class OrinocoLexer {
 			super(lexer);
 		}
 
-		@NotNull
 		@Override
-		public TokenNode accept(char c) {
+		public void accept(char c) {
+			TokenNode finished = null;
+
+			int activeCount = 0;
 			for (TokenNode child : children) {
-				TokenNode accept = child.accept(c);
-				if (child.isDone()) {
+				child.accept(c);
+				if (child.isActive()) {
+					activeCount++;
+				}
+				if (child.hasCompletedWork()) {
 					childMatched = true;
-					if (accept != child) {
-						return accept;
-					}
+					finished = child;
 				}
 			}
-			return this;
+			if (activeCount == 0 && finished != null) {
+				finished.submitWork();
+			}
 		}
 
 		@Override
-		public boolean isDone() {
-			return childMatched;
+		public boolean isActive() {
+			for (TokenNode child : children) {
+				if (child.isActive()) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		@Override
-		public void finish() {
+		public boolean hasCompletedWork() {
+			return childMatched && !isActive();
+		}
+
+		@Override
+		public void submitWork() {
 			if (!childMatched) {
 				throw new IllegalStateException();
 			}
 			childMatched = false;
+		}
+
+		public void noMoreTokens() {
+			if (isActive()) {
+				for (TokenNode child : children) {
+					if (child.hasCompletedWork()) {
+						child.submitWork();
+						break;
+					}
+				}
+			}
 		}
 	}
 
