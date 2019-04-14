@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -245,17 +244,17 @@ public class BodySegmentParserTest {
 
 		assertSingleParenSegment_onlyText("(,,,)", new String[] { "", "", "", "" });
 
-		assertSingleParenSegment_onlyText("(())", new String[] { "()" });
-
-		assertSingleParenSegment_onlyText("(() -*?)", new String[] { "() -*?" });
-
-		assertSingleParenSegment_onlyText("( -*?())", new String[] { " -*?()" });
-
-		assertSingleParenSegment_onlyText("(( -*?))", new String[] { "( -*?)" });
-
-		assertSingleParenSegment_onlyText("((,,))", new String[] { "(", "", ")" });
-
-		assertSingleParenSegment_onlyText("((, ,))", new String[] { "(", " ", ")" });
+		// assertSingleParenSegment_onlyText("(())", new String[] { "()" });
+		//
+		// assertSingleParenSegment_onlyText("(() -*?)", new String[] { "() -*?" });
+		//
+		// assertSingleParenSegment_onlyText("( -*?())", new String[] { " -*?()" });
+		//
+		// assertSingleParenSegment_onlyText("(( -*?))", new String[] { "( -*?)" });
+		//
+		// assertSingleParenSegment_onlyText("((,,))", new String[] { "(", "", ")" });
+		//
+		// assertSingleParenSegment_onlyText("((, ,))", new String[] { "(", " ", ")" });
 	}
 
 	@Test
@@ -301,9 +300,129 @@ public class BodySegmentParserTest {
 		assertSingleGlueSegment("##b", null, new WordSegment("b"));
 
 		assertSingleGlueSegment("a##b", new WordSegment("a"), new WordSegment("b"));
-		
+
 		assertSingleGlueSegment("some##word", new WordSegment("some"), new WordSegment("word"));
-		
+
 		assertSingleGlueSegment("_someTest##word23", new WordSegment("_someTest"), new WordSegment("word23"));
+	}
+
+	@SuppressWarnings("serial")
+	@Test
+	public void segmentCombinations() {
+		List<BodySegment> segments = new ArrayList<>();
+		List<BodySegment> parenSegments = new ArrayList<>();
+
+		String input = "Hello there";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		segments.add(new WordSegment("there"));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+
+		input = "Hello .,- there";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" .,- "));
+		segments.add(new WordSegment("there"));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+
+		input = "Hello #there";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		segments.add(new StringifySegment(new WordSegment("there")));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+
+		input = "Hello (there)";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new WordSegment("there"));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello (there,and,there)";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new WordSegment("there"));
+		parenSegments.add(new WordSegment("and"));
+		parenSegments.add(new WordSegment("there"));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello (there,#())";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new WordSegment("there"));
+		parenSegments.add(new BodySegmentSequence(new ArrayList<BodySegment>() {
+			{
+				add(new StringifySegment(null));
+				add(new ParenSegment(new ArrayList<>()));
+			}
+		}));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello (there, and,there)";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new WordSegment("there"));
+		parenSegments.add(new BodySegmentSequence(new ArrayList<BodySegment>() {
+			{
+				add(new TextSegment(" "));
+				add(new WordSegment("and"));
+			}
+		}));
+		parenSegments.add(new WordSegment("there"));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello ((there, and,there))";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new ParenSegment(new ArrayList<BodySegment>() {
+			{
+				add(new WordSegment("there"));
+				add(new BodySegmentSequence(new ArrayList<BodySegment>() {
+					{
+						add(new TextSegment(" "));
+						add(new WordSegment("and"));
+					}
+				}));
+				add(new WordSegment("there"));
+			}
+		}));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello (test,(there, and,there))";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new WordSegment("test"));
+		parenSegments.add(new ParenSegment(new ArrayList<BodySegment>() {
+			{
+				add(new WordSegment("there"));
+				add(new BodySegmentSequence(new ArrayList<BodySegment>() {
+					{
+						add(new TextSegment(" "));
+						add(new WordSegment("and"));
+					}
+				}));
+				add(new WordSegment("there"));
+			}
+		}));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
 	}
 }
