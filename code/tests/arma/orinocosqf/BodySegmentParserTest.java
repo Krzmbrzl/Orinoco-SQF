@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
 import arma.orinocosqf.bodySegments.BodySegmentSequence;
 import arma.orinocosqf.bodySegments.GlueSegment;
+import arma.orinocosqf.bodySegments.MacroArgumentSegment;
 import arma.orinocosqf.bodySegments.ParenSegment;
 import arma.orinocosqf.bodySegments.StringifySegment;
 import arma.orinocosqf.bodySegments.TextSegment;
@@ -21,18 +23,20 @@ public class BodySegmentParserTest {
 
 	BodySegmentParser parser;
 	OrinocoPreProcessor p;
-	List<String> EMPTY;
+	List<String> DefaultParams;
 
 	@Before
 	public void setUp() throws Exception {
 		parser = new BodySegmentParser();
 		p = new OrinocoPreProcessor(new OrinocoTokenProcessorAdapter() {
 		});
-		EMPTY = new ArrayList<>();
+		DefaultParams = new ArrayList<>();
+		DefaultParams.add("MyMacroParam");
+		DefaultParams.add("SomeParam");
 	}
 
 	void assertSegment(@NotNull String input, @NotNull BodySegment expected) {
-		assertSegment(input, expected, EMPTY);
+		assertSegment(input, expected, DefaultParams);
 	}
 
 	void assertSegment(@NotNull String input, @NotNull BodySegment expected, @NotNull List<String> params) {
@@ -46,6 +50,10 @@ public class BodySegmentParserTest {
 
 	void assertSingleWordSegment(@NotNull String input) {
 		assertSegment(input, new WordSegment(input));
+	}
+
+	void assertSingleMacroArgument(@NotNull String input, int argIndex) {
+		assertSegment(input, new MacroArgumentSegment(input, argIndex));
 	}
 
 	void assertSingleTextSegment(@NotNull String input) {
@@ -115,6 +123,13 @@ public class BodySegmentParserTest {
 		assertSingleWordSegment("I_am_A_5Macro_Name");
 
 		assertSingleWordSegment("_2test");
+	}
+
+	@Test
+	public void singleMacroArgument() {
+		assertSingleMacroArgument(DefaultParams.get(0), 0);
+
+		assertSingleMacroArgument(DefaultParams.get(1), 1);
 	}
 
 	@Test
@@ -222,6 +237,8 @@ public class BodySegmentParserTest {
 
 		assertSingleTextSegment(" ,..]:");
 
+		assertSingleTextSegment(" ,\"..\"]:");
+
 		assertSingleTextSegment("{äöü7/&$,,}");
 	}
 
@@ -244,17 +261,13 @@ public class BodySegmentParserTest {
 
 		assertSingleParenSegment_onlyText("(,,,)", new String[] { "", "", "", "" });
 
-		// assertSingleParenSegment_onlyText("(())", new String[] { "()" });
-		//
-		// assertSingleParenSegment_onlyText("(() -*?)", new String[] { "() -*?" });
-		//
-		// assertSingleParenSegment_onlyText("( -*?())", new String[] { " -*?()" });
-		//
-		// assertSingleParenSegment_onlyText("(( -*?))", new String[] { "( -*?)" });
-		//
-		// assertSingleParenSegment_onlyText("((,,))", new String[] { "(", "", ")" });
-		//
-		// assertSingleParenSegment_onlyText("((, ,))", new String[] { "(", " ", ")" });
+		assertSingleParenSegment_onlyText("( ,\"I am a test\")", new String[] { " ", "\"I am a test\"" });
+
+		assertSingleParenSegment_onlyText("( ,\"I am a test\" )", new String[] { " ", "\"I am a test\" " });
+
+		assertSingleParenSegment_onlyText("( ,\t\"I am a test\" )", new String[] { " ", "\t\"I am a test\" " });
+
+		assertSingleParenSegment_onlyText("( ,\"I, ( am ,a,, test\")", new String[] { " ", "\"I, ( am ,a,, test\"" });
 	}
 
 	@Test
@@ -304,6 +317,21 @@ public class BodySegmentParserTest {
 		assertSingleGlueSegment("some##word", new WordSegment("some"), new WordSegment("word"));
 
 		assertSingleGlueSegment("_someTest##word23", new WordSegment("_someTest"), new WordSegment("word23"));
+	}
+
+	@Test
+	public void singleStringSegment() {
+		assertSingleTextSegment("\"I am a test\"");
+
+		assertSingleTextSegment("\"I am 3 tests and ł@æ\"");
+
+		assertSingleTextSegment("\"()\"");
+
+		assertSingleTextSegment("\"I am (a test)\"");
+
+		assertSingleTextSegment("\"(a,b,z d,ref)\"");
+
+		assertSingleTextSegment("\"test(a,b,z d,ref)\"");
 	}
 
 	@SuppressWarnings("serial")
@@ -420,6 +448,26 @@ public class BodySegmentParserTest {
 				add(new WordSegment("there"));
 			}
 		}));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello (test,\"(there, and,there)\")";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new WordSegment("test"));
+		parenSegments.add(new TextSegment("\"(there, and,there)\""));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "Hello (" + DefaultParams.get(0) + ",\"(there, and,there)\")";
+		segments.add(new WordSegment("Hello"));
+		segments.add(new TextSegment(" "));
+		parenSegments.add(new MacroArgumentSegment(DefaultParams.get(0), 0));
+		parenSegments.add(new TextSegment("\"(there, and,there)\""));
 		segments.add(new ParenSegment(parenSegments));
 		assertSegment(input, new BodySegmentSequence(segments));
 		segments.clear();
