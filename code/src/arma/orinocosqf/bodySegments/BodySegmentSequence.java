@@ -34,6 +34,11 @@ public class BodySegmentSequence extends BodySegment {
 	@NotNull
 	@Override
 	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+		if (!isValid()) {
+			// invalid macros return empty texts
+			return "";
+		}
+
 		StringBuilder sb = new StringBuilder();
 		for (BodySegment bs : segments) {
 			sb.append(bs.applyArguments(args));
@@ -69,5 +74,24 @@ public class BodySegmentSequence extends BodySegment {
 		}
 
 		return other.segments.equals(this.segments);
+	}
+
+	/**
+	 * @return Whether this segment is in a valid state (doesn't contain any segment of type {@link ErrorSegment}).
+	 */
+	public boolean isValid() {
+		for (BodySegment currentSegment : segments) {
+			if (currentSegment instanceof BodySegmentSequence) {
+				if (!((BodySegmentSequence) currentSegment).isValid()) {
+					return false;
+				}
+			} else {
+				if (currentSegment instanceof ErrorSegment) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
