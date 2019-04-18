@@ -55,7 +55,7 @@ public class TextSegment extends BodySegment {
 	 * 
 	 * @param text The text to append
 	 */
-	protected void append(String text) {
+	protected void append(@NotNull String text) {
 		if (this.text != null) {
 			this.text = this.text + text;
 		} else {
