@@ -7,6 +7,8 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import arma.orinocosqf.exceptions.UnclosedStringException;
+
 /**
  * A parser that is able to transform macro bodies into a {@link BodySegment}-representation
  * 
@@ -195,8 +197,9 @@ public class BodySegmentParser {
 		 * @return The amount of read characters
 		 * @throws IOException This method itself doesn't throw this exception. The only case such an exception might arise is if the given
 		 *         targetBuf's append-method throws it.
+		 * @throws UnclosedStringException If the read String isn't closed properly
 		 */
-		public int readString(@NotNull Appendable targetBuf, char stringDelimiter) throws IOException {
+		public int readString(@NotNull Appendable targetBuf, char stringDelimiter) throws IOException, UnclosedStringException {
 			int letters = 0;
 
 			char c = nextChar();
@@ -219,9 +222,9 @@ public class BodySegmentParser {
 			}
 
 			if (c != stringDelimiter) {
+				rewindChar();
 				// unclosed string -> Error
-				// TODO: report error
-				System.err.println("Unclosed string in macro body (delimiter: " + stringDelimiter + ")");
+				throw new UnclosedStringException("Unclosed string in macro body (delimiter: " + stringDelimiter + ")");
 			} else {
 				targetBuf.append(c);
 				letters++;
@@ -425,9 +428,15 @@ public class BodySegmentParser {
 					case '"':
 						reader.rewindChar();
 						StringBuilder stringContent = new StringBuilder();
-						reader.readString(stringContent, '"');
-
-						appendText(stringContent.toString(), segmentContainer);
+						try {
+							reader.readString(stringContent, '"');
+							appendText(stringContent.toString(), segmentContainer);
+						} catch (UnclosedStringException e) {
+							// Unclosed String -> produce error token
+							segmentContainer.add(new ErrorSegment(stringContent));
+							
+							// TODO: Create error message
+						}
 						break;
 
 					case ')':
