@@ -422,6 +422,14 @@ public class BodySegmentParser {
 						}
 						break;
 
+					case '"':
+						reader.rewindChar();
+						StringBuilder stringContent = new StringBuilder();
+						reader.readString(stringContent, '"');
+
+						appendText(stringContent.toString(), segmentContainer);
+						break;
+
 					case ')':
 					case ',':
 						if (inParenExpression) {
