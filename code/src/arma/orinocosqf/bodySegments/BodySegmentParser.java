@@ -492,7 +492,13 @@ public class BodySegmentParser {
 				currentSegment = nextStandardSegment(reader, segmentBuilder, params, textDelimiters);
 
 				if (currentSegment != null) {
-					segmentContainer.add(currentSegment);
+					if (currentSegment instanceof TextSegment && segmentContainer.size() > 0
+							&& segmentContainer.get(segmentContainer.size() - 1) instanceof TextSegment) {
+						// append the text rather than creating a new segment
+						((TextSegment) segmentContainer.get(segmentContainer.size() - 1)).append(((TextSegment) currentSegment).text);
+					} else {
+						segmentContainer.add(currentSegment);
+					}
 				}
 			} catch (IOException e) {
 				// Should be unreachable
