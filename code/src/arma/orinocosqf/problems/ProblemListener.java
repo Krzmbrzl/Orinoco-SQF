@@ -13,10 +13,10 @@ public interface ProblemListener {
 	 * Gets called whenever a {@link Problem} has been encountered
 	 *
 	 * @param problem The encountered problem
-	 * @param The concrete problem's message
+	 * @param msg The concrete problem's message
 	 * @param offset The offset of the problem area in the original input or <code>-1</code> if not applicable
 	 * @param length The length of the problem area in the original input or <code>-1</code> if not applicable
-	 * @param lin e The line in which the problem occurred. If the problem spans multiple lines this is the first line in which it occurs.
+	 * @param line The line in which the problem occurred. If the problem spans multiple lines this is the first line in which it occurs.
 	 *        This is set to <code>-1</code> if the line is unknown or a line number is not applicable
 	 */
 	void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line);
