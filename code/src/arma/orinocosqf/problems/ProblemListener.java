@@ -3,7 +3,7 @@ package arma.orinocosqf.problems;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * An interface describing a ProblemListener that can be atached to anything that might encounter problems and that should be notified about
+ * An interface describing a ProblemListener that can be attached to anything that might encounter problems and that should be notified about
  * every encountered Problem
  *
  * @author Raven
