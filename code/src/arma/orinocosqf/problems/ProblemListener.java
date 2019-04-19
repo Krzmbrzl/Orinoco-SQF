@@ -16,7 +16,7 @@ public interface ProblemListener {
 	 * @param The concrete problem's message
 	 * @param offset The offset of the problem area in the original input or <code>-1</code> if not applicable
 	 * @param length The length of the problem area in the original input or <code>-1</code> if not applicable
-	 * @param lin e The line in which the problem occured. If the problem spans multiple lines this is the first line in which it occurs.
+	 * @param lin e The line in which the problem occurred. If the problem spans multiple lines this is the first line in which it occurs.
 	 *        This is set to <code>-1</code> if the line is unknown or a line number is not applicable
 	 */
 	void problemEncoutnered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line);
