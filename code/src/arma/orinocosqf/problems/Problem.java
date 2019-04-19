@@ -30,6 +30,11 @@ public abstract class Problem {
 	 * @return The unique Id of this problem
 	 */
 	public abstract int getId();
+	
+	@Override
+	public String toString() {
+		return getDisplayName() + "{" + "severity=" + getSeverity() + "; id=" + getId() + "}";
+	}
 
 
 	/**
