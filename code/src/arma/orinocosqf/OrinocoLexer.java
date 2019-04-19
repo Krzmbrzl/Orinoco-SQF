@@ -2,6 +2,9 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
+
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
  * cyclic dependency on a preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that each token may have a macro inside
@@ -9,7 +12,9 @@ import org.jetbrains.annotations.NotNull;
  * it submits the token to {@link OrinocoLexerStream#preProcessToken(char[], int, int)}. Subsequently, the preprocessed result re-enters the
  * lexer for re-lexing via {@link #acceptPreProcessedText(CharSequence)}.
  *
- * Example 1: <pre>
+ * Example 1:
+ * 
+ * <pre>
  * #define ONE 1
  * #define ASSIGN(VAR) VAR = ONE;
  * ASSIGN(hello) //begin lexing here
@@ -23,9 +28,9 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 02/20/2019
  */
-public class OrinocoLexer {
+public class OrinocoLexer implements ProblemListener {
 	public static int getCommandId(@NotNull String command) {
-		return 0; //todo
+		return 0; // todo
 	}
 
 	/**
@@ -77,5 +82,14 @@ public class OrinocoLexer {
 	public OrinocoLexerContext getContext() {
 		// TODO
 		throw new UnsupportedOperationException("Get context not yet implemented!");
+	}
+
+	/**
+	 * This method implementation is intended for the use by the preprocessor. The included offset is relative to the char-buffer provided
+	 * to it. <b>Do not call this method from outside the preprocessor</b>
+	 */
+	@Override
+	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
+		// TODO process problem and delegate to the actual problem listener
 	}
 }
