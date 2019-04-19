@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import arma.orinocosqf.exceptions.UnclosedStringException;
+import arma.orinocosqf.problems.ProblemListener;
 
 /**
  * A parser that is able to transform macro bodies into a {@link BodySegment}-representation
@@ -319,12 +320,27 @@ public class BodySegmentParser {
 
 	}
 
+	/**
+	 * An array of characters that are being used as text-delimiters inside normal areas (outside of parenthesis)
+	 */
 	protected char[] textDelimiters;
+	/**
+	 * An array of characters that are being used as text-delimiters inside parenthesis
+	 */
 	protected char[] textDelimitersInParenexpressions;
+	/**
+	 * The {@link ProblemListener} to report problems to
+	 */
+	protected ProblemListener problemListener;
 
-	public BodySegmentParser() {
+	/**
+	 * @param problemListener The {@link ProblemListener} to report problems that may occur during parsing to
+	 */
+	public BodySegmentParser(ProblemListener problemListener) {
 		textDelimiters = new char[] { '(', ')', '#', '"' };
 		textDelimitersInParenexpressions = new char[] { '(', ')', '#', '"', ',' };
+
+		this.problemListener = problemListener;
 	}
 
 	/**
@@ -434,7 +450,7 @@ public class BodySegmentParser {
 						} catch (UnclosedStringException e) {
 							// Unclosed String -> produce error token
 							segmentContainer.add(new ErrorSegment(stringContent));
-							
+
 							// TODO: Create error message
 						}
 						break;
