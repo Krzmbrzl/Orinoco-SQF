@@ -19,5 +19,5 @@ public interface ProblemListener {
 	 * @param lin e The line in which the problem occurred. If the problem spans multiple lines this is the first line in which it occurs.
 	 *        This is set to <code>-1</code> if the line is unknown or a line number is not applicable
 	 */
-	void problemEncoutnered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line);
+	void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line);
 }
