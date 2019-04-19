@@ -18,6 +18,7 @@ import arma.orinocosqf.bodySegments.ParenSegment;
 import arma.orinocosqf.bodySegments.StringifySegment;
 import arma.orinocosqf.bodySegments.TextSegment;
 import arma.orinocosqf.bodySegments.WordSegment;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 
 public class BodySegmentParserTest {
 
@@ -27,7 +28,7 @@ public class BodySegmentParserTest {
 
 	@Before
 	public void setUp() throws Exception {
-		parser = new BodySegmentParser();
+		parser = new BodySegmentParser(new ProblemListenerPanicImplementation());
 		p = new OrinocoPreProcessor(new OrinocoTokenProcessorAdapter() {
 		});
 		DefaultParams = new ArrayList<>();

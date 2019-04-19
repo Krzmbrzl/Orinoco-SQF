@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
+import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
 
 /**
  * A {@link OrinocoLexerStream} implementation that fully preprocesses tokens.
@@ -13,7 +15,7 @@ import arma.orinocosqf.bodySegments.BodySegmentParser;
  * @author K
  * @since 02/20/2019
  */
-public class OrinocoPreProcessor implements OrinocoLexerStream {
+public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener {
 	private OrinocoLexer lexer;
 	private final OrinocoTokenProcessor processor;
 	protected MacroSet macroSet;
@@ -23,7 +25,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		this.processor = p;
 
 		macroSet = new MacroSet();
-		segmentParser = new BodySegmentParser();
+		segmentParser = new BodySegmentParser(this);
 	}
 
 	@Override
@@ -247,5 +249,14 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		PreProcessorMacro macro = new PreProcessorMacro(getMacroSet(), macroName.toString(), params, body);
 
 		getMacroSet().put(macroName.toString(), macro);
+	}
+
+	/**
+	 * This method is intended to be only called by {@link BodySegmentParser}. It delegates all encountered errors to
+	 * {@link OrinocoLexer#problemEncountered(Problem, String, int, int, int)}
+	 */
+	@Override
+	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
+		// TODO 
 	}
 }
