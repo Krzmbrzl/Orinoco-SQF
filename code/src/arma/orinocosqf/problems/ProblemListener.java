@@ -13,7 +13,7 @@ public interface ProblemListener {
 	 * Gets called whenever a {@link Problem} has been encountered
 	 *
 	 * @param problem The encountered problem
-	 * @param The conrete problem's message
+	 * @param The concrete problem's message
 	 * @param offset The offset of the problem area in the original input or <code>-1</code> if not applicable
 	 * @param length The length of the problem area in the original input or <code>-1</code> if not applicable
 	 */
