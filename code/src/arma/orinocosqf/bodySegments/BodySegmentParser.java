@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import arma.orinocosqf.exceptions.UnclosedStringException;
 import arma.orinocosqf.problems.ProblemListener;
+import arma.orinocosqf.problems.Problems;
 
 /**
  * A parser that is able to transform macro bodies into a {@link BodySegment}-representation
@@ -233,6 +234,12 @@ public class BodySegmentParser {
 
 			return letters;
 		}
+
+		/**
+		 * @return the offset of this reader inside the input it is working on (note that this must not necessarily coincide with the offset
+		 *         relative to the start of the area inside which this reader operates
+		 */
+		public abstract int offset();
 	}
 
 	/**
@@ -318,6 +325,12 @@ public class BodySegmentParser {
 			return readCharacters == 0 ? (char) -1 : buf[startOffset + readCharacters - 1];
 		}
 
+		@Override
+		public int offset() {
+			// if-clause prevents possibly negative offsets
+			return readCharacters == 0 ? startOffset : startOffset - readCharacters - 1;
+		}
+
 	}
 
 	/**
@@ -385,6 +398,8 @@ public class BodySegmentParser {
 						// create new paren-expression
 						List<BodySegment> parenSegments = new ArrayList<>();
 
+						int parenStartOffset = reader.offset();
+
 						BodySegment nextSegment = doParseSegments(reader, params, true);
 						if (reader.nextChar() == ')' && nextSegment == EMPTY_SEGMENT) {
 							// special case for empty parens
@@ -406,11 +421,25 @@ public class BodySegmentParser {
 						}
 
 						if (nextC != ')') {
-							// TODO: improve error handling
-							throw new IllegalStateException("Unclosed paren-Expression");
-						}
+							// Report error
+							problemListener.problemEncountered(Problems.UNCLOSED_PARENTHESIS, "Unclosed parenthesis", parenStartOffset,
+									reader.offset() - parenStartOffset, -1);
 
-						segmentContainer.add(new ParenSegment(parenSegments));
+							// Add the whole paren-expression as an error-segment
+							StringBuilder builder = new StringBuilder();
+							builder.append("(");
+							for (BodySegment currentSegment : parenSegments) {
+								builder.append(currentSegment.toStringNoPreProcessing() + ",");
+							}
+							if (parenSegments.size() > 0) {
+								// remove last comma
+								builder.setLength(builder.length() - 1);
+							}
+
+							segmentContainer.add(new ErrorSegment(builder));
+						} else {
+							segmentContainer.add(new ParenSegment(parenSegments));
+						}
 						break;
 
 					case '#':
@@ -442,6 +471,8 @@ public class BodySegmentParser {
 						break;
 
 					case '"':
+						int stringStartPos = reader.offset();
+
 						reader.rewindChar();
 						StringBuilder stringContent = new StringBuilder();
 						try {
@@ -451,7 +482,9 @@ public class BodySegmentParser {
 							// Unclosed String -> produce error token
 							segmentContainer.add(new ErrorSegment(stringContent));
 
-							// TODO: Create error message
+							// notify error listener
+							problemListener.problemEncountered(Problems.UNCLOSED_STRING, "Encountered unclosed String (double-quote)",
+									stringStartPos, reader.offset() - stringStartPos, -1);
 						}
 						break;
 
@@ -477,8 +510,10 @@ public class BodySegmentParser {
 						break;
 
 					default:
-						// TODO: improve error handling
-						throw new IllegalStateException("Encountered unexpected character '" + c + "'");
+						// Notify problem listener about invalid character
+						problemListener.problemEncountered(Problems.INVALID_CHARACTER, "Invalid character " + c, reader.offset(), 1, -1);
+
+						// Apart from the error message the character shall be ignored
 				}
 			} catch (IOException e) {
 				// Should be unreachable
@@ -490,7 +525,10 @@ public class BodySegmentParser {
 			return new ParenSegment(segmentContainer);
 		} else {
 			if (segmentContainer.size() == 0) {
-				// TODO: improve error handling
+				// notify problem listener
+				problemListener.problemEncountered(Problems.INTERNAL, "Trying to return an empty element inside BodySegmentParser", -1, -1,
+						-1);
+				// throw exception nonetheless
 				throw new IllegalStateException("Trying to return empty element");
 			}
 			return segmentContainer.size() > 1 ? new BodySegmentSequence(segmentContainer) : segmentContainer.get(0);
