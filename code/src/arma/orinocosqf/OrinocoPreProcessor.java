@@ -84,7 +84,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void preProcessToken(@NotNull char[] bufReadOnly, int offset, int length) {
-
+		// TODO
 	}
 
 	@Override
@@ -394,9 +394,8 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		} else {
 			// Trying to undef a non-existing macro -> Warning
 			lexer.problemEncountered(Problems.WARNING_UNDEFINE_NONEXISTENT,
-					"The macro \"" + macroName + "\" is asked to be undefined, but it doesn*t even exist.", macroNameStartOffset,
+					"The macro \"" + macroName + "\" is asked to be undefined, but it doesn't even exist.", macroNameStartOffset,
 					macroName.length(), -1);
 		}
-
 	}
 }
