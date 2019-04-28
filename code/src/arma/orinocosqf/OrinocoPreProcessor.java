@@ -58,15 +58,19 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		switch (command) {
 			case IfDef:
+				handleIfDef(bufReadOnly, offset, length);
 				break;
 			case Define:
 				handleDefine(bufReadOnly, offset, length);
 				break;
 			case Else:
+				handleElse(bufReadOnly, offset, length);
 				break;
 			case EndIf:
+				handleEndIf(bufReadOnly, offset, length);
 				break;
 			case IfNDef:
+				handleIfnDef(bufReadOnly, offset, length);
 				break;
 			case Include:
 				break;
@@ -302,5 +306,49 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		for (int k = 0; k < NLCount; k++) {
 			lexer.acceptPreProcessedText(nl);
 		}
+	}
+
+	/**
+	 * Processes a #ifdef statement
+	 * 
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
+	protected void handleIfDef(@NotNull char[] readOnlyBuf, int startOffset, int length) {
+		// This is handled by the lexer so we can ignore it here
+	}
+
+	/**
+	 * Processes a #ifndef statement
+	 * 
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
+	protected void handleIfnDef(@NotNull char[] readOnlyBuf, int startOffset, int length) {
+		// This is handled by the lexer so we can ignore it here
+	}
+
+	/**
+	 * Processes a #else statement
+	 * 
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
+	protected void handleElse(@NotNull char[] readOnlyBuf, int startOffset, int length) {
+		// This is handled by the lexer so we can ignore it here
+	}
+
+	/**
+	 * Processes a #endif statement
+	 * 
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
+	protected void handleEndIf(@NotNull char[] readOnlyBuf, int startOffset, int length) {
+		// This is handled by the lexer so we can ignore it here
 	}
 }
