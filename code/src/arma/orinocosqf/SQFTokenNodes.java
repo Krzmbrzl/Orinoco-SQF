@@ -3,7 +3,6 @@ package arma.orinocosqf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import static arma.orinocosqf.ASCIITextHelper.toLowerCase;
@@ -14,29 +13,64 @@ import static arma.orinocosqf.ASCIITextHelper.toLowerCase;
  */
 public class SQFTokenNodes {
 	public static class SQFRootTokenNode extends OrinocoLexer.RootTokenNode {
-		private final OrinocoLexer.TokenNode[] nodes = new OrinocoLexer.TokenNode[6];
-		private final LinkedList<Integer> usableNodes = new LinkedList<>();
 
 		private final int MULTILINE_COMMENT = 0;
 		private final int SINGLELINE_COMMENT = 1;
 		private final int PREPROCESSOR_COMMAND = 2;
 		private final int WHITESPACE = 3;
 		private final int WORD = 4;
+		private int checkFirst = MULTILINE_COMMENT;
+
+		private final MultilineCommentTokenNode multilineComment;
+		private final SingleLineCommentTokenNode singleLineComment;
+		private final PreProcessorCommandTokenNode preprocessorCommand;
+		private final WhitespaceTokenNode whitespace;
+		private final WordTokenNode word;
 
 		public SQFRootTokenNode(@NotNull OrinocoLexer lexer) {
 			super(lexer);
-			nodes[MULTILINE_COMMENT] = new MultilineCommentTokenNode(lexer);
-			nodes[SINGLELINE_COMMENT] = new SingleLineCommentTokenNode(lexer);
-			nodes[PREPROCESSOR_COMMAND] = new PreProcessorCommandTokenNode(lexer);
-			nodes[WHITESPACE] = new WhitespaceTokenNode(lexer, true);
-			nodes[WORD] = new WordTokenNode(lexer);
-			for (int i = 0; i < nodes.length; i++) {
-				usableNodes.add(i);
-			}
+			multilineComment = new MultilineCommentTokenNode(lexer);
+			singleLineComment = new SingleLineCommentTokenNode(lexer);
+			preprocessorCommand = new PreProcessorCommandTokenNode(lexer);
+			whitespace = new WhitespaceTokenNode(lexer, true);
+			word = new WordTokenNode(lexer);
 		}
 
 		@Override
 		public void accept(char c) {
+			switch (checkFirst) {
+				case MULTILINE_COMMENT: {
+					multilineComment.accept(c);
+					if (multilineComment.isActive()) {
+						return;
+					}
+					break;
+				}
+				case SINGLELINE_COMMENT: {
+					singleLineComment.accept(c);
+					if (singleLineComment.isActive()) {
+						return;
+					}
+					break;
+				}
+				case PREPROCESSOR_COMMAND: {
+					preprocessorCommand.accept(c);
+					if (preprocessorCommand.isActive()) {
+						return;
+					}
+					break;
+				}
+				case WHITESPACE: {
+					break;
+				}
+				case WORD: {
+					break;
+				}
+				default: {
+
+				}
+			}
+
 
 		}
 
