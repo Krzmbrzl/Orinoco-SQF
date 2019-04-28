@@ -75,6 +75,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 			case Include:
 				break;
 			case Undef:
+				handleUndef(bufReadOnly, offset, length);
 				break;
 			default:
 				break;
@@ -350,5 +351,52 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 */
 	protected void handleEndIf(@NotNull char[] readOnlyBuf, int startOffset, int length) {
 		// This is handled by the lexer so we can ignore it here
+	}
+
+	/**
+	 * Processes a #undef statement
+	 * 
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
+	protected void handleUndef(@NotNull char[] readOnlyBuf, int startOffset, int length) {
+		int maxOffset = startOffset + length;
+
+		// skip the #undef itself
+		startOffset += "#undef".length();
+
+		StringBuilder macroName = new StringBuilder();
+		int macroNameStartOffset = -1;
+
+		// get the name of the macro
+		for (int i = startOffset; i < maxOffset; i++) {
+			char c = readOnlyBuf[i];
+
+			if (Character.isWhitespace(c) && macroName.length() == 0) {
+				// skip WS between #undef and the macro name
+				continue;
+			}
+
+			if (isMacroNamePart(c, i == startOffset)) {
+				if (macroNameStartOffset == -1) {
+					macroNameStartOffset = i;
+				}
+
+				macroName.append(c);
+			} else {
+				break;
+			}
+		}
+
+		if (getMacroSet().containsKey(macroName.toString())) {
+			getMacroSet().remove(macroName.toString());
+		} else {
+			// Trying to undef a non-existing macro -> Warning
+			lexer.problemEncountered(Problems.WARNING_UNDEFINE_NONEXISTENT,
+					"The macro \"" + macroName + "\" is asked to be undefined, but it doesn*t even exist.", macroNameStartOffset,
+					macroName.length(), -1);
+		}
+
 	}
 }
