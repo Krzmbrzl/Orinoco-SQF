@@ -6,26 +6,38 @@ import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
-import arma.orinocosqf.problems.Problem;
-import arma.orinocosqf.problems.ProblemListener;
+import arma.orinocosqf.problems.Problems;
 
 /**
  * A {@link OrinocoLexerStream} implementation that fully preprocesses tokens.
  *
- * @author K
+ * @author Raven
  * @since 02/20/2019
  */
-public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener {
+public class OrinocoPreProcessor implements OrinocoLexerStream {
+	/**
+	 * The lexer that is being used to feed tokens into this preprocessor
+	 */
 	private OrinocoLexer lexer;
+	/**
+	 * The {@link OrinocoTokenProcessor} to delegate method calls to
+	 */
 	private final OrinocoTokenProcessor processor;
+	/**
+	 * The {@link MacroSet} of the current preprocessing run
+	 */
 	protected MacroSet macroSet;
+	/**
+	 * The {@link BodySegmentParser} used to parse define-bodies or other preprocessor-structures
+	 */
 	protected BodySegmentParser segmentParser;
+
 
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor p) {
 		this.processor = p;
 
 		macroSet = new MacroSet();
-		segmentParser = new BodySegmentParser(this);
+		segmentParser = new BodySegmentParser(lexer);
 	}
 
 	@Override
@@ -117,13 +129,14 @@ public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener 
 	@Override
 	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 			@NotNull OrinocoLexerContext ctx) {
-
+		// search for NLs
+		ctx.getTextBuffer().getText(originalOffset, originalLength);
 	}
 
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 			@NotNull OrinocoLexerContext ctx) {
-		// TODO: extract NLs and feed them back to lexer if comments aren't kept anways
+		// TODO: extract NLs and feed them back to lexer if comments aren't kept anyways
 	}
 
 	/**
@@ -140,8 +153,16 @@ public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener 
 		return this.macroSet;
 	}
 
+	/**
+	 * Processes a #define statement
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
 	protected void handleDefine(@NotNull char[] readOnlyBuf, int startOffset, int length) {
 		int maxOffset = startOffset + length;
+		
+		// skip the #define itself
 		startOffset += "#define".length();
 
 		StringBuilder macroName = new StringBuilder();
@@ -183,8 +204,17 @@ public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener 
 				if (isMacroNamePart(c, currentArg.length() == 0)) {
 					currentArg.append(c);
 				} else {
-					params.add(currentArg.toString());
+					// trim whitespace away
+					int originalLength = currentArg.length();
+					String strCurrentArg = currentArg.toString().trim();
 					currentArg.setLength(0);
+
+					if (currentArg.length() == 0) {
+						lexer.problemEncountered(Problems.EMPTY, "Empty (or pure WS) macro argument in definition",
+								startOffset + i - 1 - originalLength, originalLength, -1);
+					}
+
+					params.add(strCurrentArg);
 
 					if (c == ')') {
 						i++; // move pointer after paren
@@ -192,18 +222,31 @@ public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener 
 					}
 
 					if (c != ',') {
-						// something's wrong
-						// TODO: produce error/warning
-						System.err.println("Detected invalid character while collecting macro arguments: '" + c + "'");
+						// something's wrong -> report
+						lexer.problemEncountered(Problems.INVALID_CHARACTER,
+								"Detected invalid character while collecting macro arguments: '" + c
+										+ "' (Expected comma or closing paren)",
+								startOffset + i, 1, -1);
 					}
 				}
 			}
 		}
 
 		if (currentArg.length() > 0) {
-			// unclosed paren
-			// TODO: Error
-			System.err.println("Unclosed paren in macro-argument definition");
+			// unclosed paren -> issue an error
+			lexer.problemEncountered(Problems.UNCLOSED_PARENTHESIS, "Unclosed paren in macro-argument definition", i, 1, -1);
+			
+			// add the argument nonetheless
+			int originalLength = currentArg.length();
+			String strCurrentArg = currentArg.toString().trim();
+			currentArg.setLength(0);
+
+			if (currentArg.length() == 0) {
+				lexer.problemEncountered(Problems.EMPTY, "Empty (or pure WS) macro argument in definition",
+						startOffset + i - 1 - originalLength, originalLength, -1);
+			}
+
+			params.add(strCurrentArg);
 		}
 
 		while (i < maxOffset && readOnlyBuf[i] == ' ') {
@@ -214,49 +257,37 @@ public class OrinocoPreProcessor implements OrinocoLexerStream, ProblemListener 
 		StringBuilder macroBody = new StringBuilder();
 
 		int remainingLength = maxOffset - i;
-		// TODO: make NL-keeping toggleable
+		boolean usesCRLF = false;
+		int NLCount = 0;
+		
 		for (int k = 0; k < remainingLength; k++) {
 			macroBody.append(readOnlyBuf[i + k]);
 
 			// Check for any
 			switch (readOnlyBuf[k + 1]) {
 				case '\r':
-					// handle CRLF
-					if (k + 1 < remainingLength && readOnlyBuf[k + 1 + i] == '\n') {
-						k++;
-						lexer.acceptPreProcessedText("\r\n");
-					}
-					// ignore lonely \r
+					usesCRLF = true;
 					break;
 				case '\n':
-					// keep newline
-					lexer.acceptPreProcessedText("\n");
-					break;
-
+					NLCount++;
 				default:
 					break;
 			}
 		}
 
-		System.out.println(macroBody.toString());
-
 		BodySegment body = segmentParser.parseSegments(readOnlyBuf, i, remainingLength, params,
 				(c, isFirstLetter) -> isMacroNamePart(c, isFirstLetter));
 
-		System.out.println(body);
-		System.out.println(body.toStringNoPreProcessing());
 
 		PreProcessorMacro macro = new PreProcessorMacro(getMacroSet(), macroName.toString(), params, body);
 
 		getMacroSet().put(macroName.toString(), macro);
-	}
-
-	/**
-	 * This method is intended to be only called by {@link BodySegmentParser}. It delegates all encountered errors to
-	 * {@link OrinocoLexer#problemEncountered(Problem, String, int, int, int)}
-	 */
-	@Override
-	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
-		// TODO 
+		
+		// Feed Newlines from macro body back to the lexer in order to preserve them
+		// TODO: make NL-keeping toggleable
+		String nl = usesCRLF ? "\r\n" : "\n";
+		for (int k=0; k < NLCount; k++) {
+			lexer.acceptPreProcessedText(nl);
+		}
 	}
 }
