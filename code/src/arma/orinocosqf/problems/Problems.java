@@ -14,4 +14,5 @@ public class Problems {
 	public static final Error_UnclosedString ERROR_UNCLOSED_STRING = new Error_UnclosedString();
 	
 	public static final Warning_OverwriteExisting WARNING_OVERWRITE = new Warning_OverwriteExisting();
+	public static final Warning_UndefineNonExistent WARNING_UNDEFINE_NONEXISTENT = new Warning_UndefineNonExistent();
 }
