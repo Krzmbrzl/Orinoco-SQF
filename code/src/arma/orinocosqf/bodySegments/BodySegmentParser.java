@@ -422,7 +422,7 @@ public class BodySegmentParser {
 
 						if (nextC != ')') {
 							// Report error
-							problemListener.problemEncountered(Problems.UNCLOSED_PARENTHESIS, "Unclosed parenthesis", parenStartOffset,
+							problemListener.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "Unclosed parenthesis", parenStartOffset,
 									reader.offset() - parenStartOffset, -1);
 
 							// Add the whole paren-expression as an error-segment
@@ -483,7 +483,7 @@ public class BodySegmentParser {
 							segmentContainer.add(new ErrorSegment(stringContent));
 
 							// notify error listener
-							problemListener.problemEncountered(Problems.UNCLOSED_STRING, "Encountered unclosed String (double-quote)",
+							problemListener.problemEncountered(Problems.ERROR_UNCLOSED_STRING, "Encountered unclosed String (double-quote)",
 									stringStartPos, reader.offset() - stringStartPos, -1);
 						}
 						break;
@@ -511,7 +511,7 @@ public class BodySegmentParser {
 
 					default:
 						// Notify problem listener about invalid character
-						problemListener.problemEncountered(Problems.INVALID_CHARACTER, "Invalid character " + c, reader.offset(), 1, -1);
+						problemListener.problemEncountered(Problems.ERROR_INVALID_CHARACTER, "Invalid character " + c, reader.offset(), 1, -1);
 
 						// Apart from the error message the character shall be ignored
 				}
@@ -526,7 +526,7 @@ public class BodySegmentParser {
 		} else {
 			if (segmentContainer.size() == 0) {
 				// notify problem listener
-				problemListener.problemEncountered(Problems.INTERNAL, "Trying to return an empty element inside BodySegmentParser", -1, -1,
+				problemListener.problemEncountered(Problems.ERROR_INTERNAL, "Trying to return an empty element inside BodySegmentParser", -1, -1,
 						-1);
 				// throw exception nonetheless
 				throw new IllegalStateException("Trying to return empty element");
