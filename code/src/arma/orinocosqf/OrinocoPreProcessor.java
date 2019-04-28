@@ -155,17 +155,19 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #define statement
+	 * 
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
 	 */
 	protected void handleDefine(@NotNull char[] readOnlyBuf, int startOffset, int length) {
 		int maxOffset = startOffset + length;
-		
+
 		// skip the #define itself
 		startOffset += "#define".length();
 
 		StringBuilder macroName = new StringBuilder();
+		int macroNameStartOffset = -1;
 
 		int i;
 		// get the name of the defined macro
@@ -178,6 +180,10 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 			}
 
 			if (isMacroNamePart(c, i == startOffset)) {
+				if (macroNameStartOffset == -1) {
+					macroNameStartOffset = i;
+				}
+
 				macroName.append(c);
 			} else {
 				break;
@@ -210,7 +216,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 					currentArg.setLength(0);
 
 					if (currentArg.length() == 0) {
-						lexer.problemEncountered(Problems.EMPTY, "Empty (or pure WS) macro argument in definition",
+						lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
 								startOffset + i - 1 - originalLength, originalLength, -1);
 					}
 
@@ -223,7 +229,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 					if (c != ',') {
 						// something's wrong -> report
-						lexer.problemEncountered(Problems.INVALID_CHARACTER,
+						lexer.problemEncountered(Problems.ERROR_INVALID_CHARACTER,
 								"Detected invalid character while collecting macro arguments: '" + c
 										+ "' (Expected comma or closing paren)",
 								startOffset + i, 1, -1);
@@ -234,15 +240,15 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		if (currentArg.length() > 0) {
 			// unclosed paren -> issue an error
-			lexer.problemEncountered(Problems.UNCLOSED_PARENTHESIS, "Unclosed paren in macro-argument definition", i, 1, -1);
-			
+			lexer.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "Unclosed paren in macro-argument definition", i, 1, -1);
+
 			// add the argument nonetheless
 			int originalLength = currentArg.length();
 			String strCurrentArg = currentArg.toString().trim();
 			currentArg.setLength(0);
 
 			if (currentArg.length() == 0) {
-				lexer.problemEncountered(Problems.EMPTY, "Empty (or pure WS) macro argument in definition",
+				lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
 						startOffset + i - 1 - originalLength, originalLength, -1);
 			}
 
@@ -259,7 +265,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		int remainingLength = maxOffset - i;
 		boolean usesCRLF = false;
 		int NLCount = 0;
-		
+
 		for (int k = 0; k < remainingLength; k++) {
 			macroBody.append(readOnlyBuf[i + k]);
 
@@ -281,12 +287,19 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		PreProcessorMacro macro = new PreProcessorMacro(getMacroSet(), macroName.toString(), params, body);
 
+		if (getMacroSet().containsKey(macroName.toString())) {
+			// There already is a macro with that name -> warn about overwriting it
+			lexer.problemEncountered(Problems.WARNING_OVERWRITE,
+					"A macro with the name " + macroName + " does already exist and is being overwritten by this declaration.",
+					macroNameStartOffset, macroName.length(), -1);
+		}
+
 		getMacroSet().put(macroName.toString(), macro);
-		
+
 		// Feed Newlines from macro body back to the lexer in order to preserve them
 		// TODO: make NL-keeping toggleable
 		String nl = usesCRLF ? "\r\n" : "\n";
-		for (int k=0; k < NLCount; k++) {
+		for (int k = 0; k < NLCount; k++) {
 			lexer.acceptPreProcessedText(nl);
 		}
 	}
