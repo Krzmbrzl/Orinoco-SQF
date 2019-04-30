@@ -10,6 +10,7 @@ public class Problems {
 	public static final Error_Generic ERROR_GENERIC = new Error_Generic();
 	public static final Error_Internal ERROR_INTERNAL = new Error_Internal();
 	public static final Error_InvalidCharacter ERROR_INVALID_CHARACTER = new Error_InvalidCharacter();
+	public static final Error_InvalidPath ERROR_INVALID_PATH = new Error_InvalidPath();
 	public static final Error_UnclosedParenthesis ERROR_UNCLOSED_PARENTHESIS = new Error_UnclosedParenthesis();
 	public static final Error_UnclosedString ERROR_UNCLOSED_STRING = new Error_UnclosedString();
 	
