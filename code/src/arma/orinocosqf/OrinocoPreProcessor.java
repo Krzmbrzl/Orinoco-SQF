@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
+import arma.orinocosqf.exceptions.InvalidPathException;
 import arma.orinocosqf.problems.Problems;
 
 /**
@@ -31,13 +32,18 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 * The {@link BodySegmentParser} used to parse define-bodies or other preprocessor-structures
 	 */
 	protected BodySegmentParser segmentParser;
+	/**
+	 * The {@link ArmaFilesystem} used to handle includes
+	 */
+	protected ArmaFilesystem fileSystem;
 
 
-	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor p) {
-		this.processor = p;
+	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor processor, @NotNull ArmaFilesystem fileSystem) {
+		this.processor = processor;
+		this.fileSystem = fileSystem;
 
-		macroSet = new MacroSet();
-		segmentParser = new BodySegmentParser(lexer);
+		this.macroSet = new MacroSet();
+		this.segmentParser = new BodySegmentParser(lexer);
 	}
 
 	@Override
@@ -458,9 +464,22 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		if (!pathClosed) {
 			// include path wasn't closed
 			lexer.problemEncountered(Problems.ERROR_UNCLOSED_STRING, "Unclosed String for include-path. Expected terminating " + delimiter,
-					pathStartOffset, includePath.length(), -1);
+					pathStartOffset, includePath.length() + 1, -1);
 		}
 
-		// TODO: include file
+		try {
+			ArmaFile includeFle = fileSystem.resolve(includePath.toString());
+
+			if (includeFle == null) {
+				lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Couldn't resolve path \"" + includePath + "\"", pathStartOffset,
+						includePath.length() + 2, -1);
+			}
+			
+			// TODO: Create OrinocoReader and feed into lexer
+			// Maybe create a buffered-inputReader -> Depends on how the lexer works
+		} catch (InvalidPathException e) {
+			lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Invalid path\"" + includePath.toString() + "\": " + e.getMessage(),
+					pathStartOffset, includePath.length() + 2, -1);
+		}
 	}
 }
