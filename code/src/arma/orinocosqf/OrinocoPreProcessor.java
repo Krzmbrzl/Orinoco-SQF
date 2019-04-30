@@ -73,12 +73,13 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 				handleIfnDef(bufReadOnly, offset, length);
 				break;
 			case Include:
+				handleInclude(bufReadOnly, offset, length);
 				break;
 			case Undef:
 				handleUndef(bufReadOnly, offset, length);
 				break;
 			default:
-				break;
+				throw new IllegalStateException("Reached unreachable code in OrinocoPreprocesor!");
 		}
 	}
 
@@ -397,5 +398,69 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 					"The macro \"" + macroName + "\" is asked to be undefined, but it doesn't even exist.", macroNameStartOffset,
 					macroName.length(), -1);
 		}
+	}
+
+	/**
+	 * Processes a #include statement
+	 * 
+	 * @param readOnlyBuf The buffer containing the statement
+	 * @param startOffset The offset at which the statement starts
+	 * @param length The length of the statement
+	 */
+	protected void handleInclude(@NotNull char[] readOnlyBuf, int startOffset, int length) {
+		int maxOffset = startOffset + length;
+
+		// skip the #include itself
+		startOffset += "#include".length();
+
+		StringBuilder includePath = new StringBuilder();
+		char delimiter = (char) -1;
+		boolean pathClosed = false;
+		int pathStartOffset = -1;
+
+		// get the name of the macro
+		for (int i = startOffset; i < maxOffset; i++) {
+			char c = readOnlyBuf[i];
+
+			if (Character.isWhitespace(c) && includePath.length() == 0) {
+				// skip WS between #undef and the macro name
+				continue;
+			}
+
+			if (delimiter == (char) -1) {
+				switch (c) {
+					case '"':
+					case '\'':
+						// TODO: check if single quoted argument is valid for #include
+						delimiter = c;
+						break;
+					case '<':
+						delimiter = '>';
+						break;
+					default:
+						// invalid path
+						lexer.problemEncountered(Problems.ERROR_INVALID_CHARACTER,
+								"Expected \" or ' or < to open the path specification for the include statement.", i, 1, -1);
+						return;
+				}
+
+				pathStartOffset = i;
+			} else {
+				if (c == delimiter) {
+					pathClosed = true;
+					break;
+				}
+
+				includePath.append(c);
+			}
+		}
+
+		if (!pathClosed) {
+			// include path wasn't closed
+			lexer.problemEncountered(Problems.ERROR_UNCLOSED_STRING, "Unclosed String for include-path. Expected terminating " + delimiter,
+					pathStartOffset, includePath.length(), -1);
+		}
+
+		// TODO: include file
 	}
 }
