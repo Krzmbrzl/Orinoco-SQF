@@ -2,6 +2,11 @@ package arma.orinocosqf.problems;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * An error about an invalid character
+ * @author Raven
+ *
+ */
 public class Error_InvalidCharacter extends Problem.Error {
 
 	@Override
