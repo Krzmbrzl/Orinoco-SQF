@@ -1,0 +1,23 @@
+<project name="Orinoco SQF" default="build">
+
+	<path id="classpath">
+		<fileset dir="../lib">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<property name="src.dir" value="${basedir}/../src"/>
+	<property name="lib.dir" value="${basedir}/../lib"/>
+	<property name="gen.dir" value="${basedir}/../gen/"/>
+
+	<target name="build">
+		<taskdef classname="jflex.anttask.JFlexTask" classpathref="classpath" name="jflex"/>
+		<jflex file="../unicode.flex" destdir="../gen"/>
+	</target>
+
+	<target name="clean">
+		<delete>
+			<fileset dir="${gen.dir}" includes="**/*.class"/>
+		</delete>
+	</target>
+</project>

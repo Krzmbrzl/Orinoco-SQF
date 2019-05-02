@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
 
-import static arma.orinocosqf.SQFTokenNodes.SQFRootTokenNode;
-
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
  * cyclic dependency on a preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that each token may have a macro inside
@@ -38,7 +36,6 @@ public class OrinocoLexer {
 	}
 
 	private final OrinocoCharStream ocs = new OrinocoCharStream();
-	private final RootTokenNode rootTokenNode = new SQFRootTokenNode(this);
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
 	private int originalLength = 0;
@@ -70,18 +67,12 @@ public class OrinocoLexer {
 			if (read == '\n') {
 				lineNumber++;
 			}
-			rootTokenNode.accept(read);
 			currentToken.append(read);
 			preprocessedOffset++;
 			if (ocs.isUsingOriginalReader()) {
 				originalLength++;
 			}
-			if (rootTokenNode.hasCompletedWork()) {
-				rootTokenNode.submitWork();
-				currentToken.setLength(0);
-			}
 		}
-		rootTokenNode.noMoreTokens();
 	}
 
 	public void backtrack(int charCount) {
