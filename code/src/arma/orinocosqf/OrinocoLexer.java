@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -41,11 +40,6 @@ public class OrinocoLexer {
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
-	private int lineNumber = 1;
-	private final StringBuilder currentToken = new StringBuilder();
-	private static final String[] NON_WHITESPACE_DELIMS = {"+", "-", "/", "*", "!", "(", ")", "{", "}", "[", "]", "?", "<", ">", "#",
-			"<=", ">=", "&&", "||"};
-
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
@@ -56,27 +50,8 @@ public class OrinocoLexer {
 	 * Starts the lexing process.
 	 */
 	public void start() {
-		// todo :backtrack
-		/*
-			Instead of clearing currentToken, have a parameter that marks what parts have been used. if currentToken hasn't had
-			all characters used, the while(ocs.hasAvailable()) will be swapped with reading from the currentToken and re-applying the chars
-			to the tokenNodes
-		*/
 		while (ocs.hasAvailable()) {
-			char read = ocs.read();
-			if (read == '\n') {
-				lineNumber++;
-			}
-			currentToken.append(read);
-			preprocessedOffset++;
-			if (ocs.isUsingOriginalReader()) {
-				originalLength++;
-			}
 		}
-	}
-
-	public void backtrack(int charCount) {
-		//todo :backtrack
 	}
 
 	private void updateOffsetsAfterMake() {
@@ -108,32 +83,6 @@ public class OrinocoLexer {
 
 	private void makeCommand() {
 		//lexerStream.acceptGlobalVariable();
-		updateOffsetsAfterMake();
-	}
-
-	private void makePreProcessorCommand(@NotNull PreProcessorCommand command, @NotNull List<Integer> tokenRanges) {
-		if (tokenRanges.size() < 2 || tokenRanges.size() % 2 != 0) {
-			throw new IllegalArgumentException();
-		}
-
-		char[] bodyWithNoComments;
-		{ //remove comments from the currentToken
-			int length = 0;
-			for (int i = 0; i < tokenRanges.size(); i += 2) {
-				length += tokenRanges.get(i + 1) - tokenRanges.get(i);
-			}
-			char[] chars = new char[length];
-
-			int ci = 0;
-			for (int tr = 0; tr < tokenRanges.size(); tr += 2) {
-				for (int i = tokenRanges.get(tr); i < tokenRanges.get(tr + 1); i++) {
-					chars[ci++] = currentToken.charAt(i);
-				}
-			}
-			bodyWithNoComments = chars;
-		}
-
-		lexerStream.acceptPreProcessorCommand(command, bodyWithNoComments, 0, bodyWithNoComments.length);
 		updateOffsetsAfterMake();
 	}
 
@@ -172,85 +121,6 @@ public class OrinocoLexer {
 
 	public OrinocoLexerStream getLexerStream() {
 		return lexerStream;
-	}
-
-
-	public abstract static class TokenNode {
-
-		protected final OrinocoLexer lexer;
-
-		public TokenNode(@NotNull OrinocoLexer lexer) {
-			this.lexer = lexer;
-		}
-
-		public abstract void accept(char c);
-
-		/**
-		 * @return true if the node is both NOT done but is in a state that is still valid. Return false if done or in invalid state
-		 */
-		public abstract boolean isActive();
-
-		/** @return true if the node is not active ({@link #isActive()}) but has work to be submitted */
-		public abstract boolean hasCompletedWork();
-
-		/** Submit the work to the lexer or whatever */
-		public abstract void submitWork();
-
-		/**
-		 * Invoke this method when there is no more chars to accept, no {@link TokenNode} has finished work ({@link #hasCompletedWork()}),
-		 * and at least 1 {@link TokenNode} is active ({@link #isActive()})
-		 */
-		public abstract void errorIncompleteState();
-
-		/**
-		 * Invoked after a {@link #errorIncompleteState()} has been called on any {@link TokenNode} in the lexer. This method should reset
-		 * the node as if no characters have been accepted
-		 */
-		public abstract void reset();
-
-
-		protected void makeWhitespace() {
-			lexer.makeWhitespace();
-		}
-
-		protected void makeComment() {
-			lexer.makeComment();
-		}
-
-		protected void makeLocalVariable() {
-			lexer.makeLocalVariable();
-		}
-
-		protected void makeGlobalVariable() {
-			lexer.makeGlobalVariable();
-		}
-
-		protected void makeCommand() {
-			lexer.makeCommand();
-		}
-
-		protected void makePreProcessorCommand(@NotNull PreProcessorCommand command, @NotNull List<Integer> tokenRanges) {
-			lexer.makePreProcessorCommand(command, tokenRanges);
-		}
-
-		protected void makePreProcessedText() {
-			lexer.makePreProcessedText();
-		}
-
-		@NotNull
-		protected CharSequence getCurrentToken() {
-			return lexer.currentToken;
-		}
-
-	}
-
-	public static abstract class RootTokenNode extends TokenNode {
-
-		public RootTokenNode(@NotNull OrinocoLexer lexer) {
-			super(lexer);
-		}
-
-		public abstract void noMoreTokens();
 	}
 
 	private static class OrinocoCharStream {
