@@ -2,9 +2,7 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Stack;
 
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
@@ -34,24 +32,97 @@ public class OrinocoLexer {
 		return 0; //todo
 	}
 
-	private final OrinocoCharStream ocs = new OrinocoCharStream();
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
+	private final OrinocoJFlexLexer jFlexLexer;
+
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
-		ocs.stateStack.push(new LexerState(r, true));
+		jFlexLexer = new OrinocoJFlexLexer(r);
 	}
 
 	/**
 	 * Starts the lexing process.
 	 */
 	public void start() {
-		while (ocs.hasAvailable()) {
+		try {
+			while (true) {
+				OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
+				if (type == null) {
+					throw new IllegalStateException(); //?
+				}
+				if (type == OrinocoJFlexLexer.TokenType.EOF) {
+					return;
+				}
+				if (type.isCommand) {
+					makeCommand();
+					continue;
+				}
+				switch (type) {
+					case WHITE_SPACE: {
+						makeWhitespace();
+						break;
+					}
+					case CMD_DEFINE: {
+						break;
+					}
+					case CMD_INCLUDE: {
+						break;
+					}
+					case CMD_IFDEF: {
+						break;
+					}
+					case CMD_IFNDEF: {
+						break;
+					}
+					case CMD_ELSE: {
+						break;
+					}
+					case CMD_ENDIF: {
+						break;
+					}
+					case CMD_UNDEF: {
+						break;
+					}
+					case BLOCK_COMMENT:
+					case INLINE_COMMENT: {
+						makeComment();
+						break;
+					}
+					case HEX_LITERAL: {
+						break;
+					}
+					case INTEGER_LITERAL: {
+						break;
+					}
+					case DEC_LITERAL: {
+						break;
+					}
+					case STRING_LITERAL: {
+						break;
+					}
+					case GLUED_WORD: {
+						break;
+					}
+					case WORD: {
+						break;
+					}
+					case BAD_CHARACTER: {
+						break;
+					}
+					default: {
+						throw new IllegalStateException(); // ?
+					}
+				}
+			}
+		} catch (IOException ignore) {
+
 		}
+
 	}
 
 	private void updateOffsetsAfterMake() {
@@ -107,7 +178,7 @@ public class OrinocoLexer {
 	 * @param reader the reader to immediately begin lexing
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
-		ocs.acceptIncludedReader(reader);
+		jFlexLexer.yypushStream(reader);
 	}
 
 	/**
@@ -123,75 +194,5 @@ public class OrinocoLexer {
 		return lexerStream;
 	}
 
-	private static class OrinocoCharStream {
-
-		private final Stack<LexerState> stateStack = new Stack<>();
-		private boolean checked = false;
-
-		public OrinocoCharStream() {
-		}
-
-		public boolean hasAvailable() {
-			if (!checked) {
-				checked = true;
-
-				do {
-					LexerState peek = stateStack.peek();
-					try {
-						if (!peek.reader.ready()) {
-							stateStack.pop();
-						}
-					} catch (IOException ignore) {
-					}
-				} while (!stateStack.isEmpty());
-			}
-			if (stateStack.isEmpty()) {
-				return false;
-			}
-			LexerState peek = stateStack.peek();
-			try {
-				return peek.reader.ready();
-			} catch (IOException ignore) {
-			}
-			return false;
-		}
-
-		public char read() {
-			if (!hasAvailable()) {
-				throw new IllegalStateException();
-			}
-			final LexerState lexState = stateStack.peek();
-
-			try {
-				return (char) lexState.reader.read();
-			} catch (IOException ignore) {
-
-			}
-			throw new IllegalStateException();
-		}
-
-		public void acceptIncludedReader(@NotNull OrinocoReader reader) {
-			stateStack.push(new LexerState(reader));
-		}
-
-		public boolean isUsingOriginalReader() {
-			return stateStack.size() == 1;
-		}
-	}
-
-	private static class LexerState {
-		@NotNull
-		public final BufferedReader reader;
-		public final boolean isFirstState;
-
-		private LexerState(@NotNull OrinocoReader reader) {
-			this(reader, false);
-		}
-
-		public LexerState(@NotNull OrinocoReader reader, boolean isFirstState) {
-			this.reader = new BufferedReader(reader);
-			this.isFirstState = isFirstState;
-		}
-	}
 
 }

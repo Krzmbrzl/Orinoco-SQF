@@ -65,46 +65,57 @@ import org.jetbrains.annotations.Nullable;
           DEC_LITERAL,
           STRING_LITERAL,
 
-          COMMAND,
+          COMMAND(true),
 
           GLUED_WORD,
           WORD,
-          EQEQ,
-          NE,
-          GTGT,
-          LE,
-          GE,
-          AMPAMP,
-          BARBAR,
+          EQEQ(true),
+          NE(true),
+          GTGT(true),
+          LE(true),
+          GE(true),
+          AMPAMP(true),
+          BARBAR(true),
 
-          ASTERISK,
-          EQ,
-          PERC,
-          PLUS,
-          MINUS,
-          FSLASH,
-          CARET,
+          ASTERISK(true),
+          EQ(true),
+          PERC(true),
+          PLUS(true),
+          MINUS(true),
+          FSLASH(true),
+          CARET(true),
 
-          HASH,
+          HASH(true),
 
-          LT,
-          GT,
+          LT(true),
+          GT(true),
 
-          EXCL,
+          EXCL(true),
 
-          LPAREN,
-          RPAREN,
-          L_CURLY_BRACE,
-          R_CURLY_BRACE,
-          L_SQ_BRACKET,
-          R_SQ_BRACKET,
-          COMMA,
-          SEMICOLON,
+          LPAREN(true),
+          RPAREN(true),
+          L_CURLY_BRACE(true),
+          R_CURLY_BRACE(true),
+          L_SQ_BRACKET(true),
+          R_SQ_BRACKET(true),
+          COMMA(true),
+          SEMICOLON(true),
           
-          QUEST,
-          COLON,
+          QUEST(true),
+          COLON(true),
 
-          BAD_CHARACTER
+          BAD_CHARACTER,
+          EOF;
+
+		  public final boolean isCommand;
+
+		  TokenType() {
+		  		isCommand = false;
+		  }
+
+		  TokenType(boolean isCommand) {
+				this.isCommand = isCommand;
+		  }
 	}
 %}
 
@@ -213,3 +224,8 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 
 	. { return TokenType.BAD_CHARACTER; }
 }
+
+<<EOF>> {
+      	if (!yymoreStreams()) { return TokenType.EOF;}
+		yypopStream();
+  }

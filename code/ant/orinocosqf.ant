@@ -10,14 +10,14 @@
 	<property name="lib.dir" value="${basedir}/../lib"/>
 	<property name="gen.dir" value="${basedir}/../gen/"/>
 
-	<target name="build">
+	<target name="build" depends="clean">
 		<taskdef classname="jflex.anttask.JFlexTask" classpathref="classpath" name="jflex"/>
-		<jflex file="../jflex/orinocosqf.flex" destdir="../gen"/>
+		<jflex file="../jflex/orinocosqf.flex" destdir="../gen" skeleton="../jflex/skeleton.nested"/>
 	</target>
 
 	<target name="clean">
 		<delete>
-			<fileset dir="${gen.dir}" includes="**/*.class"/>
+			<fileset dir="${gen.dir}"/>
 		</delete>
 	</target>
 </project>
