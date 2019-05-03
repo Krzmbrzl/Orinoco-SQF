@@ -22,13 +22,81 @@ import org.jetbrains.annotations.Nullable;
 %{
 	private CommandSet commands;
   	private final YYTextCharSequence yytextCharSequence = new YYTextCharSequence();
+	private int latestCommandId = -1;
+
+	private int EQEQ_id;
+	private int NE_id;
+	private int GTGT_id;
+	private int LE_id;
+	private int GE_id;
+	private int AMPAMP_id;
+	private int BARBAR_id;
+	private int ASTERISK_id;
+	private int EQ_id;
+	private int PERC_id;
+	private int PLUS_id;
+	private int MINUS_id;
+	private int FSLASH_id;
+	private int CARET_id;
+	private int HASH_id;
+	private int LT_id;
+	private int GT_id;
+	private int EXCL_id;
+	private int LPAREN_id;
+	private int RPAREN_id;
+	private int L_CURLY_BRACE_id;
+	private int R_CURLY_BRACE_id;
+	private int L_SQ_BRACKET_id;
+	private int R_SQ_BRACKET_id;
+	private int COMMA_id;
+	private int SEMICOLON_id;
+	private int QUEST_id;
+	private int COLON_id;
+
+
+	public int getLatestCommandId() {
+		return latestCommandId;
+	}
 
   	public void setCommandSet(@NotNull CommandSet commands) {
 		this.commands = commands;
+
+		{
+			EQEQ_id = commands.getId("==");
+			NE_id = commands.getId("!=");
+			GTGT_id = commands.getId(">>");
+			LE_id = commands.getId("<=");
+			GE_id = commands.getId(">=");
+			AMPAMP_id = commands.getId("&&");
+			BARBAR_id = commands.getId("||");
+			ASTERISK_id = commands.getId("*");
+			EQ_id = commands.getId("=");
+			PERC_id = commands.getId("%");
+			PLUS_id = commands.getId("+");
+			MINUS_id = commands.getId("-");
+			FSLASH_id = commands.getId("/");
+			CARET_id = commands.getId("^");
+			HASH_id = commands.getId("#");
+			LT_id = commands.getId("<");
+			GT_id = commands.getId(">");
+			EXCL_id = commands.getId("!");
+			LPAREN_id = commands.getId("(");
+			RPAREN_id = commands.getId(")");
+			L_CURLY_BRACE_id = commands.getId("{");
+			R_CURLY_BRACE_id = commands.getId("}");
+			L_SQ_BRACKET_id = commands.getId("[");
+			R_SQ_BRACKET_id = commands.getId("]");
+			COMMA_id = commands.getId(",");
+			SEMICOLON_id = commands.getId(";");
+			QUEST_id = commands.getId("?");
+			COLON_id = commands.getId(":");
+		}
+
 	}
 
-	public boolean yytextIsCommand() {
-  		return commands.getId(yytextCharSequence) >= 0;
+	private boolean yytextIsCommand() {
+		latestCommandId = commands.getId(yytextCharSequence);
+  		return latestCommandId >= 0;
 	}
 
 	private class YYTextCharSequence implements CharSequence{
@@ -187,40 +255,40 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
         return TokenType.WORD;
     }
 
-	"==" { return TokenType.EQEQ; }
-	"!=" { return TokenType.NE; }
-	">>" { return TokenType.GTGT; }
-	"<=" { return TokenType.LE; }
-	">=" { return TokenType.GE; }
-	"&&" { return TokenType.AMPAMP; }
-	"||" { return TokenType.BARBAR; }
+		"==" { latestCommandId = EQEQ_id; return TokenType.EQEQ; }
+    	"!=" { latestCommandId = NE_id; return TokenType.NE; }
+    	">>" { latestCommandId = GTGT_id; return TokenType.GTGT; }
+    	"<=" { latestCommandId = LE_id; return TokenType.LE; }
+    	">=" { latestCommandId = GE_id; return TokenType.GE; }
+    	"&&" { latestCommandId = AMPAMP_id; return TokenType.AMPAMP; }
+    	"||" { latestCommandId = BARBAR_id; return TokenType.BARBAR; }
 
-	"*" { return TokenType.ASTERISK; }
-	"=" { return TokenType.EQ; }
-	"%" { return TokenType.PERC; }
-	"+" { return TokenType.PLUS; }
-	"-" { return TokenType.MINUS; }
-	"/" { return TokenType.FSLASH; }
-	"^" { return TokenType.CARET; }
+    	"*" { latestCommandId = ASTERISK_id; return TokenType.ASTERISK; }
+    	"=" { latestCommandId = EQ_id; return TokenType.EQ; }
+    	"%" { latestCommandId = PERC_id; return TokenType.PERC; }
+    	"+" { latestCommandId = PLUS_id; return TokenType.PLUS; }
+    	"-" { latestCommandId = MINUS_id; return TokenType.MINUS; }
+    	"/" { latestCommandId = FSLASH_id; return TokenType.FSLASH; }
+    	"^" { latestCommandId = CARET_id; return TokenType.CARET; }
 
-	"#" { return TokenType.HASH; }
+    	"#" { latestCommandId = HASH_id; return TokenType.HASH; }
 
-	"<" { return TokenType.LT; }
-	">" { return TokenType.GT; }
+    	"<" { latestCommandId = LT_id; return TokenType.LT; }
+    	">" { latestCommandId = GT_id; return TokenType.GT; }
 
-	"!" { return TokenType.EXCL; }
+    	"!" { latestCommandId = EXCL_id; return TokenType.EXCL; }
 
-	"("   { return TokenType.LPAREN; }
-	")"   { return TokenType.RPAREN; }
-	"{"   { return TokenType.L_CURLY_BRACE; }
-	"}"   { return TokenType.R_CURLY_BRACE; }
-	"["   { return TokenType.L_SQ_BRACKET; }
-	"]"   { return TokenType.R_SQ_BRACKET; }
-	","   { return TokenType.COMMA; }
-	";"   { return TokenType.SEMICOLON; }
+    	"(" { latestCommandId = LPAREN_id; return TokenType.LPAREN; }
+    	")" { latestCommandId = RPAREN_id; return TokenType.RPAREN; }
+    	"{" { latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE; }
+    	"}" { latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE; }
+    	"[" { latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET; }
+    	"]" { latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET; }
+    	"," { latestCommandId = COMMA_id; return TokenType.COMMA; }
+    	";" { latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON; }
 
-	"?" { return TokenType.QUEST; }
-	":" { return TokenType.COLON; }
+    	"?" { latestCommandId = QUEST_id; return TokenType.QUEST; }
+    	":" { latestCommandId = COLON_id; return TokenType.COLON; }
 
 	. { return TokenType.BAD_CHARACTER; }
 }

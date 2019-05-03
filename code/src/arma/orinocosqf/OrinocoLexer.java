@@ -50,79 +50,83 @@ public class OrinocoLexer {
 	 */
 	public void start() {
 		try {
-			while (true) {
-				OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
-				if (type == null) {
-					throw new IllegalStateException(); //?
-				}
-				if (type == OrinocoJFlexLexer.TokenType.EOF) {
-					return;
-				}
-				if (type.isCommand) {
-					makeCommand();
-					continue;
-				}
-				switch (type) {
-					case WHITE_SPACE: {
-						makeWhitespace();
-						break;
-					}
-					case CMD_DEFINE: {
-						break;
-					}
-					case CMD_INCLUDE: {
-						break;
-					}
-					case CMD_IFDEF: {
-						break;
-					}
-					case CMD_IFNDEF: {
-						break;
-					}
-					case CMD_ELSE: {
-						break;
-					}
-					case CMD_ENDIF: {
-						break;
-					}
-					case CMD_UNDEF: {
-						break;
-					}
-					case BLOCK_COMMENT:
-					case INLINE_COMMENT: {
-						makeComment();
-						break;
-					}
-					case HEX_LITERAL: {
-						break;
-					}
-					case INTEGER_LITERAL: {
-						break;
-					}
-					case DEC_LITERAL: {
-						break;
-					}
-					case STRING_LITERAL: {
-						break;
-					}
-					case GLUED_WORD: {
-						break;
-					}
-					case WORD: {
-						break;
-					}
-					case BAD_CHARACTER: {
-						break;
-					}
-					default: {
-						throw new IllegalStateException(); // ?
-					}
-				}
-			}
+			doStart();
 		} catch (IOException ignore) {
 
 		}
 
+	}
+
+	private void doStart() throws IOException {
+		while (true) {
+			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
+			if (type == null) {
+				throw new IllegalStateException(); //?
+			}
+			if (type == OrinocoJFlexLexer.TokenType.EOF) {
+				return;
+			}
+			if (type.isCommand) {
+				makeCommand();
+				continue;
+			}
+			switch (type) {
+				case WHITE_SPACE: {
+					makeWhitespace();
+					break;
+				}
+				case CMD_DEFINE: {
+					break;
+				}
+				case CMD_INCLUDE: {
+					break;
+				}
+				case CMD_IFDEF: {
+					break;
+				}
+				case CMD_IFNDEF: {
+					break;
+				}
+				case CMD_ELSE: {
+					break;
+				}
+				case CMD_ENDIF: {
+					break;
+				}
+				case CMD_UNDEF: {
+					break;
+				}
+				case BLOCK_COMMENT:
+				case INLINE_COMMENT: {
+					makeComment();
+					break;
+				}
+				case HEX_LITERAL: {
+					break;
+				}
+				case INTEGER_LITERAL: {
+					break;
+				}
+				case DEC_LITERAL: {
+					break;
+				}
+				case STRING_LITERAL: {
+					break;
+				}
+				case GLUED_WORD: {
+					break;
+				}
+				case WORD: {
+					break;
+				}
+				case BAD_CHARACTER: {
+					break;
+				}
+				default: {
+					throw new IllegalStateException(); // ?
+				}
+			}
+		}
 	}
 
 	private void updateOffsetsAfterMake() {
@@ -153,7 +157,7 @@ public class OrinocoLexer {
 	}
 
 	private void makeCommand() {
-		//lexerStream.acceptGlobalVariable();
+		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -186,8 +190,7 @@ public class OrinocoLexer {
 	 */
 	@NotNull
 	public OrinocoLexerContext getContext() {
-		// TODO
-		throw new UnsupportedOperationException("Get context not yet implemented!");
+		return context;
 	}
 
 	public OrinocoLexerStream getLexerStream() {
