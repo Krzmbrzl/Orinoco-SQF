@@ -12,7 +12,7 @@
 
 	<target name="build">
 		<taskdef classname="jflex.anttask.JFlexTask" classpathref="classpath" name="jflex"/>
-		<jflex file="../unicode.flex" destdir="../gen"/>
+		<jflex file="../jflex/orinocosqf.flex" destdir="../gen"/>
 	</target>
 
 	<target name="clean">

@@ -1,19 +1,115 @@
 package arma.orinocosqf;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 %%
 
-%public %class OrinocoSQFJFlexLexer
+%init{
+	// constructor things in here
+%init}
+
+
+%public %class OrinocoJFlexLexer
 // %implements
 %unicode
 %function advance
-%type IElementType
+%type TokenType
 %eof{
     return;
 %eof}
 
+%{
+	private CommandSet commands;
+  	private final YYTextCharSequence yytextCharSequence = new YYTextCharSequence();
 
-LOCAL_VAR = [_]([:jletterdigit:] | "##" [:jletterdigit:])*
-GLOBAL_VAR = [:jletter:] ([:jletterdigit:] | "##" [:jletterdigit:])*
+  	public void setCommandSet(@NotNull CommandSet commands) {
+		this.commands = commands;
+	}
+
+	public boolean yytextIsCommand() {
+  		return commands.getId(yytextCharSequence) >= 0;
+	}
+
+	private class YYTextCharSequence implements CharSequence{
+		public int length() {
+			return zzMarkedPos - zzStartRead;
+		}
+        public char charAt(int i) {
+			return zzBuffer[zzStartRead + i];
+        }
+
+        public CharSequence subSequence(int startinc, int endex) {
+			return new String(zzBuffer, zzStartRead + startinc, zzStartRead + endex);
+        }
+	}
+%}
+
+%{
+	public enum TokenType {
+		  WHITE_SPACE,
+		  
+          CMD_DEFINE,
+          CMD_INCLUDE,
+          CMD_IFDEF,
+          CMD_IFNDEF,
+          CMD_ELSE,
+          CMD_ENDIF,
+          CMD_UNDEF,
+
+          BLOCK_COMMENT,
+          INLINE_COMMENT,
+          
+          HEX_LITERAL,
+          INTEGER_LITERAL,
+          DEC_LITERAL,
+          STRING_LITERAL,
+
+          COMMAND,
+
+          GLUED_WORD,
+          WORD,
+          EQEQ,
+          NE,
+          GTGT,
+          LE,
+          GE,
+          AMPAMP,
+          BARBAR,
+
+          ASTERISK,
+          EQ,
+          PERC,
+          PLUS,
+          MINUS,
+          FSLASH,
+          CARET,
+
+          HASH,
+
+          LT,
+          GT,
+
+          EXCL,
+
+          LPAREN,
+          RPAREN,
+          L_CURLY_BRACE,
+          R_CURLY_BRACE,
+          L_SQ_BRACKET,
+          R_SQ_BRACKET,
+          COMMA,
+          SEMICOLON,
+          
+          QUEST,
+          COLON,
+
+          BAD_CHARACTER
+	}
+%}
+
+WORD = [:jletter:] ([:jletterdigit:])*
+GLUED_WORD = ("##")? [:jletter:] ("##" [:jletterdigit:] | [:jletterdigit:])* ("##")?
 
 LINE_TERMINATOR = \r|\n|\r\n
 INPUT_CHARACTER = [^\r\n]
@@ -38,76 +134,82 @@ INLINE_COMMENT = "//" {INPUT_CHARACTER}*
 
 MACRO_CHARACTER = [^\r\n] | (("\\\n" | "\\\r\n" | "\\\r") [ \t\f]*)
 MACRO_TEXT = {MACRO_CHARACTER}+
-MACRO = "#"([a-zA-Z_0-9$]+) {MACRO_TEXT}?
-
-MACRO_FUNC_BODY = ([^,\r\n]+ | ([^,]* ("\\\n" | "\\\r\n" | "\\\r") [ \t\f]*))+
-MACRO_FUNC = {GLOBAL_VAR} "(" {MACRO_FUNC_BODY} ("," {MACRO_FUNC_BODY})* ")"
+CMD_DEFINE = "#define" {MACRO_TEXT}?
+CMD_INCLUDE = "#include" {MACRO_TEXT}?
+CMD_IFDEF = "#ifdef" {MACRO_TEXT}?
+CMD_IFNDEF = "#ifndef" {MACRO_TEXT}?
+CMD_ELSE = "#else" {MACRO_TEXT}?
+CMD_ENDIF = "#endif" {MACRO_TEXT}?
+CMD_UNDEF = "#undef" {MACRO_TEXT}?
 
 %%
 
 
-<YYINITIAL> {WHITE_SPACE} { return TokenType.WHITE_SPACE; }
-<YYINITIAL> {MACRO} { return TokenType.WHITE_SPACE; }
+<YYINITIAL> {
 
-<YYINITIAL> {BLOCK_COMMENT} { return SQFParserDefinition.BLOCK_COMMENT; }
-<YYINITIAL> {INLINE_COMMENT} { return SQFParserDefinition.INLINE_COMMENT; }
+	{WHITE_SPACE} { return TokenType.WHITE_SPACE; }
+	{CMD_DEFINE} { return TokenType.CMD_DEFINE; }
+	{CMD_INCLUDE} { return TokenType.CMD_INCLUDE; }
+	{CMD_IFDEF} { return TokenType.CMD_IFDEF; }
+	{CMD_IFNDEF} { return TokenType.CMD_IFNDEF; }
+	{CMD_ELSE} { return TokenType.CMD_ELSE; }
+	{CMD_ENDIF} { return TokenType.CMD_ENDIF; }
+	{CMD_UNDEF} { return TokenType.CMD_UNDEF; }
 
-<YYINITIAL> {HEX_LITERAL} { return SQFTypes.HEX_LITERAL; }
-<YYINITIAL> {INTEGER_LITERAL} { return SQFTypes.INTEGER_LITERAL; }
-<YYINITIAL> {DEC_LITERAL} { return SQFTypes.DEC_LITERAL; }
-<YYINITIAL> {STRING_LITERAL} { return SQFTypes.STRING_LITERAL; }
+	{BLOCK_COMMENT} { return TokenType.BLOCK_COMMENT; }
+	{INLINE_COMMENT} { return TokenType.INLINE_COMMENT; }
 
-<YYINITIAL> {MACRO_FUNC} {
-    String yytext = yytext().toString();
-    int parenIndex = yytext.indexOf('(');
-    String identifier = yytext.substring(0, parenIndex);
-    if(SQFStatic.COMMANDS_SET.contains(identifier)) {
-        yypushback(yytext.length() - identifier.length()); //push the (...) back into stream to re-lex
-        return SQFTypes.COMMAND_TOKEN;
-    } else {
-        return SQFTypes.MACRO_FUNC;
+	{HEX_LITERAL} { return TokenType.HEX_LITERAL; }
+	{INTEGER_LITERAL} { return TokenType.INTEGER_LITERAL; }
+	{DEC_LITERAL} { return TokenType.DEC_LITERAL; }
+	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
+
+	{GLUED_WORD} {
+		return TokenType.GLUED_WORD;
+	}
+
+	{WORD} {
+        if(yytextIsCommand()) {
+            return TokenType.COMMAND;
+        }
+
+        return TokenType.WORD;
     }
+
+	"==" { return TokenType.EQEQ; }
+	"!=" { return TokenType.NE; }
+	">>" { return TokenType.GTGT; }
+	"<=" { return TokenType.LE; }
+	">=" { return TokenType.GE; }
+	"&&" { return TokenType.AMPAMP; }
+	"||" { return TokenType.BARBAR; }
+
+	"*" { return TokenType.ASTERISK; }
+	"=" { return TokenType.EQ; }
+	"%" { return TokenType.PERC; }
+	"+" { return TokenType.PLUS; }
+	"-" { return TokenType.MINUS; }
+	"/" { return TokenType.FSLASH; }
+	"^" { return TokenType.CARET; }
+
+	"#" { return TokenType.HASH; }
+
+	"<" { return TokenType.LT; }
+	">" { return TokenType.GT; }
+
+	"!" { return TokenType.EXCL; }
+
+	"("   { return TokenType.LPAREN; }
+	")"   { return TokenType.RPAREN; }
+	"{"   { return TokenType.L_CURLY_BRACE; }
+	"}"   { return TokenType.R_CURLY_BRACE; }
+	"["   { return TokenType.L_SQ_BRACKET; }
+	"]"   { return TokenType.R_SQ_BRACKET; }
+	","   { return TokenType.COMMA; }
+	";"   { return TokenType.SEMICOLON; }
+
+	"?" { return TokenType.QUEST; }
+	":" { return TokenType.COLON; }
+
+	. { return TokenType.BAD_CHARACTER; }
 }
-<YYINITIAL> {LOCAL_VAR} { return SQFTypes.LOCAL_VAR; }
-<YYINITIAL> {GLOBAL_VAR} {
-    if(SQFStatic.COMMANDS_SET.contains(yytext().toString())){
-        return SQFTypes.COMMAND_TOKEN;
-    }
-
-    return SQFTypes.GLOBAL_VAR;
-}
-
-<YYINITIAL> "==" { return SQFTypes.EQEQ; }
-<YYINITIAL> "!=" { return SQFTypes.NE; }
-<YYINITIAL> ">>" { return SQFTypes.GTGT; }
-<YYINITIAL> "<=" { return SQFTypes.LE; }
-<YYINITIAL> ">=" { return SQFTypes.GE; }
-<YYINITIAL> "&&" { return SQFTypes.AMPAMP; }
-<YYINITIAL> "||" { return SQFTypes.BARBAR; }
-
-<YYINITIAL> "*" { return SQFTypes.ASTERISK; }
-<YYINITIAL> "=" { return SQFTypes.EQ; }
-<YYINITIAL> "%" { return SQFTypes.PERC; }
-<YYINITIAL> "+" { return SQFTypes.PLUS; }
-<YYINITIAL> "-" { return SQFTypes.MINUS; }
-<YYINITIAL> "/" { return SQFTypes.FSLASH; }
-<YYINITIAL> "^" { return SQFTypes.CARET; }
-
-<YYINITIAL> "<" { return SQFTypes.LT; }
-<YYINITIAL> ">" { return SQFTypes.GT; }
-
-<YYINITIAL> "!" { return SQFTypes.EXCL; }
-
-<YYINITIAL> "("   { return SQFTypes.LPAREN; }
-<YYINITIAL> ")"   { return SQFTypes.RPAREN; }
-<YYINITIAL> "{"   { return SQFTypes.L_CURLY_BRACE; }
-<YYINITIAL> "}"   { return SQFTypes.R_CURLY_BRACE; }
-<YYINITIAL> "["   { return SQFTypes.L_SQ_BRACKET; }
-<YYINITIAL> "]"   { return SQFTypes.R_SQ_BRACKET; }
-<YYINITIAL> ","   { return SQFTypes.COMMA; }
-<YYINITIAL> ";"   { return SQFTypes.SEMICOLON; }
-
-<YYINITIAL> "?" { return SQFTypes.QUEST; }
-<YYINITIAL> ":" { return SQFTypes.COLON; }
-
-<YYINITIAL> . { return TokenType.BAD_CHARACTER; }
