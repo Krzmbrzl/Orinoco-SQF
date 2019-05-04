@@ -24,6 +24,7 @@ public class ArmaFile {
 	 * @return The file associated with this object. Note that the input of the returned file this isn't necessarily directly the desired
 	 *         input. FOr accessing the file's content, use {@link #getStream()}
 	 */
+	@NotNull
 	public File getFile() {
 		return file;
 	}
@@ -32,7 +33,13 @@ public class ArmaFile {
 	 * @return An {@link InputStream} to the desired FileContent
 	 * @throws FileNotFoundException
 	 */
+	@NotNull
 	public InputStream getStream() throws FileNotFoundException {
 		return new FileInputStream(file);
+	}
+	
+	@Override
+	public String toString() {
+		return file.toString();
 	}
 }
