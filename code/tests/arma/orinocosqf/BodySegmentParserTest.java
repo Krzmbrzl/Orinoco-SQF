@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import arma.orinocosqf.bodySegments.BodySegment;
@@ -23,12 +23,12 @@ import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 
 public class BodySegmentParserTest {
 
-	BodySegmentParser parser;
-	OrinocoPreProcessor p;
-	List<String> DefaultParams;
+	static BodySegmentParser parser;
+	static OrinocoPreProcessor p;
+	static List<String> DefaultParams;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeClass
+	public static void setUp() throws Exception {
 		parser = new BodySegmentParser(new ProblemListenerPanicImplementation());
 		p = new OrinocoPreProcessor(new OrinocoTokenProcessorAdapter() {
 		}, new DummyFileSystem());
