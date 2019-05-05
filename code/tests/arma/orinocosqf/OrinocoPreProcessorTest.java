@@ -104,7 +104,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void noPreProcessing_matchButMissingHashHash() {
 		// this test creates valid defines that get matched, but arma's preprocessor doesn't
-		// allow for replacing text inbetween text unless there is a ##
+		// allow for replacing text in between text unless there is a ##
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 
 		String[] lines = { "#define e a", "#define oo a", "The cow jumped over the moon!" };
@@ -117,7 +117,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void simpleParamMacro() {
 		// This test is for a simple macro with parameters
-		final String expected = "v=z";
+		final String expected = "\nv=z";
 		Consumer<CharSequence> cb = s -> assertEquals(expected, s);
 
 		String define = "#define MACRO(arg,arg2) arg=arg2";
