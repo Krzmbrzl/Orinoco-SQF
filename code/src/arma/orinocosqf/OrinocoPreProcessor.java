@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
+import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
 import arma.orinocosqf.problems.Problems;
 
@@ -36,11 +37,21 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 * The {@link ArmaFilesystem} used to handle includes
 	 */
 	protected ArmaFilesystem fileSystem;
+	/**
+	 * The {@link OrinocoPreprocessorConfiguration} holding all preferences for this preprocessor
+	 */
+	protected OrinocoPreprocessorConfiguration configuration;
 
 
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor processor, @NotNull ArmaFilesystem fileSystem) {
+		this(processor, fileSystem, new OrinocoPreprocessorConfiguration());
+	}
+
+	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor processor, @NotNull ArmaFilesystem fileSystem,
+			@NotNull OrinocoPreprocessorConfiguration configuration) {
 		this.processor = processor;
 		this.fileSystem = fileSystem;
+		this.configuration = configuration;
 
 		this.macroSet = new MacroSet();
 		this.segmentParser = new BodySegmentParser(lexer);
@@ -148,7 +159,11 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 			@NotNull OrinocoLexerContext ctx) {
-		// TODO: extract NLs and feed them back to lexer if comments aren't kept anyways
+		if (configuration.keepComments()) {
+			// TODO: feed comments back to special method in lexer to prevent endless loop
+		} else {
+			// TODO: extract NLs and feed them back to lexer
+		}
 	}
 
 	/**
@@ -308,11 +323,12 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		getMacroSet().put(macroName.toString(), macro);
 
-		// Feed Newlines from macro body back to the lexer in order to preserve them
-		// TODO: make NL-keeping toggleable
-		String nl = usesCRLF ? "\r\n" : "\n";
-		for (int k = 0; k < NLCount; k++) {
-			lexer.acceptPreProcessedText(nl);
+		if (configuration.preserveNewlines()) {
+			// Feed Newlines from macro body back to the lexer in order to preserve them
+			String nl = usesCRLF ? "\r\n" : "\n";
+			for (int k = 0; k < NLCount; k++) {
+				lexer.acceptPreProcessedText(nl);
+			}
 		}
 	}
 
@@ -474,7 +490,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 				lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Couldn't resolve path \"" + includePath + "\"", pathStartOffset,
 						includePath.length() + 2, -1);
 			}
-			
+
 			// TODO: Create OrinocoReader and feed into lexer
 			// Maybe create a buffered-inputReader -> Depends on how the lexer works
 		} catch (InvalidPathException e) {
