@@ -1,6 +1,7 @@
 package arma.orinocosqf;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -63,11 +64,25 @@ public class ArmaFilesystem {
 	 * The current working directory
 	 */
 	protected Path cwd;
+	/**
+	 * The {@link FileFilter} used to find prefix files
+	 */
+	protected FileFilter prefixFilter;
 
 
 	public ArmaFilesystem(@NotNull Path cwd, @NotNull List<File> searchPaths) {
 		this.cwd = cwd;
 		this.searchPaths = searchPaths;
+
+		this.prefixFilter = new FileFilter() {
+
+			@Override
+			public boolean accept(File pathname) {
+				// match only files containing "pboprefix" in their name and that aren't longer than 15 characters (so no filenames that
+				// significantly contain other stuff than the pboprefix-part
+				return pathname.getName().toLowerCase().contains("pboprefix") && pathname.getName().length() <= 15;
+			}
+		};
 
 		// Add CWD to search path if it isn't included anyways
 		File cwdFile = cwd.toFile();
@@ -172,18 +187,52 @@ public class ArmaFilesystem {
 				// This search won't succeed in this directory
 				return null;
 			}
-		} else {
-			// try to match against existing file structure
-			if (path.startsWith(File.separator + currentFile.getName())) {
-				File target = new File(currentFile.getParentFile(), path.substring(1)); // substring to remove leading separator
-
-				if (target.exists()) {
-					return target;
-				}
-			}
 		}
 
 		if (currentFile.isDirectory()) {
+			if (prefixPath == null) {
+				// Check for a prefix file first
+				File[] potentialPrefixFiles = currentFile.listFiles(prefixFilter);
+
+				if (potentialPrefixFiles.length > 0) {
+					// Process prefix
+					if (potentialPrefixFiles.length > 1) {
+						// Too many candidates found -> chose one
+						// TODO
+						throw new UnsupportedOperationException("Not yet implemented");
+					}
+
+					File prefixFile = potentialPrefixFiles[0];
+					if (prefixFile.length() < 5000 && prefixFile.canRead()) {
+						// process only prefixes smaller than 5kB
+						try {
+							String prefix = new String(Files.readAllBytes(prefixFile.toPath()), Charset.defaultCharset()).replace('\\',
+									File.separatorChar);
+							if (prefix.contains("\n")) {
+								prefix = prefix.substring(0, prefix.indexOf("\n")).trim();
+							}
+							if (!prefix.startsWith(File.separator)) {
+								prefix = File.separator + prefix;
+							}
+							if (!prefix.endsWith(File.separator)) {
+								prefix = prefix + File.separator;
+							}
+
+							if (prefix.length() > 0) {
+								if (!path.startsWith(prefix)) {
+									// The path doesn't point to this directory
+									return null;
+								}
+
+								// This directory is to be interpreted as if it was reachable under the path specified in the prefix file
+								return resolveAbsolute(currentFile, path, new PrefixPath(Paths.get(prefix), currentFile.toPath()));
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 			for (File currentChild : currentFile.listFiles()) {
 				File found = resolveAbsolute(currentChild, path, prefixPath);
 				if (found != null) {
@@ -191,35 +240,13 @@ public class ArmaFilesystem {
 				}
 			}
 		} else {
+			if (currentFile.toPath().normalize().endsWith(Paths.get(path.substring(1)).normalize())) {
+				// If the current path ends with the searched path (after removing the leading path separator
+				return currentFile;
+			}
 			if (currentFile.isFile()) {
-				if (prefixPath == null && currentFile.getName().toLowerCase().toLowerCase().contains("pboprefix") && currentFile.canRead()
-						&& currentFile.length() <= 5000) {
-					// Read the prefix and check against path but don't even consider files greater 5kB
-					try {
-						String prefix = new String(Files.readAllBytes(currentFile.toPath()), Charset.defaultCharset()).replace('\\',
-								File.separatorChar);
-						if (prefix.contains("\n")) {
-							prefix = prefix.substring(0, prefix.indexOf("\n")).trim();
-						}
-						if (!prefix.startsWith(File.separator)) {
-							prefix = File.separator + prefix;
-						}
-						if (!prefix.endsWith(File.separator)) {
-							prefix = prefix + File.separator;
-						}
-
-						if (path.startsWith(prefix)) {
-							// This directory is to be interpreted as if it was reachable under the path specified in the prefix file
-							return resolveAbsolute(currentFile.getParentFile(), path,
-									new PrefixPath(Paths.get(prefix), currentFile.getParentFile().toPath()));
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				} else {
-					if (currentFile.getName().toLowerCase().endsWith(".pbo")) {
-						// TODO: Check PBOs as well
-					}
+				if (currentFile.getName().toLowerCase().endsWith(".pbo")) {
+					// TODO: Check PBOs as well
 				}
 			}
 		}
