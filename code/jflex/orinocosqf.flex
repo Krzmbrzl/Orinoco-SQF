@@ -190,7 +190,7 @@ import org.jetbrains.annotations.Nullable;
 WORD = [:jletter:] ([:jletterdigit:])*
 GLUED_WORD = ("##")? [:jletter:] ("##" [:jletterdigit:] | [:jletterdigit:])* ("##")?
 
-LINE_TERMINATOR = \r|\n|\r\n
+LINE_TERMINATOR = \n|\r\n
 INPUT_CHARACTER = [^\r\n]
 
 WHITE_SPACE = ({LINE_TERMINATOR} | [ \t\f])+
