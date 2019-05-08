@@ -25,6 +25,15 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			arrayList.add(new SQFCommand(scanner.nextLine()));
 		}
 
+		scanner.close();
+
+		stm = SQFCommands.class.getResourceAsStream("/arma/orinocosqf/sqfcommands_operators.list");
+		scanner = new Scanner(new InputStreamReader(stm, StandardCharsets.UTF_8));
+		while (scanner.hasNextLine()) {
+			arrayList.add(new SQFCommand(scanner.nextLine()));
+		}
+		scanner.close();
+
 		arrayList.trimToSize();
 		arrayList.sort(COMPARATOR);
 	}

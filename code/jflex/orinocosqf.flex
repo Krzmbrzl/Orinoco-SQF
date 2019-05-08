@@ -112,6 +112,12 @@ import org.jetbrains.annotations.Nullable;
         public CharSequence subSequence(int startinc, int endex) {
 			return new String(zzBuffer, zzStartRead + startinc, zzStartRead + endex);
         }
+
+        @NotNull
+        @Override
+		public String toString() {
+			return new String(zzBuffer, zzStartRead, length());
+		}
 	}
 %}
 
@@ -188,9 +194,10 @@ import org.jetbrains.annotations.Nullable;
 		  }
 	}
 %}
-
-WORD = [:jletter:] ([:jletterdigit:])*
-GLUED_WORD = ("##")? [:jletter:] ("##" [:jletterdigit:] | [:jletterdigit:])* ("##")?
+LETTER = [a-zA-Z_$]
+LETTER_DIGIT = [a-zA-Z_$0-9]
+WORD = {LETTER} {LETTER_DIGIT}*
+GLUED_WORD = ("##")? {LETTER_DIGIT} ("##" {LETTER_DIGIT} | {LETTER_DIGIT})* ("##")?
 
 LINE_TERMINATOR = \n|\r\n|\r
 INPUT_CHARACTER = [^\r\n]
@@ -245,54 +252,52 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 	{DEC_LITERAL} { return TokenType.DEC_LITERAL; }
 	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
 
-	{GLUED_WORD} {
-		return TokenType.GLUED_WORD;
-	}
-
 	{WORD} {
-        if(yytextIsCommand()) {
+      	if(yytextIsCommand()) {
             return TokenType.COMMAND;
         }
-
-
 
         return TokenType.WORD;
     }
 
-		"==" { latestCommandId = EQEQ_id; return TokenType.EQEQ; }
-    	"!=" { latestCommandId = NE_id; return TokenType.NE; }
-    	">>" { latestCommandId = GTGT_id; return TokenType.GTGT; }
-    	"<=" { latestCommandId = LE_id; return TokenType.LE; }
-    	">=" { latestCommandId = GE_id; return TokenType.GE; }
-    	"&&" { latestCommandId = AMPAMP_id; return TokenType.AMPAMP; }
-    	"||" { latestCommandId = BARBAR_id; return TokenType.BARBAR; }
+	{GLUED_WORD} {
+		return TokenType.GLUED_WORD;
+	}
 
-    	"*" { latestCommandId = ASTERISK_id; return TokenType.ASTERISK; }
-    	"=" { latestCommandId = EQ_id; return TokenType.EQ; }
-    	"%" { latestCommandId = PERC_id; return TokenType.PERC; }
-    	"+" { latestCommandId = PLUS_id; return TokenType.PLUS; }
-    	"-" { latestCommandId = MINUS_id; return TokenType.MINUS; }
-    	"/" { latestCommandId = FSLASH_id; return TokenType.FSLASH; }
-    	"^" { latestCommandId = CARET_id; return TokenType.CARET; }
+	"==" { latestCommandId = EQEQ_id; return TokenType.EQEQ; }
+	"!=" { latestCommandId = NE_id; return TokenType.NE; }
+	">>" { latestCommandId = GTGT_id; return TokenType.GTGT; }
+	"<=" { latestCommandId = LE_id; return TokenType.LE; }
+	">=" { latestCommandId = GE_id; return TokenType.GE; }
+	"&&" { latestCommandId = AMPAMP_id; return TokenType.AMPAMP; }
+	"||" { latestCommandId = BARBAR_id; return TokenType.BARBAR; }
 
-    	"#" { latestCommandId = HASH_id; return TokenType.HASH; }
+	"*" { latestCommandId = ASTERISK_id; return TokenType.ASTERISK; }
+	"=" { latestCommandId = EQ_id; return TokenType.EQ; }
+	"%" { latestCommandId = PERC_id; return TokenType.PERC; }
+	"+" { latestCommandId = PLUS_id; return TokenType.PLUS; }
+	"-" { latestCommandId = MINUS_id; return TokenType.MINUS; }
+	"/" { latestCommandId = FSLASH_id; return TokenType.FSLASH; }
+	"^" { latestCommandId = CARET_id; return TokenType.CARET; }
 
-    	"<" { latestCommandId = LT_id; return TokenType.LT; }
-    	">" { latestCommandId = GT_id; return TokenType.GT; }
+	"#" { latestCommandId = HASH_id; return TokenType.HASH; }
 
-    	"!" { latestCommandId = EXCL_id; return TokenType.EXCL; }
+	"<" { latestCommandId = LT_id; return TokenType.LT; }
+	">" { latestCommandId = GT_id; return TokenType.GT; }
 
-    	"(" { latestCommandId = LPAREN_id; return TokenType.LPAREN; }
-    	")" { latestCommandId = RPAREN_id; return TokenType.RPAREN; }
-    	"{" { latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE; }
-    	"}" { latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE; }
-    	"[" { latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET; }
-    	"]" { latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET; }
-    	"," { latestCommandId = COMMA_id; return TokenType.COMMA; }
-    	";" { latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON; }
+	"!" { latestCommandId = EXCL_id; return TokenType.EXCL; }
 
-    	"?" { latestCommandId = QUEST_id; return TokenType.QUEST; }
-    	":" { latestCommandId = COLON_id; return TokenType.COLON; }
+	"(" { latestCommandId = LPAREN_id; return TokenType.LPAREN; }
+	")" { latestCommandId = RPAREN_id; return TokenType.RPAREN; }
+	"{" { latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE; }
+	"}" { latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE; }
+	"[" { latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET; }
+	"]" { latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET; }
+	"," { latestCommandId = COMMA_id; return TokenType.COMMA; }
+	";" { latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON; }
+
+	"?" { latestCommandId = QUEST_id; return TokenType.QUEST; }
+	":" { latestCommandId = COLON_id; return TokenType.COLON; }
 
 	. { return TokenType.BAD_CHARACTER; }
 }

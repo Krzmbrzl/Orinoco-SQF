@@ -86,6 +86,7 @@ public class OrinocoLexer {
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
 		jFlexLexer = new OrinocoJFlexLexer(r);
+		jFlexLexer.setCommandSet(SQFCommands.instance);
 	}
 
 	/**
@@ -108,6 +109,12 @@ public class OrinocoLexer {
 			}
 			if (type == OrinocoJFlexLexer.TokenType.EOF) {
 				return;
+			}
+			originalLength = jFlexLexer.yylength();
+			if (!jFlexLexer.yymoreStreams()) {
+				preprocessedLength = jFlexLexer.yylength();
+			} else {
+				preprocessedLength += jFlexLexer.yylength();
 			}
 			if (!preProcessorState.isEmpty()) {
 				if (type == OrinocoJFlexLexer.TokenType.CMD_ENDIF) {

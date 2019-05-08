@@ -21,15 +21,16 @@ public class OrinocoLexerTest {
 	@Before
 	public void setUp() throws Exception {
 		expector = new TokenExpector(true);
-		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
 	private void lexerFromText(@NotNull String text) {
 		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), expector);
+		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
 	private void lexerFromFile(@NotNull File f) throws FileNotFoundException {
 		lexer = new OrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), expector);
+		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
 	private IdTransformer<String> getVariableTransformer() {
@@ -1264,7 +1265,6 @@ public class OrinocoLexerTest {
 				getCommandTransformer().toId("createunit"));
 
 		int createUnitId = getCommandTransformer().toId("createUnit");
-		System.out.println("OrinocoLexerTest.commands_sqfkeywords_caseInsensitive createUnitId=" + createUnitId);
 		int addActionId = getCommandTransformer().toId("addAction");
 		int callId = getCommandTransformer().toId("call");
 
