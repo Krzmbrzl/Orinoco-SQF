@@ -17,12 +17,6 @@ public interface Command {
 	String getName();
 
 	/**
-	 * @return globally unique static id for all {@link Command} instances that is
-	 *         assigned at runtime
-	 */
-	int id();
-
-	/**
 	 * @return true if this command is always nular (always no arguments). Returns
 	 *         false if the command is nular sometimes (arguments are optional) or
 	 *         is never nular (always has at least 1 argument)

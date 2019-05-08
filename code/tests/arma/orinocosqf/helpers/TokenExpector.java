@@ -45,7 +45,7 @@ public class TokenExpector implements OrinocoLexerStream {
 		Iterator<AcceptedToken> actualIter = acceptFactory.getTokens().iterator();
 		for (AcceptedToken expectedToken : expectedTokens) {
 			if (!actualIter.hasNext()) {
-				fail("Actual ran out of tokens");
+				fail("Actual ran out of tokens. Expected size: " + expectedTokens.size() + ", Actual size: " + acceptFactory.getTokens().size());
 			}
 			AcceptedToken actualNext = actualIter.next();
 			assertEquals(expectedToken.method, actualNext.method);

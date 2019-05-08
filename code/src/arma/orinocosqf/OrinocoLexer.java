@@ -1,6 +1,8 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.exceptions.UnknownIdException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Stack;
@@ -30,12 +32,41 @@ import java.util.regex.Pattern;
  */
 public class OrinocoLexer {
 	public static int getCommandId(@NotNull String command) {
-		return 0; //todo
+		return SQFCommands.instance.getId(command);
 	}
 
 	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
 
-	private OrinocoLexerContext context;
+	private OrinocoLexerContext context = new OrinocoLexerContext() {
+		@Override
+		public @NotNull String getCommand(int id) throws UnknownIdException {
+			String c = SQFCommands.instance.getCommandById(id);
+			if (c == null) {
+				throw new UnknownIdException(id + "");
+			}
+			return c;
+		}
+
+		@Override
+		public @Nullable String getVariable(int id) {
+			return null;
+		}
+
+		@Override
+		public boolean isTextBufferingEnabled() {
+			return false;
+		}
+
+		@Override
+		public @Nullable TextBuffer getTextBuffer() {
+			return null;
+		}
+
+		@Override
+		public @Nullable TextBuffer getTextBufferPreprocessed() {
+			return null;
+		}
+	};
 
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
@@ -63,8 +94,8 @@ public class OrinocoLexer {
 	public void start() {
 		try {
 			doStart();
-		} catch (IOException ignore) {
-
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -162,16 +193,14 @@ public class OrinocoLexer {
 					makeComment();
 					break;
 				}
-				case HEX_LITERAL: {
-					break;
-				}
-				case INTEGER_LITERAL: {
-					break;
-				}
+				case HEX_LITERAL: //fall
+				case INTEGER_LITERAL: //fall
 				case DEC_LITERAL: {
+					makeLiteral(OrinocoLexerSQFLiteralType.Number);
 					break;
 				}
 				case STRING_LITERAL: {
+					makeLiteral(OrinocoLexerSQFLiteralType.String);
 					break;
 				}
 				case GLUED_WORD: {
@@ -188,6 +217,11 @@ public class OrinocoLexer {
 				}
 			}
 		}
+	}
+
+	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType number) {
+		lexerStream.acceptLiteral(number, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		updateOffsetsAfterMake();
 	}
 
 	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {

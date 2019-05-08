@@ -1,18 +1,17 @@
 package arma.orinocosqf;
 
-import static org.junit.Assert.assertEquals;
+import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.helpers.TokenExpector;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-
-import arma.orinocosqf.exceptions.UnknownIdException;
-import arma.orinocosqf.helpers.TokenExpector;
+import static org.junit.Assert.assertEquals;
 
 public class OrinocoLexerTest {
 	private TokenExpector expector;
@@ -38,7 +37,7 @@ public class OrinocoLexerTest {
 	}
 
 	private IdTransformer<String> getCommandTransformer() {
-		throw new UnsupportedOperationException("Command ID-transformer not yet implemented");
+		return SQFCommands.instance;
 	}
 
 	@Test
@@ -1265,6 +1264,7 @@ public class OrinocoLexerTest {
 				getCommandTransformer().toId("createunit"));
 
 		int createUnitId = getCommandTransformer().toId("createUnit");
+		System.out.println("OrinocoLexerTest.commands_sqfkeywords_caseInsensitive createUnitId=" + createUnitId);
 		int addActionId = getCommandTransformer().toId("addAction");
 		int callId = getCommandTransformer().toId("call");
 

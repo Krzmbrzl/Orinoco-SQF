@@ -1,6 +1,7 @@
 package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,14 +40,14 @@ public class CommandSet<C extends Command> {
 		return CHAR_SEQUENCE_COMPARATOR.compare(c1, c2);
 	};
 
-	private static final Comparator<Command> COMPARATOR = (command, other) -> {
+	public static final Comparator<Command> COMPARATOR = (command, other) -> {
 		String c1 = command.getName();
 		String c2 = other.getName();
 		return CHAR_SEQUENCE_COMPARATOR.compare(c1, c2);
 	};
 
 
-	private final List<C> commands;
+	protected final List<C> commands;
 
 
 	public CommandSet(@NotNull List<C> commands) {
@@ -64,5 +65,14 @@ public class CommandSet<C extends Command> {
 
 	public int getId(@NotNull Command command) {
 		return Collections.binarySearch(commands, command, COMPARATOR);
+	}
+
+	@Nullable
+	public String getCommandById(int id) {
+		C c = commands.get(id);
+		if (c == null) {
+			return null;
+		}
+		return c.getName();
 	}
 }
