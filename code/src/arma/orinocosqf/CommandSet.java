@@ -7,24 +7,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static arma.orinocosqf.ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR;
+
 /**
  * @author K
  * @since 5/2/19
  */
 public class CommandSet<C extends Command> {
-	private static final Comparator<CharSequence> CHAR_SEQUENCE_COMPARATOR = (left, right) -> {
-		int len1 = left.length();
-		int len2 = right.length();
-		int lim = Math.min(left.length(), right.length());
-		for (int k = 0; k < lim; ++k) {
-			final char lc = ASCIITextHelper.toLowerCase(left.charAt(k));
-			final char rc = ASCIITextHelper.toLowerCase(right.charAt(k));
-			if (lc != rc) {
-				return lc - rc;
-			}
-		}
-		return len1 - len2;
-	};
+
 	private static final Comparator<Object> DYNAMIC_COMPARATOR = (left, right) -> {
 		CharSequence c1, c2;
 		if (left instanceof CharSequence) {
@@ -37,13 +27,13 @@ public class CommandSet<C extends Command> {
 		} else {
 			c2 = ((Command) right).getName();
 		}
-		return CHAR_SEQUENCE_COMPARATOR.compare(c1, c2);
+		return CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(c1, c2);
 	};
 
 	public static final Comparator<Command> COMPARATOR = (command, other) -> {
 		String c1 = command.getName();
 		String c2 = other.getName();
-		return CHAR_SEQUENCE_COMPARATOR.compare(c1, c2);
+		return CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(c1, c2);
 	};
 
 
