@@ -20,22 +20,22 @@ public class OrinocoPreProcessorTest {
 	private final TokenExpector expector = new TokenExpector();
 	private TestOrinocoPreProcessor preProcessor;
 	private TestOrinocoLexer lexer;
-	private final TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
+	private TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
 
 	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) {
-		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
+		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 	}
 
 	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
+		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 		lexer = new TestOrinocoLexer(
 				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
 				preProcessor,
 				preprocessTextCb
 		);
-		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 	}
 
 	@Test
