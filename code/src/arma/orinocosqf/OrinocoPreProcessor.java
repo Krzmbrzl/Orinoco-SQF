@@ -92,5 +92,10 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	}
 
+	@Override
+	public @NotNull MacroSet getMacroSet() {
+		return null;
+	}
+
 
 }

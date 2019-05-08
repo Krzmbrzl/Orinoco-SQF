@@ -3,6 +3,9 @@ package arma.orinocosqf;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
@@ -26,11 +29,13 @@ import java.io.IOException;
  * @since 02/20/2019
  */
 public class OrinocoLexer {
-	private OrinocoLexerContext context;
-
 	public static int getCommandId(@NotNull String command) {
 		return 0; //todo
 	}
+
+	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
+
+	private OrinocoLexerContext context;
 
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
@@ -38,6 +43,13 @@ public class OrinocoLexer {
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
 	private final OrinocoJFlexLexer jFlexLexer;
+
+	private enum PreProcessorState {
+		IfDef, IfNDef, ElseIfDef, ElseIfNDef
+	}
+
+	@NotNull
+	private Stack<PreProcessorState> preProcessorState = new Stack<>();
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
@@ -66,6 +78,38 @@ public class OrinocoLexer {
 			if (type == OrinocoJFlexLexer.TokenType.EOF) {
 				return;
 			}
+			if (!preProcessorState.isEmpty()) {
+				if (type == OrinocoJFlexLexer.TokenType.CMD_ENDIF) {
+					preProcessorState.pop();
+					return;
+				}
+				switch (preProcessorState.peek()) {
+					case IfDef: { //read tokens until an #else comes along
+						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
+							preProcessorState.pop();
+							preProcessorState.push(PreProcessorState.ElseIfDef);
+							return;
+						}
+						break;
+					}
+					case IfNDef: { //skip tokens until an #else comes along or endif
+						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
+							preProcessorState.pop();
+							preProcessorState.push(PreProcessorState.ElseIfNDef);
+						}
+						return;
+					}
+					case ElseIfDef: {
+						return; //skip tokens
+					}
+					case ElseIfNDef: {
+						break;
+					}
+					default: {
+						throw new IllegalStateException(); // ???
+					}
+				}
+			}
 			if (type.isCommand) {
 				makeCommand();
 				continue;
@@ -75,25 +119,42 @@ public class OrinocoLexer {
 					makeWhitespace();
 					break;
 				}
+				case CMD_IFDEF: //fall
+				case CMD_IFNDEF: {
+					Matcher m = pattern_ifdef.matcher(jFlexLexer.yytext());
+					if (m.find()) {
+						String name = m.group(2);
+						MacroSet macroSet = lexerStream.getMacroSet();
+						if (macroSet.containsKey(name)) {
+							if (type == OrinocoJFlexLexer.TokenType.CMD_IFDEF) {
+								preProcessorState.push(PreProcessorState.IfDef);
+							} else {
+								preProcessorState.push(PreProcessorState.IfNDef);
+							}
+						}
+					}
+					break;
+				}
 				case CMD_DEFINE: {
+					makePreProcessorCommand(PreProcessorCommand.Define);
 					break;
 				}
 				case CMD_INCLUDE: {
-					break;
-				}
-				case CMD_IFDEF: {
-					break;
-				}
-				case CMD_IFNDEF: {
+					makePreProcessorCommand(PreProcessorCommand.Include);
 					break;
 				}
 				case CMD_ELSE: {
+					//todo report uneeded #else
+					makePreProcessorCommand(PreProcessorCommand.Else);
 					break;
 				}
 				case CMD_ENDIF: {
+					//todo report uneeded #endif
+					makePreProcessorCommand(PreProcessorCommand.EndIf);
 					break;
 				}
 				case CMD_UNDEF: {
+					makePreProcessorCommand(PreProcessorCommand.Undef);
 					break;
 				}
 				case BLOCK_COMMENT:
@@ -127,6 +188,11 @@ public class OrinocoLexer {
 				}
 			}
 		}
+	}
+
+	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {
+		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), originalOffset, originalLength);
+		updateOffsetsAfterMake();
 	}
 
 	private void updateOffsetsAfterMake() {

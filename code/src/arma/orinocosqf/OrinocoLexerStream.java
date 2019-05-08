@@ -78,4 +78,7 @@ public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	 */
 	void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 					   @NotNull OrinocoLexerContext ctx);
+
+	@NotNull
+	MacroSet getMacroSet();
 }

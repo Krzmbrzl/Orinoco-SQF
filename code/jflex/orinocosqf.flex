@@ -19,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
     return;
 %eof}
 
+%state MACRO_CALL
+
 %{
 	private CommandSet commands;
   	private final YYTextCharSequence yytextCharSequence = new YYTextCharSequence();
@@ -190,7 +192,7 @@ import org.jetbrains.annotations.Nullable;
 WORD = [:jletter:] ([:jletterdigit:])*
 GLUED_WORD = ("##")? [:jletter:] ("##" [:jletterdigit:] | [:jletterdigit:])* ("##")?
 
-LINE_TERMINATOR = \n|\r\n
+LINE_TERMINATOR = \n|\r\n|\r
 INPUT_CHARACTER = [^\r\n]
 
 WHITE_SPACE = ({LINE_TERMINATOR} | [ \t\f])+
@@ -251,6 +253,8 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
         if(yytextIsCommand()) {
             return TokenType.COMMAND;
         }
+
+
 
         return TokenType.WORD;
     }

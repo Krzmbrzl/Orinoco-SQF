@@ -154,6 +154,11 @@ public class TokenExpector implements OrinocoLexerStream {
 	}
 
 	@Override
+	public @NotNull MacroSet getMacroSet() {
+		return null;
+	}
+
+	@Override
 	public void end() {
 		acceptFactory.end();
 	}
@@ -379,6 +384,11 @@ public class TokenExpector implements OrinocoLexerStream {
 			q.add(AcceptedToken.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
 					ctx.getTextBuffer().getText(originalOffset, originalLength),
 					ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength)));
+		}
+
+		@Override
+		public @NotNull MacroSet getMacroSet() {
+			return null;
 		}
 
 		@Override

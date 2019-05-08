@@ -299,6 +299,12 @@
       zzBuffer = new char[ZZ_BUFFERSIZE];
   }
 
+  /**
+   * Returns the buffer
+   */
+  public final char[] getBuffer() {
+    return zzBuffer;
+  }
 
   /**
    * Returns the current lexical state.
