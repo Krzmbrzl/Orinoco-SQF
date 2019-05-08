@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class OrinocoPreProcessor implements OrinocoLexerStream {
 	private OrinocoLexer lexer;
 	private final OrinocoTokenProcessor processor;
+	private final MacroSet macroSet = new MacroSet();
 
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor p) {
 		this.processor = p;
@@ -94,7 +95,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public @NotNull MacroSet getMacroSet() {
-		return null;
+		return macroSet;
 	}
 
 

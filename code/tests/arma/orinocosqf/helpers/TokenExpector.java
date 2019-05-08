@@ -18,6 +18,7 @@ public class TokenExpector implements OrinocoLexerStream {
 	private final AcceptedTokenFactory acceptFactory;
 	private final List<AcceptedToken> expectedTokens;
 	private boolean skipPreprocessing;
+	private final MacroSet macroSet = new MacroSet();
 
 	public TokenExpector() {
 		this(new ArrayList<>(), false);
@@ -155,7 +156,7 @@ public class TokenExpector implements OrinocoLexerStream {
 
 	@Override
 	public @NotNull MacroSet getMacroSet() {
-		return null;
+		return macroSet;
 	}
 
 	@Override
@@ -308,6 +309,7 @@ public class TokenExpector implements OrinocoLexerStream {
 
 	public static class AcceptedTokenFactory implements OrinocoLexerStream {
 		private final List<AcceptedToken> q = new ArrayList<>();
+		private final MacroSet macroSet = new MacroSet();
 
 		@Override
 		public void begin() {
@@ -388,7 +390,7 @@ public class TokenExpector implements OrinocoLexerStream {
 
 		@Override
 		public @NotNull MacroSet getMacroSet() {
-			return null;
+			return macroSet;
 		}
 
 		@Override

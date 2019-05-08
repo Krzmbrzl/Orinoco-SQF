@@ -16,6 +16,7 @@ import java.util.function.Consumer;
  */
 public class TestOrinocoLexer extends OrinocoLexer {
 	private final Consumer<CharSequence> preprocessedTextCallback;
+	private boolean didPreProcessing = false;
 
 	public TestOrinocoLexer(@NotNull OrinocoReader r,
 							@NotNull OrinocoLexerStream lexerStream,
@@ -26,9 +27,14 @@ public class TestOrinocoLexer extends OrinocoLexer {
 
 	@Override
 	public void acceptPreProcessedText(@NotNull CharSequence text) {
+		didPreProcessing = true;
 		// do this first to stop further preprocessing before assertions
 		preprocessedTextCallback.accept(text);
 
 		super.acceptPreProcessedText(text);
+	}
+
+	public void assertDidPreProcessing() {
+		org.junit.Assert.assertTrue(didPreProcessing);
 	}
 }
