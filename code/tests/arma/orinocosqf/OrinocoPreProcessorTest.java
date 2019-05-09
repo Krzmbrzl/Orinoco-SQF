@@ -17,19 +17,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class OrinocoPreProcessorTest {
-	private final TokenExpector expector = new TokenExpector();
+	private TokenExpector expector;
 	private TestOrinocoPreProcessor preProcessor;
 	private TestOrinocoLexer lexer;
-	private TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
+	private TokenExpector.AcceptedTokenFactory tokenFactory;
 
 	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) {
+		expector = new TokenExpector(false);
+		tokenFactory = new TokenExpector.AcceptedTokenFactory();
+
 		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 	}
 
 	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
 							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
+		expector = new TokenExpector(false);
+		tokenFactory = new TokenExpector.AcceptedTokenFactory();
+
 		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
 		lexer = new TestOrinocoLexer(
 				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
@@ -43,7 +49,7 @@ public class OrinocoPreProcessorTest {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("format", cb, s -> null);
 		final int formatId = OrinocoLexer.getCommandId("format");
-		tokenFactory.acceptCommand(formatId, 0, 0, 6, 6, lexer.getContext());
+		tokenFactory.acceptCommand(formatId, 0, 6, 0, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -53,7 +59,7 @@ public class OrinocoPreProcessorTest {
 	public void noPreProcessing_globalVariable() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("text1", cb, s -> null);
-		tokenFactory.acceptGlobalVariable(0, 0, 0, 5, 5, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(0, 0, 5, 0, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -63,7 +69,7 @@ public class OrinocoPreProcessorTest {
 	public void noPreProcessing_localVariable() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 		lexerFromText("_text1", cb, s -> null);
-		tokenFactory.acceptLocalVariable(0, 0, 0, 6, 6, lexer.getContext());
+		tokenFactory.acceptLocalVariable(0, 0, 6, 0, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();

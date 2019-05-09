@@ -45,25 +45,25 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	@Override
 	public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
 							  @NotNull OrinocoLexerContext ctx) {
-
+		processor.acceptCommand(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
 									@NotNull OrinocoLexerContext ctx) {
-
+		processor.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
 									 @NotNull OrinocoLexerContext ctx) {
-
+		processor.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
 							  int originalLength, @NotNull OrinocoLexerContext ctx) {
-
+		processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
@@ -84,7 +84,6 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	@Override
 	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 								 @NotNull OrinocoLexerContext ctx) {
-
 	}
 
 	@Override

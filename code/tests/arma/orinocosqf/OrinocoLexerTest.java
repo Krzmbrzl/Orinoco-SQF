@@ -3,7 +3,6 @@ package arma.orinocosqf;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.TokenExpector;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,17 +17,15 @@ public class OrinocoLexerTest {
 	private TokenExpector.AcceptedTokenFactory tokenFactory;
 	private OrinocoLexer lexer;
 
-	@Before
-	public void setUp() throws Exception {
-		expector = new TokenExpector(true);
-	}
 
 	private void lexerFromText(@NotNull String text) {
+		expector = new TokenExpector(true);
 		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), expector);
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
 	private void lexerFromFile(@NotNull File f) throws FileNotFoundException {
+		expector = new TokenExpector(true);
 		lexer = new OrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), expector);
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
