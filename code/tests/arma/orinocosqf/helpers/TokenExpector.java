@@ -212,30 +212,36 @@ public class TokenExpector implements OrinocoLexerStream {
 		}
 
 		@NotNull
-		public static AcceptedToken acceptCommand(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+		public static AcceptedToken acceptCommand(int id, int preprocessedOffset, int preprocessedLength,
+												  int originalOffset, int originalLength) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptCommand);
 			t.putParameter("id", id);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			return t;
 		}
 
 		@NotNull
-		public static AcceptedToken acceptLocalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+		public static AcceptedToken acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength,
+														int originalOffset, int originalLength) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptLocalVariable);
 			t.putParameter("id", id);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			return t;
 		}
 
 		@NotNull
-		public static AcceptedToken acceptGlobalVariable(int id, int preprocessedOffset, int originalOffset, int originalLength) {
+		public static AcceptedToken acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength,
+														 int originalOffset, int originalLength) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptGlobalVariable);
 			t.putParameter("id", id);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			return t;
@@ -243,11 +249,12 @@ public class TokenExpector implements OrinocoLexerStream {
 
 		@NotNull
 		public static AcceptedToken acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
-												  int originalOffset, int originalLength) {
+												  int preprocessedLength, int originalOffset, int originalLength) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptLiteral);
 			t.putParameter("type", type);
 			t.putParameter("token", token);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
+			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			return t;
@@ -319,26 +326,26 @@ public class TokenExpector implements OrinocoLexerStream {
 		@Override
 		public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
 								  @NotNull OrinocoLexerContext ctx) {
-			q.add(AcceptedToken.acceptCommand(id, preprocessedOffset, originalOffset, originalLength));
+			q.add(AcceptedToken.acceptCommand(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength));
 		}
 
 		@Override
 		public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
 										@NotNull OrinocoLexerContext ctx) {
-			q.add(AcceptedToken.acceptLocalVariable(id, preprocessedOffset, originalOffset, originalLength));
+			q.add(AcceptedToken.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength));
 		}
 
 		@Override
 		public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
 										 @NotNull OrinocoLexerContext ctx) {
-			q.add(AcceptedToken.acceptGlobalVariable(id, preprocessedOffset, originalOffset, originalLength));
+			q.add(AcceptedToken.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength));
 		}
 
 		@Override
 		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
 								  int originalLength, @NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptLiteral(type, ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength),
-					preprocessedOffset, originalOffset, originalLength));
+					preprocessedOffset, preprocessedLength, originalOffset, originalLength));
 		}
 
 		@Override
