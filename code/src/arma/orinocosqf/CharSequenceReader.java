@@ -3,6 +3,7 @@ package arma.orinocosqf;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
@@ -23,13 +24,18 @@ public class CharSequenceReader extends Reader {
 	}
 
 	@Override
+	public int read() throws IOException {
+		return cursor < cs.length() ? cs.charAt(cursor++) : -1;
+	}
+
+	@Override
 	public int read(@NotNull char[] cbuf, int off, int len) {
 		int count = 0;
 		for (int i = off; i < len && cursor < cs.length(); i++) {
 			cbuf[i] = cs.charAt(cursor++);
 			count++;
 		}
-		return count;
+		return count > 0 ? count : -1;
 	}
 
 	@Override

@@ -1,6 +1,13 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.exceptions.UnknownIdException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import arma.orinocosqf.problems.Problem;
 import arma.orinocosqf.problems.ProblemListener;
@@ -30,30 +37,245 @@ import arma.orinocosqf.problems.ProblemListener;
  */
 public class OrinocoLexer implements ProblemListener {
 	public static int getCommandId(@NotNull String command) {
-		return 0; // todo
+    return SQFCommands.instance.getId(command);
 	}
 
-	/**
-	 * The current {@link OrinocoReader} instance
-	 */
-	private @NotNull OrinocoReader reader;
+	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
+
+	private OrinocoLexerContext context = new OrinocoLexerContext() {
+		@Override
+		public @NotNull String getCommand(int id) throws UnknownIdException {
+			String c = SQFCommands.instance.getCommandById(id);
+			if (c == null) {
+				throw new UnknownIdException(id + "");
+			}
+			return c;
+		}
+
+		@Override
+		public @Nullable String getVariable(int id) {
+			return null;
+		}
+
+		@Override
+		public boolean isTextBufferingEnabled() {
+			return false;
+		}
+
+		@Override
+		public @Nullable TextBuffer getTextBuffer() {
+			return null;
+		}
+
+		@Override
+		public @Nullable TextBuffer getTextBufferPreprocessed() {
+			return null;
+		}
+	};
+
 	private final OrinocoLexerStream lexerStream;
-	/**
-	 * The offset of tokens after preprocessing
-	 */
-	private int preprocessedOffset;
+	private int originalOffset = 0;
+	private int originalLength = 0;
+	private int preprocessedOffset = 0;
+	private int preprocessedLength = 0;
+	private final OrinocoJFlexLexer jFlexLexer;
+
+	private enum PreProcessorState {
+		IfDef, IfNDef, ElseIfDef, ElseIfNDef
+	}
+
+	@NotNull
+	private Stack<PreProcessorState> preProcessorState = new Stack<>();
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
-		this.reader = r;
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
+		jFlexLexer = new OrinocoJFlexLexer(r);
+		jFlexLexer.setCommandSet(SQFCommands.instance);
 	}
 
 	/**
 	 * Starts the lexing process.
 	 */
 	public void start() {
+		try {
+			doStart();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
+	}
+
+	private void doStart() throws IOException {
+		while (true) {
+			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
+			if (type == null) {
+				throw new IllegalStateException(); //?
+			}
+			if (type == OrinocoJFlexLexer.TokenType.EOF) {
+				return;
+			}
+			originalLength = jFlexLexer.yylength();
+			if (!jFlexLexer.yymoreStreams()) {
+				preprocessedLength = jFlexLexer.yylength();
+			} else {
+				preprocessedLength += jFlexLexer.yylength();
+			}
+			if (!preProcessorState.isEmpty()) {
+				if (type == OrinocoJFlexLexer.TokenType.CMD_ENDIF) {
+					preProcessorState.pop();
+					return;
+				}
+				switch (preProcessorState.peek()) {
+					case IfDef: { //read tokens until an #else comes along
+						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
+							preProcessorState.pop();
+							preProcessorState.push(PreProcessorState.ElseIfDef);
+							return;
+						}
+						break;
+					}
+					case IfNDef: { //skip tokens until an #else comes along or endif
+						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
+							preProcessorState.pop();
+							preProcessorState.push(PreProcessorState.ElseIfNDef);
+						}
+						return;
+					}
+					case ElseIfDef: {
+						return; //skip tokens
+					}
+					case ElseIfNDef: {
+						break;
+					}
+					default: {
+						throw new IllegalStateException(); // ???
+					}
+				}
+			}
+			if (type.isCommand) {
+				makeCommand();
+				continue;
+			}
+			switch (type) {
+				case WHITE_SPACE: {
+					makeWhitespace();
+					break;
+				}
+				case CMD_IFDEF: //fall
+				case CMD_IFNDEF: {
+					Matcher m = pattern_ifdef.matcher(jFlexLexer.yytext());
+					if (m.find()) {
+						String name = m.group(2);
+						MacroSet macroSet = lexerStream.getMacroSet();
+						if (macroSet.containsKey(name)) {
+							if (type == OrinocoJFlexLexer.TokenType.CMD_IFDEF) {
+								preProcessorState.push(PreProcessorState.IfDef);
+							} else {
+								preProcessorState.push(PreProcessorState.IfNDef);
+							}
+						}
+					}
+					break;
+				}
+				case CMD_DEFINE: {
+					makePreProcessorCommand(PreProcessorCommand.Define);
+					break;
+				}
+				case CMD_INCLUDE: {
+					makePreProcessorCommand(PreProcessorCommand.Include);
+					break;
+				}
+				case CMD_ELSE: {
+					//todo report uneeded #else
+					makePreProcessorCommand(PreProcessorCommand.Else);
+					break;
+				}
+				case CMD_ENDIF: {
+					//todo report uneeded #endif
+					makePreProcessorCommand(PreProcessorCommand.EndIf);
+					break;
+				}
+				case CMD_UNDEF: {
+					makePreProcessorCommand(PreProcessorCommand.Undef);
+					break;
+				}
+				case BLOCK_COMMENT:
+				case INLINE_COMMENT: {
+					makeComment();
+					break;
+				}
+				case HEX_LITERAL: //fall
+				case INTEGER_LITERAL: //fall
+				case DEC_LITERAL: {
+					makeLiteral(OrinocoLexerSQFLiteralType.Number);
+					break;
+				}
+				case STRING_LITERAL: {
+					makeLiteral(OrinocoLexerSQFLiteralType.String);
+					break;
+				}
+				case GLUED_WORD: {
+					break;
+				}
+				case WORD: {
+					break;
+				}
+				case BAD_CHARACTER: {
+					break;
+				}
+				default: {
+					throw new IllegalStateException(); // ?
+				}
+			}
+		}
+	}
+
+	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType number) {
+		lexerStream.acceptLiteral(number, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		updateOffsetsAfterMake();
+	}
+
+	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {
+		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), originalOffset, originalLength);
+		updateOffsetsAfterMake();
+	}
+
+	private void updateOffsetsAfterMake() {
+		originalOffset += originalLength;
+		originalLength = 0;
+		preprocessedOffset += preprocessedLength;
+		preprocessedLength = 0;
+	}
+
+	private void makeWhitespace() {
+		lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		updateOffsetsAfterMake();
+	}
+
+	private void makeComment() {
+		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		updateOffsetsAfterMake();
+	}
+
+	private void makeLocalVariable() {
+		//lexerStream.acceptLocalVariable();
+		updateOffsetsAfterMake();
+	}
+
+	private void makeGlobalVariable() {
+		//lexerStream.acceptGlobalVariable();
+		updateOffsetsAfterMake();
+	}
+
+	private void makeCommand() {
+		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		updateOffsetsAfterMake();
+	}
+
+	private void makePreProcessedText() {
+		//lexerStream.preProcessToken();
+		updateOffsetsAfterMake();
 	}
 
 	/**
@@ -62,7 +284,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @param text the preprocessed, untokenized text
 	 */
 	public void acceptPreProcessedText(@NotNull CharSequence text) {
-
+		acceptIncludedReader(OrinocoReader.fromCharSequence(text));
 	}
 
 	/**
@@ -72,7 +294,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @param reader the reader to immediately begin lexing
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
-
+		jFlexLexer.yypushStream(reader);
 	}
 
 	/**
@@ -80,8 +302,11 @@ public class OrinocoLexer implements ProblemListener {
 	 */
 	@NotNull
 	public OrinocoLexerContext getContext() {
-		// TODO
-		throw new UnsupportedOperationException("Get context not yet implemented!");
+		return context;
+	}
+
+	public OrinocoLexerStream getLexerStream() {
+		return lexerStream;
 	}
 
 	/**

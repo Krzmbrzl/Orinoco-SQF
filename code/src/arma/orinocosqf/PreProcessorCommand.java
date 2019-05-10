@@ -1,5 +1,7 @@
 package arma.orinocosqf;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Here is the format for a preprocessor command: <b>#commandName body?</b>. The
  * ? means optional.
@@ -9,13 +11,13 @@ package arma.orinocosqf;
  */
 public enum PreProcessorCommand {
 	/** #ifdef MACRO */
-	IfDef,
+	IfDef("ifdef"),
 	/** #ifndef MACRO */
-	IfNDef,
+	IfNDef("ifndef"),
 	/** #else */
-	Else,
+	Else("else"),
 	/** #endif */
-	EndIf,
+	EndIf("endif"),
 	/**
 	 * <ul>
 	 * <li>#define MACRO body</li>
@@ -23,14 +25,25 @@ public enum PreProcessorCommand {
 	 * <li>#define MACRO(PARAM1,PARAM2) PARAM1 PARAM2</li>
 	 * </ul>
 	 */
-	Define,
+	Define("define"),
 	/** #undef MACRO */
-	Undef,
+	Undef("undef"),
 	/**
 	 * <ul>
 	 * <li>#include "file"</li>
 	 * <li>#include &lt;file&gt;</li>
 	 * </ul>
 	 */
-	Include
+	Include("include");
+
+	private String s;
+
+	PreProcessorCommand(@NotNull String s) {
+		this.s = s;
+	}
+
+	@NotNull
+	public String commandName() {
+		return s;
+	}
 }

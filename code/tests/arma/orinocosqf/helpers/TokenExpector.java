@@ -18,6 +18,7 @@ public class TokenExpector implements OrinocoLexerStream {
 	private final AcceptedTokenFactory acceptFactory;
 	private final List<AcceptedToken> expectedTokens;
 	private boolean skipPreprocessing;
+	private final MacroSet macroSet = new MacroSet();
 
 	public TokenExpector() {
 		this(new ArrayList<>(), false);
@@ -45,7 +46,7 @@ public class TokenExpector implements OrinocoLexerStream {
 		Iterator<AcceptedToken> actualIter = acceptFactory.getTokens().iterator();
 		for (AcceptedToken expectedToken : expectedTokens) {
 			if (!actualIter.hasNext()) {
-				fail("Actual ran out of tokens");
+				fail("Actual ran out of tokens. Expected size: " + expectedTokens.size() + ", Actual size: " + acceptFactory.getTokens().size());
 			}
 			AcceptedToken actualNext = actualIter.next();
 			assertEquals(expectedToken.method, actualNext.method);
@@ -151,6 +152,11 @@ public class TokenExpector implements OrinocoLexerStream {
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 							  @NotNull OrinocoLexerContext ctx) {
 		acceptFactory.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, ctx);
+	}
+
+	@Override
+	public @NotNull MacroSet getMacroSet() {
+		return macroSet;
 	}
 
 	@Override
@@ -303,6 +309,7 @@ public class TokenExpector implements OrinocoLexerStream {
 
 	public static class AcceptedTokenFactory implements OrinocoLexerStream {
 		private final List<AcceptedToken> q = new ArrayList<>();
+		private final MacroSet macroSet = new MacroSet();
 
 		@Override
 		public void begin() {
@@ -379,6 +386,11 @@ public class TokenExpector implements OrinocoLexerStream {
 			q.add(AcceptedToken.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
 					ctx.getTextBuffer().getText(originalOffset, originalLength),
 					ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength)));
+		}
+
+		@Override
+		public @NotNull MacroSet getMacroSet() {
+			return macroSet;
 		}
 
 		@Override

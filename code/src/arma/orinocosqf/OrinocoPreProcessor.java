@@ -25,7 +25,8 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 * The {@link OrinocoTokenProcessor} to delegate method calls to
 	 */
 	private final OrinocoTokenProcessor processor;
-	/**
+
+  /**
 	 * The {@link MacroSet} of the current preprocessing run
 	 */
 	protected MacroSet macroSet;
@@ -52,7 +53,6 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		this.processor = processor;
 		this.fileSystem = fileSystem;
 		this.configuration = configuration;
-
 		this.macroSet = new MacroSet();
 		this.segmentParser = new BodySegmentParser(lexer);
 	}
@@ -124,7 +124,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-			@NotNull OrinocoLexerContext ctx) {
+      @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
@@ -176,6 +176,8 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		return (c > 'Z' ? c <= 'z' && c >= 'a' : c <= 'Z' && c >= 'A') || c == '_' || (!isFirstLetter && Character.isDigit(c));
 	}
 
+  @Override
+  @NotNull
 	protected MacroSet getMacroSet() {
 		return this.macroSet;
 	}

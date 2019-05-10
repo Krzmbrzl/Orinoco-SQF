@@ -1,36 +1,33 @@
 package arma.orinocosqf;
 
-import static org.junit.Assert.assertEquals;
+import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.helpers.TokenExpector;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
-
-import arma.orinocosqf.exceptions.UnknownIdException;
-import arma.orinocosqf.helpers.TokenExpector;
+import static org.junit.Assert.assertEquals;
 
 public class OrinocoLexerTest {
 	private TokenExpector expector;
 	private TokenExpector.AcceptedTokenFactory tokenFactory;
 	private OrinocoLexer lexer;
 
-	@Before
-	public void setUp() throws Exception {
+
+	private void lexerFromText(@NotNull String text) {
 		expector = new TokenExpector(true);
+		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), expector);
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
-	private void lexerFromText(@NotNull String text) {
-		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), expector);
-	}
-
 	private void lexerFromFile(@NotNull File f) throws FileNotFoundException {
+		expector = new TokenExpector(true);
 		lexer = new OrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), expector);
+		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
 	private IdTransformer<String> getVariableTransformer() {
@@ -38,7 +35,7 @@ public class OrinocoLexerTest {
 	}
 
 	private IdTransformer<String> getCommandTransformer() {
-		throw new UnsupportedOperationException("Command ID-transformer not yet implemented");
+		return SQFCommands.instance;
 	}
 
 	@Test
