@@ -1,7 +1,6 @@
 package arma.orinocosqf;
 
 import arma.orinocosqf.helpers.TestOrinocoLexer;
-import arma.orinocosqf.helpers.TestOrinocoPreProcessor;
 import arma.orinocosqf.helpers.TokenExpector;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -10,38 +9,34 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class OrinocoPreProcessorTest {
 	private final TokenExpector expector = new TokenExpector();
-	private TestOrinocoPreProcessor preProcessor;
+	private OrinocoPreProcessor preProcessor;
 	private TestOrinocoLexer lexer;
+	private ArmaFilesystem fs = new ArmaFilesystem(new File(System.getProperty("user.home")).toPath(), new ArrayList<>());
 	private final TokenExpector.AcceptedTokenFactory tokenFactory = new TokenExpector.AcceptedTokenFactory();
 
-	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
-							   @NotNull Function<String, OrinocoReader> includeHandler) {
-		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
+	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb) {
+		preProcessor = new OrinocoPreProcessor(expector, fs);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 	}
 
-	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
-							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
-		preProcessor = new TestOrinocoPreProcessor(expector, includeHandler);
-		lexer = new TestOrinocoLexer(
-				OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8),
-				preProcessor,
-				preprocessTextCb
-		);
+	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb) throws FileNotFoundException {
+		preProcessor = new OrinocoPreProcessor(expector, fs);
+		lexer = new TestOrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), preProcessor,
+				preprocessTextCb);
 	}
 
 	@Test
 	public void noPreProcessing_command() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("format", cb, s -> null);
+		lexerFromText("format", cb);
 		final int formatId = OrinocoLexer.getCommandId("format");
 		tokenFactory.acceptCommand(formatId, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
@@ -53,7 +48,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void noPreProcessing_globalVariable() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("text1", cb, s -> null);
+		lexerFromText("text1", cb);
 		tokenFactory.acceptGlobalVariable(0, 0, 0, 5, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -64,7 +59,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void noPreProcessing_localVariable() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("_text1", cb, s -> null);
+		lexerFromText("_text1", cb);
 		tokenFactory.acceptLocalVariable(0, 0, 0, 6, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -79,7 +74,7 @@ public class OrinocoPreProcessorTest {
 		String define = "#define Macro(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
 		String all = define + "\n" + text;
-		lexerFromText(all, cb, s -> null);
+		lexerFromText(all, cb);
 
 		final int textStart = define.length() + 1; // +1 for \n
 		final int lparenStart = text.indexOf('(');
@@ -105,20 +100,16 @@ public class OrinocoPreProcessorTest {
 		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
-	
+
 	@Test
 	public void noPreProcessing_matchButMissingHashHash() {
 		// this test creates valid defines that get matched, but arma's preprocessor doesn't
-		// allow for replacing text inbetween text unless there is a ##
+		// allow for replacing text in between text unless there is a ##
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 
-		String[] lines = {
-				"#define e a",
-				"#define oo a",
-				"The cow jumped over the moon!"
-		};
+		String[] lines = { "#define e a", "#define oo a", "The cow jumped over the moon!" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -126,13 +117,13 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void simpleParamMacro() {
 		// This test is for a simple macro with parameters
-		final String expected = "v=z";
+		final String expected = "\nv=z";
 		Consumer<CharSequence> cb = s -> assertEquals(expected, s);
 
 		String define = "#define MACRO(arg,arg2) arg=arg2";
 		String text = "MACRO(v,z)";
 		String all = define + "\n" + text;
-		lexerFromText(all, cb, s -> null);
+		lexerFromText(all, cb);
 
 		final int textStart = define.length() + 1; // +1 for \n
 
@@ -156,18 +147,13 @@ public class OrinocoPreProcessorTest {
 	public void simpleDefine() {
 		// This test is for a simple macro without parameters
 
-		String[] expected = {"a", "b", "c"};
-		int[] expectedInd = {0};
+		String[] expected = { "a", "b", "c" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"#define ARG2 b",
-				"#define ARG3 c",
-				"ARG = 1 + ARG2 + ARG3"
-		};
+		String[] lines = { "#define ARG a", "#define ARG2 b", "#define ARG3 c", "ARG = 1 + ARG2 + ARG3" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -179,12 +165,9 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("number 0", s);
 
-		String[] lines = {
-				"#define N(NUMBER) number NUMBER",
-				"Hello N(0)",
-		};
+		String[] lines = { "#define N(NUMBER) number NUMBER", "Hello N(0)", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -196,12 +179,9 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("car setVelocity [0,0,5];", s);
 
-		String[] lines = {
-				"#define BLASTOFF(UNIT,RATE) UNIT setVelocity [0,0,RATE];",
-				"disableSerialization; BLASTOFF(car,5)",
-		};
+		String[] lines = { "#define BLASTOFF(UNIT,RATE) UNIT setVelocity [0,0,RATE];", "disableSerialization; BLASTOFF(car,5)", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -214,13 +194,9 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess, got " + s);
 
-		String[] lines = {
-				"#define N(NUMBER) number NUMBER",
-				"#define MAC Hello N(0)word",
-				"MAC"
-		};
+		String[] lines = { "#define N(NUMBER) number NUMBER", "#define MAC Hello N(0)word", "MAC" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -231,75 +207,62 @@ public class OrinocoPreProcessorTest {
 		// This test is for a simple macro with a single parameter,
 		// and there is a ## between the macro and a word.
 
-		String[] expected = {"Hello number 0word"};
-		int[] expectedInd = {0};
+		String[] expected = { "Hello number 0word" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define N(NUMBER) number NUMBER",
-				"#define MAC Hello N(0)##word",
-				"MAC"
-		};
+		String[] lines = { "#define N(NUMBER) number NUMBER", "#define MAC Hello N(0)##word", "MAC" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
-	
+
 	@Test
 	public void multilineDefine() {
 		// This test is for a macro spanning multiple lines
 
-		String[] expected = {"Hello word"};
-		int[] expectedInd = {0};
+		String[] expected = { "Hello word" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define HELLO Hello \\\nworld",
-				"HELLO"
-		};
+		String[] lines = { "#define HELLO Hello \\\nworld", "HELLO" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
-	
+
 	@Test
 	public void multilineDefine_withSingleLineComment() {
 		// This test is for a macro spanning multiple lines
 		// and containging a single line comment in its body
 
-		String[] expected = {"Hello"};
-		int[] expectedInd = {0};
+		String[] expected = { "Hello" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define HELLO Hello// comment here\\\nworld",
-				"HELLO"
-		};
+		String[] lines = { "#define HELLO Hello// comment here\\\nworld", "HELLO" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
-	
+
 	@Test
 	public void multilineDefine_withMultiLineComment() {
 		// This test is for a macro spanning multiple lines
 
-		String[] expected = {"Hello world"};
-		int[] expectedInd = {0};
+		String[] expected = { "Hello world" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define HELLO Hello/* Multiline\ncomment here*/\\\nworld",
-				"HELLO"
-		};
+		String[] lines = { "#define HELLO Hello/* Multiline\ncomment here*/\\\nworld", "HELLO" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -312,13 +275,10 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("20", s);
 
-		String[] lines = {
-				"#define TWO 2",
-				"#define twenty ##TWO##0",
-				"hint str twenty;", // outputs "20"
+		String[] lines = { "#define TWO 2", "#define twenty ##TWO##0", "hint str twenty;", // outputs "20"
 		};
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -330,12 +290,9 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("123456", s);
 
-		String[] lines = {
-				"#define GLUE(g1,g2) g1##g2",
-				"GLUE(123,456)",
-		};
+		String[] lines = { "#define GLUE(g1,g2) g1##g2", "GLUE(123,456)", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -345,17 +302,13 @@ public class OrinocoPreProcessorTest {
 	public void stringify() {
 		// This test is for stringify
 
-		String[] expected = {"\"123\";", "\"456\";"};
-		int[] expectedInd = {0};
+		String[] expected = { "\"123\";", "\"456\";" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define STRINGIFY(s) #s;",
-				"test1 = STRINGIFY(123)",
-				"test2 = STRINGIFY(FOO)"
-		};
+		String[] lines = { "#define STRINGIFY(s) #s;", "test1 = STRINGIFY(123)", "test2 = STRINGIFY(FOO)" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -367,12 +320,9 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("\"Is it me youre looking for\"", s);
 
-		String[] lines = {
-				"#define HELLO(s) #s",
-				"HELLO(Is it me youre looking for)",
-		};
+		String[] lines = { "#define HELLO(s) #s", "HELLO(Is it me youre looking for)", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -385,12 +335,10 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("Hello, \" Is it me youre looking for\"?", s);
 
-		String[] lines = {
-				"#define HELLO(hi,s,end) hi, #s##end",//## is so we can put ? right after "
-				"HELLO(Hello, Is it me youre looking for,?)",
-		};
+		String[] lines = { "#define HELLO(hi,s,end) hi, #s##end", // ## is so we can put ? right after "
+				"HELLO(Hello, Is it me youre looking for,?)", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -402,26 +350,18 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("Foo=1;", s);
 
-		String[] lines = {
-				"#define ASSIGN(NAME,VAL) NAME=VAL",
-				"#define SET_TO_ONE(NAME) ASSIGN(NAME,1)",
-				"SET_TO_ONE(Foo);"
-		};
+		String[] lines = { "#define ASSIGN(NAME,VAL) NAME=VAL", "#define SET_TO_ONE(NAME) ASSIGN(NAME,1)", "SET_TO_ONE(Foo);" };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 
 		// This test is to make sure that there are different instances of NAME across different macro definitions.
 		// Notice how in this test, ASSIGN uses KEY rather than NAME.
-		String[] lines2 = {
-				"#define ASSIGN(KEY,VAL) KEY=VAL",
-				"#define SET_TO_ONE(NAME) ASSIGN(NAME,1)",
-				"SET_TO_ONE(Foo);"
-		};
+		String[] lines2 = { "#define ASSIGN(KEY,VAL) KEY=VAL", "#define SET_TO_ONE(NAME) ASSIGN(NAME,1)", "SET_TO_ONE(Foo);" };
 
-		lexerFromText(String.join("\n", lines2), cb, s -> null);
+		lexerFromText(String.join("\n", lines2), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -433,13 +373,10 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("Something", s);
 
-		String[] lines = {
-				"#define ONE TWO", //notice how ONE is dependent on TWO, but TWO is defined after ONE
-				"#define TWO Something",
-				"ONE",
-		};
+		String[] lines = { "#define ONE TWO", // notice how ONE is dependent on TWO, but TWO is defined after ONE
+				"#define TWO Something", "ONE", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();
@@ -449,18 +386,13 @@ public class OrinocoPreProcessorTest {
 	public void undef() {
 		// This test is for a simple macro that becomes undefined
 
-		String[] expected = {"a"};
-		int[] expectedInd = {0};
+		String[] expected = { "a" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"ARG",
-				"#undef ARG",
-				"ARG",
-		};
+		String[] lines = { "#define ARG a", "ARG", "#undef ARG", "ARG", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -469,20 +401,13 @@ public class OrinocoPreProcessorTest {
 	public void undefThenRedef() {
 		// This test is for a simple macro that becomes undefined and then redefined
 
-		String[] expected = {"a", "BB"};
-		int[] expectedInd = {0};
+		String[] expected = { "a", "BB" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"ARG",
-				"#undef ARG",
-				"ARG",
-				"#define ARG BB",
-				"ARG",
-		};
+		String[] lines = { "#define ARG a", "ARG", "#undef ARG", "ARG", "#define ARG BB", "ARG", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -491,20 +416,13 @@ public class OrinocoPreProcessorTest {
 	public void ifdef() {
 		// This test is for a simple macro that becomes defined inside an ifdef
 
-		String[] expected = {"def", "def"};
-		int[] expectedInd = {0};
+		String[] expected = { "def", "def" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"#ifdef ARG",
-				"#define DEF def",
-				"DEF",
-				"#endif",
-				"DEF",
-		};
+		String[] lines = { "#define ARG a", "#ifdef ARG", "#define DEF def", "DEF", "#endif", "DEF", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -513,23 +431,14 @@ public class OrinocoPreProcessorTest {
 	public void ifdefElse() {
 		// This test is for #else for #ifdef
 
-		String[] expected = {"beg"};
-		int[] expectedInd = {0};
+		String[] expected = { "beg" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#ifdef ARG",
-				"#define DEF def",
-				"DEF", //this is here to ensure the #define is skipped
-				"#else",
-				"#define BEG beg",
-				"#endif",
-				"DEF",
-				"ARG",
-				"BEG",
-		};
+		String[] lines = { "#ifdef ARG", "#define DEF def", "DEF", // this is here to ensure the #define is skipped
+				"#else", "#define BEG beg", "#endif", "DEF", "ARG", "BEG", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -538,23 +447,13 @@ public class OrinocoPreProcessorTest {
 	public void ifdefIgnoreElse() {
 		// This test is for #else for #ifdef, but the #else block is skipped because #ifdef is true
 
-		String[] expected = {"def", "a"};
-		int[] expectedInd = {0};
+		String[] expected = { "def", "a" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"#ifdef ARG",
-				"#define DEF def",
-				"#else",
-				"#define BEG beg",
-				"#endif",
-				"DEF",
-				"ARG",
-				"BEG",
-		};
+		String[] lines = { "#define ARG a", "#ifdef ARG", "#define DEF def", "#else", "#define BEG beg", "#endif", "DEF", "ARG", "BEG", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -563,19 +462,13 @@ public class OrinocoPreProcessorTest {
 	public void ifndef() {
 		// This test is for a simple macro that becomes defined inside an ifndef
 
-		String[] expected = {"def", "def"};
-		int[] expectedInd = {0};
+		String[] expected = { "def", "def" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#ifndef ARG",
-				"#define DEF def",
-				"DEF",
-				"#endif",
-				"DEF",
-		};
+		String[] lines = { "#ifndef ARG", "#define DEF def", "DEF", "#endif", "DEF", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -584,24 +477,14 @@ public class OrinocoPreProcessorTest {
 	public void ifndefElse() {
 		// This test is for #else for #ifndef
 
-		String[] expected = {"a", "beg"};
-		int[] expectedInd = {0};
+		String[] expected = { "a", "beg" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"#ifndef ARG",
-				"#define DEF def",
-				"DEF", //this is here to ensure the #define is skipped
-				"#else",
-				"#define BEG beg",
-				"#endif",
-				"DEF",
-				"ARG",
-				"BEG",
-		};
+		String[] lines = { "#define ARG a", "#ifndef ARG", "#define DEF def", "DEF", // this is here to ensure the #define is skipped
+				"#else", "#define BEG beg", "#endif", "DEF", "ARG", "BEG", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
@@ -612,39 +495,27 @@ public class OrinocoPreProcessorTest {
 
 		Consumer<CharSequence> cb = s -> assertEquals("def", s);
 
-		String[] lines = {
-				"#ifndef ARG",
-				"#define DEF def",
-				"#else",
-				"#define BEG beg",
-				"#endif",
-				"DEF",
-				"ARG",
-				"BEG",
-		};
+		String[] lines = { "#ifndef ARG", "#define DEF def", "#else", "#define BEG beg", "#endif", "DEF", "ARG", "BEG", };
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
 	public void includeVirtual() {
+		// TODO: reimplement properly
 		// This test is for a simple include where the included handler returns hard coded text
 
-		String[] expected = {"a", "included"};
-		int[] expectedInd = {0};
+		String[] expected = { "a", "included" };
+		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
 
-		String[] lines = {
-				"#define ARG a",
-				"ARG",
-				"#include \"test include\"", //doesn't matter what is included as include handler is hard coded
-				"INCLUDE_MACRO"
-		};
+		String[] lines = { "#define ARG a", "ARG", "#include \"test include\"", // doesn't matter what is included as include handler is
+																				// hard coded
+				"INCLUDE_MACRO" };
 
-		Function<String, OrinocoReader> includeHandler = s -> OrinocoReader.fromCharSequence("#define INCLUDE_MACRO included");
-		lexerFromText(String.join("\n", lines), cb, includeHandler);
+		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
 		lexer.assertPreProcessorUsed();

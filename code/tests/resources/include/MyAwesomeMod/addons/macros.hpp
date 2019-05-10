@@ -1,0 +1,7 @@
+#include "helpers.hpp"
+#include "subModule\moduleInfo.hpp"
+#include "\test\someReallyWeirdName\Awesome\weird.hpp"
+#include "\AnotherAddon\addons\macros.hpp"
+#include "\AnotherAddon\addons\anotherSub\info.hpp"
+#include "\some\prefix\test.hpp"
+#include "\some\prefix\sub\text.txt"
