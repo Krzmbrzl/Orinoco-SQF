@@ -8,4 +8,7 @@ import java.util.HashMap;
  */
 public class MacroSet extends HashMap<String, PreProcessorMacro> {
 
+	private static final long serialVersionUID = 6102312990139496236L;
+
+	
 }

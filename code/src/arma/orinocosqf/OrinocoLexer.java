@@ -9,6 +9,9 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
+
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
  * cyclic dependency on a preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that each token may have a macro inside
@@ -16,7 +19,9 @@ import java.util.regex.Pattern;
  * it submits the token to {@link OrinocoLexerStream#preProcessToken(char[], int, int)}. Subsequently, the preprocessed result re-enters the
  * lexer for re-lexing via {@link #acceptPreProcessedText(CharSequence)}.
  *
- * Example 1: <pre>
+ * Example 1:
+ * 
+ * <pre>
  * #define ONE 1
  * #define ASSIGN(VAR) VAR = ONE;
  * ASSIGN(hello) //begin lexing here
@@ -30,9 +35,9 @@ import java.util.regex.Pattern;
  * @author K
  * @since 02/20/2019
  */
-public class OrinocoLexer {
+public class OrinocoLexer implements ProblemListener {
 	public static int getCommandId(@NotNull String command) {
-		return SQFCommands.instance.getId(command);
+    return SQFCommands.instance.getId(command);
 	}
 
 	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
@@ -304,5 +309,12 @@ public class OrinocoLexer {
 		return lexerStream;
 	}
 
-
+	/**
+	 * This method implementation is intended for the use by the preprocessor. The included offset is relative to the char-buffer provided
+	 * to it. <b>Do not call this method from outside the preprocessor</b>
+	 */
+	@Override
+	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
+		// TODO process problem and delegate to the actual problem listener
+	}
 }

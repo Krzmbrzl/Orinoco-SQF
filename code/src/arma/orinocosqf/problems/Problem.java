@@ -30,6 +30,11 @@ public abstract class Problem {
 	 * @return The unique Id of this problem
 	 */
 	public abstract int getId();
+	
+	@Override
+	public String toString() {
+		return getDisplayName() + "{" + "severity=" + getSeverity() + "; id=" + getId() + "}";
+	}
 
 
 	/**
@@ -37,26 +42,26 @@ public abstract class Problem {
 	 *
 	 * @author Raven
 	 */
-	enum Severity {
+	public static enum Severity {
 		INFO, WARNING, ERROR
 	}
 
 	// Base classes of all concrete problems
-	public abstract class Warning extends Problem {
+	public abstract static class Warning extends Problem {
 		@Override
 		public Severity getSeverity() {
 			return Severity.WARNING;
 		}
 	}
 
-	public abstract class Error extends Problem {
+	public abstract static class Error extends Problem {
 		@Override
 		public Severity getSeverity() {
 			return Severity.ERROR;
 		}
 	}
 
-	public abstract class Info extends Problem {
+	public abstract static class Info extends Problem {
 		@Override
 		public Severity getSeverity() {
 			return Severity.INFO;

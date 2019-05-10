@@ -1,18 +1,20 @@
 package arma.orinocosqf.exceptions;
 
 /**
- * An exception that is thrown if a provided Id is unknown
- *
+ * An exception thrown when an invalid path is being encountered
+ * 
  * @author Raven
+ *
  */
-public class UnknownIdException extends OrinocoException {
-	private static final long serialVersionUID = -2150394272107512233L;
+public class InvalidPathException extends OrinocoException {
+
+	private static final long serialVersionUID = -3319241170803165423L;
 
 	/**
 	 * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may subsequently be initialized
 	 * by a call to {@link #initCause}.
 	 */
-	public UnknownIdException() {
+	public InvalidPathException() {
 		super();
 	}
 
@@ -22,7 +24,7 @@ public class UnknownIdException extends OrinocoException {
 	 *
 	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
 	 */
-	public UnknownIdException(String message) {
+	public InvalidPathException(String message) {
 		super(message);
 	}
 
@@ -34,9 +36,9 @@ public class UnknownIdException extends OrinocoException {
 	 *
 	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
-	 * and indicates that the cause is nonexistent or unknown.)
+	 *        and indicates that the cause is nonexistent or unknown.)
 	 */
-	public UnknownIdException(String message, Throwable cause) {
+	public InvalidPathException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -46,9 +48,9 @@ public class UnknownIdException extends OrinocoException {
 	 * than wrappers for other throwables (for example, {@link java.security.PrivilegedActionException}).
 	 *
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
-	 * and indicates that the cause is nonexistent or unknown.)
+	 *        and indicates that the cause is nonexistent or unknown.)
 	 */
-	public UnknownIdException(Throwable cause) {
+	public InvalidPathException(Throwable cause) {
 		super(cause);
 	}
 
@@ -61,7 +63,7 @@ public class UnknownIdException extends OrinocoException {
 	 * @param enableSuppression whether or not suppression is enabled or disabled
 	 * @param writableStackTrace whether or not the stack trace should be writable
 	 */
-	protected UnknownIdException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+	protected InvalidPathException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 }

@@ -32,9 +32,10 @@ public class TestOrinocoLexer extends OrinocoLexer {
 		preprocessedTextCallback.accept(text);
 
 		super.acceptPreProcessedText(text);
+		preprocessorUsed = true;
 	}
 
 	public void assertDidPreProcessing() {
-		org.junit.Assert.assertTrue(didPreProcessing);
+		org.junit.Assert.assertTrue("PreProcessor should have been used!", didPreProcessing);
 	}
 }
