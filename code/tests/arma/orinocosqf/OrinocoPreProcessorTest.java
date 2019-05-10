@@ -18,23 +18,21 @@ import static org.junit.Assert.fail;
 public class OrinocoPreProcessorTest {
 
 	private TokenExpector expector;
-	private TestOrinocoPreProcessor preProcessor;
+	private OrinocoPreProcessor preProcessor;
 	private TestOrinocoLexer lexer;
 	private ArmaFilesystem fs = new ArmaFilesystem(new File(System.getProperty("user.home")).toPath(), new ArrayList<>());
 	private TokenExpector.AcceptedTokenFactory tokenFactory;
 
-	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb,
-							   @NotNull Function<String, OrinocoReader> includeHandler) {
+	private void lexerFromText(@NotNull String text, @NotNull Consumer<CharSequence> preprocessTextCb) {
 		expector = new TokenExpector();
-    preProcessor = new TestOrinocoPreProcessor(expector, fs, includeHandler);
+		preProcessor = new OrinocoPreProcessor(expector, fs);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
     tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
-	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb,
-							   @NotNull Function<String, OrinocoReader> includeHandler) throws FileNotFoundException {
+	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb) throws FileNotFoundException {
 		expector = new TokenExpector();
-    preProcessor = new TestOrinocoPreProcessor(expector, fs, includeHandler);
+		preProcessor = new OrinocoPreProcessor(expector, fs);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), preProcessor,
 				preprocessTextCb);
     tokenFactory = new TokenExpector.AcceptedTokenFactory();
@@ -43,34 +41,31 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void noPreProcessing_command() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("format", cb, s -> null);
+		lexerFromText("format", cb);
 		final int formatId = OrinocoLexer.getCommandId("format");
 		tokenFactory.acceptCommand(formatId, 0, 6, 0, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
-		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
 	@Test
 	public void noPreProcessing_globalVariable() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("text1", cb, s -> null);
+		lexerFromText("text1", cb);
 		tokenFactory.acceptGlobalVariable(0, 0, 5, 0, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
-		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
 	@Test
 	public void noPreProcessing_localVariable() {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("_text1", cb, s -> null);
+		lexerFromText("_text1", cb);
 		tokenFactory.acceptLocalVariable(0, 0, 6, 0, 6, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
-		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
 	}
 
@@ -104,21 +99,7 @@ public class OrinocoPreProcessorTest {
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
-		lexer.assertPreProcessorUsed();
 		expector.assertTokensMatch();
-	}
-
-	@Test
-	public void noPreProcessing_matchButMissingHashHash() {
-		// this test creates valid defines that get matched, but arma's preprocessor doesn't
-		// allow for replacing text in between text unless there is a ##
-		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-
-		String[] lines = { "#define e a", "#define oo a", "The cow jumped over the moon!" };
-
-		lexerFromText(String.join("\n", lines), cb);
-		lexer.start();
-		lexer.assertPreProcessorUsed();
 	}
 
 	@Test
@@ -162,10 +143,11 @@ public class OrinocoPreProcessorTest {
 				"The cow jumped over the moon!"
 		};
 
-		lexerFromText(String.join("\n", lines), cb, s -> null);
+		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 	}
 
+	@Test
 	public void simpleDefine() {
 		// This test is for a simple macro without parameters
 
@@ -239,7 +221,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
-		lexer.assertPreProcessorUsed();
+		lexer.assertDidPreProcessing();
 	}
 
 	@Test
@@ -255,7 +237,7 @@ public class OrinocoPreProcessorTest {
 		lexerFromText(String.join("\n", lines), cb);
 
 		lexer.start();
-		lexer.assertPreProcessorUsed();
+		lexer.assertDidPreProcessing();
 	}
 
 	@Test
@@ -550,9 +532,6 @@ public class OrinocoPreProcessorTest {
 				"BEG",
 		};
 
-		String[] lines = { "#define ARG a", "#ifndef ARG", "#define DEF def", "DEF", // this is here to ensure the #define is skipped
-				"#else", "#define BEG beg", "#endif", "DEF", "ARG", "BEG", };
-
 		lexerFromText(String.join("\n", lines), cb);
 		lexer.start();
 		lexer.assertDidPreProcessing();
@@ -578,25 +557,25 @@ public class OrinocoPreProcessorTest {
 		lexer.start();
 		lexer.assertDidPreProcessing();
 	}
-
-	@Test
-	public void includeVirtual() {
-		// TODO: reimplement properly
-		// This test is for a simple include where the included handler returns hard coded text
-
-		String[] expected = {"a", "included"};
-		int[] expectedInd = {0};
-		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
-
-		String[] lines = { "#define ARG a", "ARG", "#include \"test include\"", // doesn't matter what is included as include handler is
-																				// hard coded
-				"INCLUDE_MACRO" };
-
-		lexerFromText(String.join("\n", lines), cb);
-
-		lexer.start();
-		lexer.assertDidPreProcessing();
-	}
+//
+//	@Test
+//	public void includeVirtual() {
+//		// TODO: reimplement properly
+//		// This test is for a simple include where the included handler returns hard coded text
+//
+//		String[] expected = {"a", "included"};
+//		int[] expectedInd = {0};
+//		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s);
+//
+//		String[] lines = { "#define ARG a", "ARG", "#include \"test include\"", // doesn't matter what is included as include handler is
+//																				// hard coded
+//				"INCLUDE_MACRO" };
+//
+//		lexerFromText(String.join("\n", lines), cb);
+//
+//		lexer.start();
+//		lexer.assertDidPreProcessing();
+//	}
 
 
 }

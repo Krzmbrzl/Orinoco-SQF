@@ -1,14 +1,14 @@
 package arma.orinocosqf;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.jetbrains.annotations.NotNull;
-
 import arma.orinocosqf.bodySegments.BodySegment;
 import arma.orinocosqf.bodySegments.BodySegmentParser;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
 import arma.orinocosqf.problems.Problems;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link OrinocoLexerStream} implementation that fully preprocesses tokens.
@@ -26,7 +26,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 */
 	private final OrinocoTokenProcessor processor;
 
-  /**
+	/**
 	 * The {@link MacroSet} of the current preprocessing run
 	 */
 	protected MacroSet macroSet;
@@ -49,7 +49,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	}
 
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor processor, @NotNull ArmaFilesystem fileSystem,
-			@NotNull OrinocoPreprocessorConfiguration configuration) {
+							   @NotNull OrinocoPreprocessorConfiguration configuration) {
 		this.processor = processor;
 		this.fileSystem = fileSystem;
 		this.configuration = configuration;
@@ -112,25 +112,25 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-			@NotNull OrinocoLexerContext ctx) {
+							  @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptCommand(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-			@NotNull OrinocoLexerContext ctx) {
+									@NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-      @NotNull OrinocoLexerContext ctx) {
+									 @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-			int originalLength, @NotNull OrinocoLexerContext ctx) {
+							  int originalLength, @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
@@ -151,14 +151,14 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerContext ctx) {
+								 @NotNull OrinocoLexerContext ctx) {
 		// search for NLs
 		ctx.getTextBuffer().getText(originalOffset, originalLength);
 	}
 
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerContext ctx) {
+							  @NotNull OrinocoLexerContext ctx) {
 		if (configuration.keepComments()) {
 			// TODO: feed comments back to special method in lexer to prevent endless loop
 		} else {
@@ -168,7 +168,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Checks whether the given character can be part of a macro name (or macro-argument-name)
-	 * 
+	 *
 	 * @param c The character to check
 	 * @return Whether or not it can be a macro name part
 	 */
@@ -176,15 +176,15 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		return (c > 'Z' ? c <= 'z' && c >= 'a' : c <= 'Z' && c >= 'A') || c == '_' || (!isFirstLetter && Character.isDigit(c));
 	}
 
-  @Override
-  @NotNull
-	protected MacroSet getMacroSet() {
+	@Override
+	@NotNull
+	public MacroSet getMacroSet() {
 		return this.macroSet;
 	}
 
 	/**
 	 * Processes a #define statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
@@ -336,7 +336,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #ifdef statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
@@ -347,7 +347,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #ifndef statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
@@ -358,7 +358,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #else statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
@@ -369,7 +369,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #endif statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
@@ -380,7 +380,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #undef statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement
@@ -426,7 +426,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	/**
 	 * Processes a #include statement
-	 * 
+	 *
 	 * @param readOnlyBuf The buffer containing the statement
 	 * @param startOffset The offset at which the statement starts
 	 * @param length The length of the statement

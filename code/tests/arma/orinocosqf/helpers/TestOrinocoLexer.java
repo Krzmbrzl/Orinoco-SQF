@@ -32,7 +32,6 @@ public class TestOrinocoLexer extends OrinocoLexer {
 		preprocessedTextCallback.accept(text);
 
 		super.acceptPreProcessedText(text);
-		preprocessorUsed = true;
 	}
 
 	public void assertDidPreProcessing() {

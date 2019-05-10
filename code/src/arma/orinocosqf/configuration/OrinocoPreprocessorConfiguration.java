@@ -1,11 +1,11 @@
 package arma.orinocosqf.configuration;
 
+import arma.orinocosqf.OrinocoPreProcessor;
+import arma.orinocosqf.exceptions.InvalidSyntaxException;
 import org.jetbrains.annotations.NotNull;
 
-import arma.orinocosqf.exceptions.InvalidSyntaxException;
-
 /**
- * The configuration for the {@link OrinocoPreprocessor}
+ * The configuration for the {@link OrinocoPreProcessor}
  * 
  * @author Raven
  *
