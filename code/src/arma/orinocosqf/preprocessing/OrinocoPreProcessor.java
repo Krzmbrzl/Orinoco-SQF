@@ -1,9 +1,14 @@
-package arma.orinocosqf;
+package arma.orinocosqf.preprocessing;
 
-import arma.orinocosqf.bodySegments.BodySegment;
-import arma.orinocosqf.bodySegments.BodySegmentParser;
+import arma.orinocosqf.OrinocoLexer;
+import arma.orinocosqf.OrinocoLexerContext;
+import arma.orinocosqf.OrinocoLexerLiteralType;
+import arma.orinocosqf.OrinocoLexerStream;
+import arma.orinocosqf.OrinocoTokenProcessor;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
 import arma.orinocosqf.problems.Problems;
 import org.jetbrains.annotations.NotNull;
 

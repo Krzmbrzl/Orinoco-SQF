@@ -1,6 +1,9 @@
 package arma.orinocosqf;
 
 import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.preprocessing.MacroSet;
+import arma.orinocosqf.preprocessing.PreProcessorCommand;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

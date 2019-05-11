@@ -1,4 +1,4 @@
-package arma.orinocosqf;
+package arma.orinocosqf.preprocessing;
 
 import java.io.File;
 import java.io.FileInputStream;

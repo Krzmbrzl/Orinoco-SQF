@@ -1,10 +1,10 @@
-package arma.orinocosqf.bodySegments;
+package arma.orinocosqf.preprocessing.bodySegments;
 
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import arma.orinocosqf.PreProcessorMacro;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
  * A non {@link MacroArgumentSegment} which is simply a word which can either be a {@link PreProcessorMacro} itself or just plain text. When

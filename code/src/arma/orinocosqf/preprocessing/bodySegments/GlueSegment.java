@@ -1,11 +1,11 @@
-package arma.orinocosqf.bodySegments;
+package arma.orinocosqf.preprocessing.bodySegments;
 
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import arma.orinocosqf.PreProcessorMacro;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
  * A segment used for ## inside the macro body (#define MACRO leftSegment##rightSegment). When {@link #applyArguments(List)} is invoked, it
