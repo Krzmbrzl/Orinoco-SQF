@@ -9,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import arma.orinocosqf.helpers.DummyFileSystem;
-import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.helpers.TestOrinocoPreprocessor;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentSequence;
@@ -25,14 +24,13 @@ import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 public class BodySegmentParserTest {
 
 	static BodySegmentParser parser;
-	static OrinocoPreProcessor p;
+	static TestOrinocoPreprocessor p;
 	static List<String> DefaultParams;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
 		parser = new BodySegmentParser(new ProblemListenerPanicImplementation());
-		p = new OrinocoPreProcessor(new OrinocoTokenProcessorAdapter() {
-		}, new DummyFileSystem());
+		p = new TestOrinocoPreprocessor();
 		DefaultParams = new ArrayList<>();
 		DefaultParams.add("MyMacroParam");
 		DefaultParams.add("SomeParam");
