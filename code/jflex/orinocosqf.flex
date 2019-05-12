@@ -2,11 +2,14 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import arma.orinocosqf.MacroSet;
 
 %%
 
+%ctorarg MacroSet macroSet
+
 %init{
-	// constructor things in here
+	this.macroSet = macroSet;
 %init}
 
 
@@ -21,179 +24,8 @@ import org.jetbrains.annotations.Nullable;
 
 %state MACRO_CALL
 
-%{
-	private CommandSet commands;
-  	private final YYTextCharSequence yytextCharSequence = new YYTextCharSequence();
-	private int latestCommandId = -1;
+%include orinocosqf_javaheader
 
-	private int EQEQ_id;
-	private int NE_id;
-	private int GTGT_id;
-	private int LE_id;
-	private int GE_id;
-	private int AMPAMP_id;
-	private int BARBAR_id;
-	private int ASTERISK_id;
-	private int EQ_id;
-	private int PERC_id;
-	private int PLUS_id;
-	private int MINUS_id;
-	private int FSLASH_id;
-	private int CARET_id;
-	private int HASH_id;
-	private int LT_id;
-	private int GT_id;
-	private int EXCL_id;
-	private int LPAREN_id;
-	private int RPAREN_id;
-	private int L_CURLY_BRACE_id;
-	private int R_CURLY_BRACE_id;
-	private int L_SQ_BRACKET_id;
-	private int R_SQ_BRACKET_id;
-	private int COMMA_id;
-	private int SEMICOLON_id;
-	private int QUEST_id;
-	private int COLON_id;
-
-
-	public int getLatestCommandId() {
-		return latestCommandId;
-	}
-
-  	public void setCommandSet(@NotNull CommandSet commands) {
-		this.commands = commands;
-
-		{
-			EQEQ_id = commands.getId("==");
-			NE_id = commands.getId("!=");
-			GTGT_id = commands.getId(">>");
-			LE_id = commands.getId("<=");
-			GE_id = commands.getId(">=");
-			AMPAMP_id = commands.getId("&&");
-			BARBAR_id = commands.getId("||");
-			ASTERISK_id = commands.getId("*");
-			EQ_id = commands.getId("=");
-			PERC_id = commands.getId("%");
-			PLUS_id = commands.getId("+");
-			MINUS_id = commands.getId("-");
-			FSLASH_id = commands.getId("/");
-			CARET_id = commands.getId("^");
-			HASH_id = commands.getId("#");
-			LT_id = commands.getId("<");
-			GT_id = commands.getId(">");
-			EXCL_id = commands.getId("!");
-			LPAREN_id = commands.getId("(");
-			RPAREN_id = commands.getId(")");
-			L_CURLY_BRACE_id = commands.getId("{");
-			R_CURLY_BRACE_id = commands.getId("}");
-			L_SQ_BRACKET_id = commands.getId("[");
-			R_SQ_BRACKET_id = commands.getId("]");
-			COMMA_id = commands.getId(",");
-			SEMICOLON_id = commands.getId(";");
-			QUEST_id = commands.getId("?");
-			COLON_id = commands.getId(":");
-		}
-
-	}
-
-	private boolean yytextIsCommand() {
-		latestCommandId = commands.getId(yytextCharSequence);
-  		return latestCommandId >= 0;
-	}
-
-	private class YYTextCharSequence implements CharSequence{
-		public int length() {
-			return zzMarkedPos - zzStartRead;
-		}
-        public char charAt(int i) {
-			return zzBuffer[zzStartRead + i];
-        }
-
-        public CharSequence subSequence(int startinc, int endex) {
-			return new String(zzBuffer, zzStartRead + startinc, zzStartRead + endex);
-        }
-
-        @NotNull
-        @Override
-		public String toString() {
-			return new String(zzBuffer, zzStartRead, length());
-		}
-	}
-%}
-
-%{
-	public enum TokenType {
-		  WHITE_SPACE,
-		  
-          CMD_DEFINE,
-          CMD_INCLUDE,
-          CMD_IFDEF,
-          CMD_IFNDEF,
-          CMD_ELSE,
-          CMD_ENDIF,
-          CMD_UNDEF,
-
-          BLOCK_COMMENT,
-          INLINE_COMMENT,
-          
-          HEX_LITERAL,
-          INTEGER_LITERAL,
-          DEC_LITERAL,
-          STRING_LITERAL,
-
-          COMMAND(true),
-
-          GLUED_WORD,
-          WORD,
-          EQEQ(true),
-          NE(true),
-          GTGT(true),
-          LE(true),
-          GE(true),
-          AMPAMP(true),
-          BARBAR(true),
-
-          ASTERISK(true),
-          EQ(true),
-          PERC(true),
-          PLUS(true),
-          MINUS(true),
-          FSLASH(true),
-          CARET(true),
-
-          HASH(true),
-
-          LT(true),
-          GT(true),
-
-          EXCL(true),
-
-          LPAREN(true),
-          RPAREN(true),
-          L_CURLY_BRACE(true),
-          R_CURLY_BRACE(true),
-          L_SQ_BRACKET(true),
-          R_SQ_BRACKET(true),
-          COMMA(true),
-          SEMICOLON(true),
-          
-          QUEST(true),
-          COLON(true),
-
-          BAD_CHARACTER,
-          EOF;
-
-		  public final boolean isCommand;
-
-		  TokenType() {
-		  		isCommand = false;
-		  }
-
-		  TokenType(boolean isCommand) {
-				this.isCommand = isCommand;
-		  }
-	}
-%}
 LETTER = [a-zA-Z_$]
 LETTER_DIGIT = [a-zA-Z_$0-9]
 WORD = {LETTER} {LETTER_DIGIT}*
@@ -253,6 +85,9 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
 
 	{WORD} {
+      	if(yytextCharSequence.charAt(0) == '_') {
+			return TokenType.LOCAL_VAR;
+		}
       	if(yytextIsCommand()) {
             return TokenType.COMMAND;
         }

@@ -1,6 +1,8 @@
 package arma.orinocosqf;
 
 import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,9 +10,6 @@ import java.io.IOException;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import arma.orinocosqf.problems.Problem;
-import arma.orinocosqf.problems.ProblemListener;
 
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
@@ -90,7 +89,7 @@ public class OrinocoLexer implements ProblemListener {
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
-		jFlexLexer = new OrinocoJFlexLexer(r);
+		jFlexLexer = new OrinocoJFlexLexer(r, lexerStream.getMacroSet());
 		jFlexLexer.setCommandSet(SQFCommands.instance);
 	}
 

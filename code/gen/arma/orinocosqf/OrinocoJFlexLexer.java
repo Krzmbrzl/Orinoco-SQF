@@ -4,6 +4,7 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import arma.orinocosqf.MacroSet;
 
 
 /**
@@ -364,6 +365,7 @@ public class OrinocoJFlexLexer {
   }
 
   /* user code: */
+	private final MacroSet macroSet;
 	private CommandSet commands;
   	private final YYTextCharSequence yytextCharSequence = new YYTextCharSequence();
 	private int latestCommandId = -1;
@@ -463,7 +465,7 @@ public class OrinocoJFlexLexer {
 	}
 	public enum TokenType {
 		  WHITE_SPACE,
-		  
+
           CMD_DEFINE,
           CMD_INCLUDE,
           CMD_IFDEF,
@@ -474,7 +476,7 @@ public class OrinocoJFlexLexer {
 
           BLOCK_COMMENT,
           INLINE_COMMENT,
-          
+
           HEX_LITERAL,
           INTEGER_LITERAL,
           DEC_LITERAL,
@@ -482,6 +484,8 @@ public class OrinocoJFlexLexer {
 
           COMMAND(true),
 
+          MACRO,
+          LOCAL_VAR,
           GLUED_WORD,
           WORD,
           EQEQ(true),
@@ -515,7 +519,7 @@ public class OrinocoJFlexLexer {
           R_SQ_BRACKET(true),
           COMMA(true),
           SEMICOLON(true),
-          
+
           QUEST(true),
           COLON(true),
 
@@ -539,8 +543,8 @@ public class OrinocoJFlexLexer {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  public OrinocoJFlexLexer(java.io.Reader in) {
-  	// constructor things in here
+  public OrinocoJFlexLexer(java.io.Reader in, MacroSet macroSet) {
+  	this.macroSet = macroSet;
     this.zzReader = in;
   }
 
@@ -948,7 +952,10 @@ public class OrinocoJFlexLexer {
             // fall through
           case 46: break;
           case 2: 
-            { if(yytextIsCommand()) {
+            { if(yytextCharSequence.charAt(0) == '_') {
+			return TokenType.LOCAL_VAR;
+		}
+      	if(yytextIsCommand()) {
             return TokenType.COMMAND;
         }
 
