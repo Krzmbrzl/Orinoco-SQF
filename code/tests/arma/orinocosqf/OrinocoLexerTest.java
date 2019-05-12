@@ -31,7 +31,7 @@ public class OrinocoLexerTest {
 	}
 
 	private IdTransformer<String> getVariableTransformer() {
-		throw new UnsupportedOperationException("Variable ID-transformer not yet implemented");
+		return lexer.getIdTransformer();
 	}
 
 	private IdTransformer<String> getCommandTransformer() {
@@ -796,101 +796,129 @@ public class OrinocoLexerTest {
 
 	@Test
 	public void localVariables_caseInsensitive() throws UnknownIdException {
-		// precondition: Used id-transformer is case-insensitive
-		assertEquals("The used variable transformer appears to be case-sensitive", getVariableTransformer().toId("_test"),
-				getVariableTransformer().toId("_TeSt"));
+		String input;
+		{
+			input = "_test";
+			lexerFromText(input);
 
-		int testId = getVariableTransformer().toId("_test");
-		int secondTestId = getVariableTransformer().toId("_second_Test");
+			// precondition: Used id-transformer is case-insensitive
+			assertEquals("The used variable transformer appears to be case-sensitive", getVariableTransformer().toId("_test"),
+					getVariableTransformer().toId("_TeSt"));
 
-		String input = "_test";
-		lexerFromText(input);
+			int testId = getVariableTransformer().toId("_test");
 
-		tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
 
+		{
+			input = "_Test";
+			lexerFromText(input);
+			int testId = getVariableTransformer().toId("_test");
 
-		input = "_Test";
-		lexerFromText(input);
-
-		tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
-
-
-		input = "_tesT";
-		lexerFromText(input);
-
-		tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
 
 
-		input = "_TEST";
-		lexerFromText(input);
+		{
+			input = "_tesT";
+			lexerFromText(input);
+			int testId = getVariableTransformer().toId("_test");
 
-		tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
-
-
-		input = "_tEsT";
-		lexerFromText(input);
-
-		tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
 
 
-		input = "_second_Test";
-		lexerFromText(input);
+		{
+			input = "_TEST";
+			lexerFromText(input);
+			int testId = getVariableTransformer().toId("_test");
 
-		tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
-
-
-		input = "_second_test";
-		lexerFromText(input);
-
-		tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
 
 
-		input = "_Second_TesT";
-		lexerFromText(input);
+		{
+			input = "_tEsT";
+			lexerFromText(input);
+			int testId = getVariableTransformer().toId("_test");
 
-		tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
-
-
-		input = "_SECOND_TEST";
-		lexerFromText(input);
-
-		tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
 
 
-		input = "_sEcOnD_tEsT";
-		lexerFromText(input);
+		{
+			input = "_second_Test";
+			lexerFromText(input);
+			int secondTestId = getVariableTransformer().toId("_second_Test");
 
-		tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
+
+
+		{
+			input = "_second_test";
+			lexerFromText(input);
+			int secondTestId = getVariableTransformer().toId("_second_Test");
+
+			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
+
+
+		{
+			input = "_Second_TesT";
+			lexerFromText(input);
+			int secondTestId = getVariableTransformer().toId("_second_Test");
+
+			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
+
+
+		{
+			input = "_SECOND_TEST";
+			lexerFromText(input);
+			int secondTestId = getVariableTransformer().toId("_second_Test");
+
+			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
+
+
+		{
+			input = "_sEcOnD_tEsT";
+			lexerFromText(input);
+			int secondTestId = getVariableTransformer().toId("_second_Test");
+
+			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
+			expector.addExpectedTokens(tokenFactory.getTokens());
+			lexer.start();
+			expector.assertTokensMatch();
+		}
 	}
 
 	@Test

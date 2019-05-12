@@ -3,13 +3,14 @@ package arma.orinocosqf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
  * @author K
  * @since 5/12/19
  */
-public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> {
+public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Iterable<Cik> {
 	private Group[] data = new Group[32];
 	private int entryCount = 0;
 	private int groupCount = 0;
@@ -49,7 +50,7 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> {
 	}
 
 	@Nullable
-	public Cik getKey(@NotNull CharSequence cs) {
+	public Cik getKeyForCharSequence(@NotNull CharSequence cs) {
 		Group g = getGroup(cs);
 		for (Object o : g.list) {
 			Cik cik = (Cik) o;
@@ -95,7 +96,7 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> {
 
 	@NotNull
 	private Group getGroup(@NotNull CharSequence cs) {
-		final int ind = computeHash(cs) % data.length;
+		final int ind = Math.abs(computeHash(cs)) % data.length;
 		Group g = data[ind];
 		if (g == null) {
 			data[ind] = new Group();
@@ -115,7 +116,60 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> {
 		return hash;
 	}
 
+	@NotNull
+	@Override
+	public Iterator<Cik> iterator() {
+		return new MyIterator(this);
+	}
+
 	private static class Group<C extends CaseInsentiveKey> {
 		public final LinkedList<C> list = new LinkedList<>();
+	}
+
+	private class MyIterator implements Iterator<Cik> {
+		private final CaseInsensitiveHashSet<Cik> set;
+		private int dataInd = 0;
+		private Iterator<Cik> groupIter;
+		private boolean checked = false;
+		private boolean toast = false;
+
+		public MyIterator(@NotNull CaseInsensitiveHashSet<Cik> set) {
+			this.set = set;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (!checked) {
+				checked = true;
+				while (true) {
+					if (groupIter != null) {
+						if (groupIter.hasNext()) {
+							break;
+						} else {
+							dataInd++;
+						}
+					}
+					if (dataInd >= data.length) {
+						toast = true;
+						break;
+					}
+					if (set.data[dataInd] == null) {
+						dataInd++;
+						continue;
+					}
+					groupIter = set.data[dataInd].list.iterator();
+				}
+			}
+			return !toast && groupIter != null && groupIter.hasNext();
+		}
+
+		@Override
+		public Cik next() {
+			if (!hasNext()) {
+				throw new IllegalStateException();
+			}
+			checked = false;
+			return groupIter.next();
+		}
 	}
 }

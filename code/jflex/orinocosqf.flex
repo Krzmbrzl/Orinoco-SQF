@@ -2,7 +2,8 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import arma.orinocosqf.MacroSet;
+import arma.orinocosqf.preprocessing.MacroSet;
+import arma.orinocosqf.HashableCharSequence;
 
 %%
 
@@ -21,8 +22,6 @@ import arma.orinocosqf.MacroSet;
 %eof{
     return;
 %eof}
-
-%state MACRO_CALL
 
 %include orinocosqf_javaheader
 
@@ -52,7 +51,8 @@ STRING_LITERAL = ("\"\""|"\""([^\"]+|\"\")+"\"") | ("''" | "'"([^']+|'')+"'")
 BLOCK_COMMENT = "/*" ~"*/"
 INLINE_COMMENT = "//" {INPUT_CHARACTER}*
 
-MACRO_CHARACTER = [^\r\n] | (("\\\n" | "\\\r\n" | "\\\r") [ \t\f]*)
+MACRO_NEXT_LINE = (("\\\n" | "\\\r\n" | "\\\r") [ \t\f]*)
+MACRO_CHARACTER = [^\r\n] | {MACRO_NEXT_LINE}
 MACRO_TEXT = {MACRO_CHARACTER}+
 CMD_DEFINE = "#define" {MACRO_TEXT}?
 CMD_INCLUDE = "#include" {MACRO_TEXT}?
@@ -63,7 +63,6 @@ CMD_ENDIF = "#endif" {MACRO_TEXT}?
 CMD_UNDEF = "#undef" {MACRO_TEXT}?
 
 %%
-
 
 <YYINITIAL> {
 
@@ -85,14 +84,15 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
 
 	{WORD} {
-      	if(yytextCharSequence.charAt(0) == '_') {
-			return TokenType.LOCAL_VAR;
+		if(macroSet.containsKey(yytextHashableCharSequence)) {
+			return TokenType.MACRO;
 		}
-      	if(yytextIsCommand()) {
-            return TokenType.COMMAND;
-        }
+		if(yytextIsCommand()) {
+			return TokenType.COMMAND;
+		}
 
-        return TokenType.WORD;
+		return TokenType.WORD;
+
     }
 
 	{GLUED_WORD} {

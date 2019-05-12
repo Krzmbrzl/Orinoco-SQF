@@ -1,10 +1,10 @@
 package arma.orinocosqf;
 
 import arma.orinocosqf.exceptions.UnknownIdException;
-import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.preprocessing.MacroSet;
-import arma.orinocosqf.problems.ProblemListener;
+import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * lexer for re-lexing via {@link #acceptPreProcessedText(CharSequence)}.
  *
  * Example 1:
- * 
+ *
  * <pre>
  * #define ONE 1
  * #define ASSIGN(VAR) VAR = ONE;
@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  */
 public class OrinocoLexer implements ProblemListener {
 	public static int getCommandId(@NotNull String command) {
-    return SQFCommands.instance.getId(command);
+		return SQFCommands.instance.getId(command);
 	}
 
 	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
@@ -80,6 +80,11 @@ public class OrinocoLexer implements ProblemListener {
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
 	private final OrinocoJFlexLexer jFlexLexer;
+	private static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
+	private static int nextGlobalVarId = 0;
+	private final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
+	private int nextLocalVarId = 0;
+	private final VariableIdTransformer varIdTransformer = new MyVariableIdTransformer();
 
 	private enum PreProcessorState {
 		IfDef, IfNDef, ElseIfDef, ElseIfNDef
@@ -94,6 +99,12 @@ public class OrinocoLexer implements ProblemListener {
 		jFlexLexer = new OrinocoJFlexLexer(r, lexerStream.getMacroSet());
 		jFlexLexer.setCommandSet(SQFCommands.instance);
 	}
+
+	@NotNull
+	public VariableIdTransformer getIdTransformer() {
+		return varIdTransformer;
+	}
+
 
 	/**
 	 * Starts the lexing process.
@@ -217,9 +228,31 @@ public class OrinocoLexer implements ProblemListener {
 					break;
 				}
 				case GLUED_WORD: {
+
 					break;
 				}
 				case WORD: {
+					CharSequence cs = jFlexLexer.getTokenCharSequence();
+					if (cs.charAt(0) == '_') {
+						SQFVariable var = localVarSet.getKeyForCharSequence(cs);
+						if (var == null) {
+							var = new SQFVariable(new String(HashableCharSequence.asChars(cs)), nextLocalVarId);
+							localVarSet.put(var);
+							nextLocalVarId++;
+						}
+						makeLocalVariable(var.getId());
+					} else {
+						SQFVariable var = globalVarSet.getKeyForCharSequence(cs);
+						if (var == null) {
+							var = new SQFVariable(new String(HashableCharSequence.asChars(cs)), nextGlobalVarId);
+							globalVarSet.put(var);
+							nextGlobalVarId++;
+						}
+						makeGlobalVariable(var.getId());
+					}
+					break;
+				}
+				case MACRO: {
 					break;
 				}
 				case BAD_CHARACTER: {
@@ -259,13 +292,13 @@ public class OrinocoLexer implements ProblemListener {
 		updateOffsetsAfterMake();
 	}
 
-	private void makeLocalVariable() {
-		//lexerStream.acceptLocalVariable();
+	private void makeLocalVariable(int id) {
+		lexerStream.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeGlobalVariable() {
-		//lexerStream.acceptGlobalVariable();
+	private void makeGlobalVariable(int id) {
+		lexerStream.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -275,7 +308,7 @@ public class OrinocoLexer implements ProblemListener {
 	}
 
 	private void makePreProcessedText() {
-		//lexerStream.preProcessToken();
+//		lexerStream.preProcessToken(jFlexLexer.getBuffer(), );
 		updateOffsetsAfterMake();
 	}
 
@@ -317,5 +350,19 @@ public class OrinocoLexer implements ProblemListener {
 	@Override
 	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
 		// TODO process problem and delegate to the actual problem listener
+	}
+
+	private class MyVariableIdTransformer extends VariableIdTransformer {
+
+		public MyVariableIdTransformer() {
+			super(localVarSet, globalVarSet, s -> {
+				if (s.charAt(0) == '_') {
+					nextLocalVarId++;
+					return nextLocalVarId - 1;
+				}
+				nextGlobalVarId++;
+				return nextGlobalVarId - 1;
+			});
+		}
 	}
 }
