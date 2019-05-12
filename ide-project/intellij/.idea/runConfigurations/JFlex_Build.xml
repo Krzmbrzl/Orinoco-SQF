@@ -1,8 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="JFlex Build" type="AntRunConfiguration">
     <antsettings antfile="file://$PROJECT_DIR$/../../code/ant/orinocosqf.ant" target="build" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
+    <method v="2" />
   </configuration>
 </component>
