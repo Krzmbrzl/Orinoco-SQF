@@ -3,8 +3,7 @@
 package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import arma.orinocosqf.MacroSet;
+import arma.orinocosqf.preprocessing.MacroSet;
 
 
 /**
