@@ -1,10 +1,10 @@
-package arma.orinocosqf.bodySegments;
+package arma.orinocosqf.preprocessing.bodySegments;
 
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import arma.orinocosqf.PreProcessorMacro;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
  * A type of {@link BodySegment} in that it contains a sequence/list of segments. When {@link #applyArguments(List)} is invoked, each

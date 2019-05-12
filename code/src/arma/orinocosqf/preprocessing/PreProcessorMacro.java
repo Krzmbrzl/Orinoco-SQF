@@ -1,8 +1,8 @@
-package arma.orinocosqf;
+package arma.orinocosqf.preprocessing;
 
 import org.jetbrains.annotations.NotNull;
 
-import arma.orinocosqf.bodySegments.BodySegment;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 
 import java.util.List;
 

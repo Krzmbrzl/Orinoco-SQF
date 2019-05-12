@@ -1,6 +1,9 @@
 package arma.orinocosqf.helpers;
 
 import arma.orinocosqf.*;
+import arma.orinocosqf.preprocessing.MacroSet;
+import arma.orinocosqf.preprocessing.PreProcessorCommand;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

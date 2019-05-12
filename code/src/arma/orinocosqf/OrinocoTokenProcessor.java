@@ -2,6 +2,8 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.preprocessing.PreProcessorCommand;
+
 /**
  * A token processor that is designed to not need {@link OrinocoToken} instances.
  *

@@ -1,10 +1,10 @@
-package arma.orinocosqf.bodySegments;
+package arma.orinocosqf.preprocessing.bodySegments;
 
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import arma.orinocosqf.PreProcessorMacro;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
  * A {@link BodySegment} is a portion of a {@link PreProcessorMacro} body. #define MACRO body. When a macro is invoked, use

@@ -12,6 +12,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import arma.orinocosqf.exceptions.InvalidPathException;
+import arma.orinocosqf.preprocessing.ArmaFile;
+import arma.orinocosqf.preprocessing.ArmaFilesystem;
 
 public class ArmaFilesystemTest {
 

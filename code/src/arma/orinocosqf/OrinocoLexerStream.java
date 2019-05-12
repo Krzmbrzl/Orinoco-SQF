@@ -2,6 +2,9 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.preprocessing.MacroSet;
+import arma.orinocosqf.preprocessing.PreProcessorCommand;
+
 /**
  * This interface describes a stream-object that will process everything {@link OrinocoLexer} lexes. Additionally it is also responsible for
  * providing preprocessing-support.

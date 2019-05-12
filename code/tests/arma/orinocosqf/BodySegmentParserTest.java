@@ -9,29 +9,28 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import arma.orinocosqf.bodySegments.BodySegment;
-import arma.orinocosqf.bodySegments.BodySegmentParser;
-import arma.orinocosqf.bodySegments.BodySegmentSequence;
-import arma.orinocosqf.bodySegments.GlueSegment;
-import arma.orinocosqf.bodySegments.MacroArgumentSegment;
-import arma.orinocosqf.bodySegments.ParenSegment;
-import arma.orinocosqf.bodySegments.StringifySegment;
-import arma.orinocosqf.bodySegments.TextSegment;
-import arma.orinocosqf.bodySegments.WordSegment;
-import arma.orinocosqf.helpers.DummyFileSystem;
+import arma.orinocosqf.helpers.TestOrinocoPreprocessor;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegmentSequence;
+import arma.orinocosqf.preprocessing.bodySegments.GlueSegment;
+import arma.orinocosqf.preprocessing.bodySegments.MacroArgumentSegment;
+import arma.orinocosqf.preprocessing.bodySegments.ParenSegment;
+import arma.orinocosqf.preprocessing.bodySegments.StringifySegment;
+import arma.orinocosqf.preprocessing.bodySegments.TextSegment;
+import arma.orinocosqf.preprocessing.bodySegments.WordSegment;
 import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 
 public class BodySegmentParserTest {
 
 	static BodySegmentParser parser;
-	static OrinocoPreProcessor p;
+	static TestOrinocoPreprocessor p;
 	static List<String> DefaultParams;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
 		parser = new BodySegmentParser(new ProblemListenerPanicImplementation());
-		p = new OrinocoPreProcessor(new OrinocoTokenProcessorAdapter() {
-		}, new DummyFileSystem());
+		p = new TestOrinocoPreprocessor();
 		DefaultParams = new ArrayList<>();
 		DefaultParams.add("MyMacroParam");
 		DefaultParams.add("SomeParam");

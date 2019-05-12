@@ -1,4 +1,4 @@
-package arma.orinocosqf.bodySegments;
+package arma.orinocosqf.preprocessing.bodySegments;
 
 import java.util.List;
 
