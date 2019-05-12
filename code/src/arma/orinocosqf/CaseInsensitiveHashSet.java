@@ -9,7 +9,7 @@ import java.util.LinkedList;
  * @author K
  * @since 5/12/19
  */
-public class CaseInsensitiveHashMap<Cik extends CaseInsentiveKey> {
+public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> {
 	private Group[] data = new Group[32];
 	private int entryCount = 0;
 	private int groupCount = 0;
