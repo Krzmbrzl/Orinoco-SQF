@@ -52,6 +52,8 @@ public class PreProcessorMacro {
 			}
 		}
 		this.body = body;
+		
+		body.setOwner(this);
 	}
 
 	/**
