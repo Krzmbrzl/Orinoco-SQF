@@ -400,6 +400,10 @@ public class OrinocoJFlexLexer {
 	private int QUEST_id;
 	private int COLON_id;
 
+	public int yystart() {
+		return zzStartRead;
+	}
+
 	@NotNull
 	public CharSequence getTokenCharSequence() {
 		return yytextCharSequence;

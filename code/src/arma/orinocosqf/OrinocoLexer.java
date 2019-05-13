@@ -9,12 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import arma.orinocosqf.problems.Problem;
-import arma.orinocosqf.problems.ProblemListener;
 
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
@@ -46,36 +44,7 @@ public class OrinocoLexer implements ProblemListener {
 
 	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
 
-	private OrinocoLexerContext context = new OrinocoLexerContext() {
-		@Override
-		public @NotNull String getCommand(int id) throws UnknownIdException {
-			String c = SQFCommands.instance.getCommandById(id);
-			if (c == null) {
-				throw new UnknownIdException(id + "");
-			}
-			return c;
-		}
-
-		@Override
-		public @Nullable String getVariable(int id) {
-			return null;
-		}
-
-		@Override
-		public boolean isTextBufferingEnabled() {
-			return false;
-		}
-
-		@Override
-		public @Nullable TextBuffer getTextBuffer() {
-			return null;
-		}
-
-		@Override
-		public @Nullable TextBuffer getTextBufferPreprocessed() {
-			return null;
-		}
-	};
+	private OrinocoLexerContext context = new DefaultLexerContext();
 
 	private final OrinocoLexerStream lexerStream;
 	private int originalOffset = 0;
@@ -88,6 +57,7 @@ public class OrinocoLexer implements ProblemListener {
 	private final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
 	private int nextLocalVarId = 0;
 	private final VariableIdTransformer varIdTransformer = new MyVariableIdTransformer();
+	private Writer preprocessedResultWriter;
 
 	private enum PreProcessorState {
 		IfDef, IfNDef, ElseIfDef, ElseIfNDef
@@ -108,6 +78,16 @@ public class OrinocoLexer implements ProblemListener {
 		return varIdTransformer;
 	}
 
+	protected void setPreprocessedResultWriter(@Nullable Writer writer) {
+		this.preprocessedResultWriter = writer;
+	}
+
+	public void setContext(@Nullable OrinocoLexerContext context) {
+		if (context == null) {
+			context = new DefaultLexerContext();
+		}
+		this.context = context;
+	}
 
 	/**
 	 * Starts the lexing process.
@@ -167,6 +147,9 @@ public class OrinocoLexer implements ProblemListener {
 						throw new IllegalStateException(); // ???
 					}
 				}
+			}
+			if (preprocessedResultWriter != null) {
+				preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 			}
 			if (type.isCommand) {
 				makeCommand();
@@ -366,6 +349,42 @@ public class OrinocoLexer implements ProblemListener {
 				nextGlobalVarId++;
 				return nextGlobalVarId - 1;
 			});
+		}
+	}
+
+	private class DefaultLexerContext implements OrinocoLexerContext {
+
+		@Override
+		public @NotNull String getCommand(int id) throws UnknownIdException {
+			String c = SQFCommands.instance.getCommandById(id);
+			if (c == null) {
+				throw new UnknownIdException(id + "");
+			}
+			return c;
+		}
+
+		@Override
+		public @Nullable String getVariable(int id) {
+			try {
+				return OrinocoLexer.this.getIdTransformer().fromId(id);
+			} catch (UnknownIdException ignore) {
+				return null;
+			}
+		}
+
+		@Override
+		public boolean isTextBufferingEnabled() {
+			return false;
+		}
+
+		@Override
+		public @Nullable TextBuffer getTextBuffer() {
+			return null;
+		}
+
+		@Override
+		public @Nullable TextBuffer getTextBufferPreprocessed() {
+			return null;
 		}
 	}
 }
