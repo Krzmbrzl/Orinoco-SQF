@@ -149,9 +149,6 @@ public class OrinocoLexer implements ProblemListener {
 					}
 				}
 			}
-			if (preprocessedResultWriter != null) {
-				preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
-			}
 			if (type.isCommand) {
 				makeCommand();
 				continue;
@@ -252,7 +249,10 @@ public class OrinocoLexer implements ProblemListener {
 		}
 	}
 
-	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType number) {
+	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType number) throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptLiteral(number, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
@@ -269,27 +269,42 @@ public class OrinocoLexer implements ProblemListener {
 		preprocessedLength = 0;
 	}
 
-	private void makeWhitespace() {
+	private void makeWhitespace() throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeComment() {
+	private void makeComment() throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeLocalVariable(int id) {
+	private void makeLocalVariable(int id) throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeGlobalVariable(int id) {
+	private void makeGlobalVariable(int id) throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeCommand() {
+	private void makeCommand() throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
