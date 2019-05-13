@@ -44,17 +44,19 @@ public class SimpleOrinocoLexerContext implements OrinocoLexerContext {
 
 	@Override
 	public boolean isTextBufferingEnabled() {
-		return false;
+		return true;
 	}
 
 	@Override
-	public @Nullable TextBuffer getTextBuffer() {
-		return null;
+	@Nullable
+	public TextBuffer getTextBuffer() {
+		return originalText;
 	}
 
 	@Override
-	public @Nullable TextBuffer getTextBufferPreprocessed() {
-		return null;
+	@Nullable
+	public TextBuffer getTextBufferPreprocessed() {
+		return preprocessedBuffer;
 	}
 
 	private static class StringBuilderWriter extends Writer implements CharSequence {

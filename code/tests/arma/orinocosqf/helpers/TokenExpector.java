@@ -1,9 +1,11 @@
 package arma.orinocosqf.helpers;
 
-import arma.orinocosqf.*;
+import arma.orinocosqf.OrinocoLexer;
+import arma.orinocosqf.OrinocoLexerContext;
+import arma.orinocosqf.OrinocoLexerLiteralType;
+import arma.orinocosqf.OrinocoLexerStream;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -292,27 +294,25 @@ public class TokenExpector implements OrinocoLexerStream {
 
 		@NotNull
 		public static AcceptedToken acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-													 @NotNull String originalToken, @NotNull String preprocessedToken) {
+													 @NotNull String originalToken) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.acceptWhitespace);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
 			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalToken", originalToken);
-			t.putParameter("preprocessedToken", preprocessedToken);
 			return t;
 		}
 
 		@NotNull
 		public static AcceptedToken acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-												  @NotNull String originalToken, @NotNull String preprocessedToken) {
+												  @NotNull String originalToken) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.acceptComment);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
 			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalToken", originalToken);
-			t.putParameter("preprocessedToken", preprocessedToken);
 			return t;
 		}
 	}
@@ -347,7 +347,7 @@ public class TokenExpector implements OrinocoLexerStream {
 		@Override
 		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
 								  int originalLength, @NotNull OrinocoLexerContext ctx) {
-			q.add(AcceptedToken.acceptLiteral(type, ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength),
+			q.add(AcceptedToken.acceptLiteral(type, ctx.getTextBuffer().getText(originalOffset, originalLength),
 					preprocessedOffset, preprocessedLength, originalOffset, originalLength));
 		}
 
@@ -386,16 +386,14 @@ public class TokenExpector implements OrinocoLexerStream {
 		public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 									 @NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
-					ctx.getTextBuffer().getText(originalOffset, originalLength),
-					ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength)));
+					ctx.getTextBuffer().getText(originalOffset, originalLength)));
 		}
 
 		@Override
 		public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 								  @NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
-					ctx.getTextBuffer().getText(originalOffset, originalLength),
-					ctx.getTextBufferPreprocessed().getText(preprocessedOffset, preprocessedLength)));
+					ctx.getTextBuffer().getText(originalOffset, originalLength)));
 		}
 
 		@Override
