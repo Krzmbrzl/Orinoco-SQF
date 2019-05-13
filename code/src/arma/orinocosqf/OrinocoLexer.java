@@ -53,7 +53,7 @@ public class OrinocoLexer implements ProblemListener {
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
 	private final OrinocoJFlexLexer jFlexLexer;
-	private static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
+	/*private*/ static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
 	private static int nextGlobalVarId = 0;
 	private final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
 	private int nextLocalVarId = 0;

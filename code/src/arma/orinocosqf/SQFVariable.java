@@ -35,4 +35,12 @@ public class SQFVariable implements CaseInsentiveKey {
 	public CharSequence getKey() {
 		return name;
 	}
+
+	@Override
+	public String toString() {
+		return "SQFVariable{" +
+				"name='" + name + '\'' +
+				", id=" + id +
+				'}';
+	}
 }
