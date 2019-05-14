@@ -131,9 +131,9 @@ public class OrinocoLexer implements ProblemListener {
 			if (type == OrinocoJFlexLexer.TokenType.EOF) {
 				return;
 			}
-			originalLength = jFlexLexer.yylength();
 			if (!jFlexLexer.yymoreStreams()) {
 				preprocessedLength = jFlexLexer.yylength();
+				originalLength = jFlexLexer.yylength();
 			} else {
 				preprocessedLength += jFlexLexer.yylength();
 			}

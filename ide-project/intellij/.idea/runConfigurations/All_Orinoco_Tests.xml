@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All Orinoco Tests" type="JUnit" factoryName="JUnit">
+    <module name="Orinoco SQF" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="directory" />
+    <option name="PARAMETERS" value="" />
+    <dir value="$PROJECT_DIR$/../../code/tests/arma/orinocosqf" />
+    <fork_mode value="class" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
