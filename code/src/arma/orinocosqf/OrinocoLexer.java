@@ -211,8 +211,9 @@ public class OrinocoLexer implements ProblemListener {
 					makeLiteral(OrinocoLexerSQFLiteralType.String);
 					break;
 				}
-				case GLUED_WORD: {
-
+				case GLUED_WORD: //fall
+				case MACRO: {
+					lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 					break;
 				}
 				case WORD: {
@@ -236,9 +237,6 @@ public class OrinocoLexer implements ProblemListener {
 					}
 					break;
 				}
-				case MACRO: {
-					break;
-				}
 				case BAD_CHARACTER: {
 					break;
 				}
@@ -258,7 +256,7 @@ public class OrinocoLexer implements ProblemListener {
 	}
 
 	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {
-		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), originalOffset, originalLength);
+		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), jFlexLexer.yystart(), originalLength);
 		updateOffsetsAfterMake();
 	}
 
