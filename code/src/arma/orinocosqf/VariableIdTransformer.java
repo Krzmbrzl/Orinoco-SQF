@@ -36,12 +36,12 @@ public class VariableIdTransformer implements IdTransformer<String> {
 	@Override
 	public int toId(@NotNull String value) throws UnknownIdException {
 		final boolean local = value.charAt(0) == '_';
-		for (SQFVariable var : local ? localVars : globalVars) {
-			if (ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(var.getKey(), value) == 0) {
-				return var.getId();
-			}
+		CaseInsensitiveHashSet<SQFVariable> set = local ? localVars : globalVars;
+		SQFVariable var = set.getKeyForCharSequence(value);
+		if (var != null) {
+			return var.getId();
 		}
-		SQFVariable var = new SQFVariable(value, nextIdFunc.apply(value));
+		var = new SQFVariable(value, nextIdFunc.apply(value));
 		if (local) {
 			localVars.put(var);
 		} else {

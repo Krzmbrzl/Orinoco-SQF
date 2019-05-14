@@ -25,8 +25,8 @@ import arma.orinocosqf.HashableCharSequence;
 
 %include orinocosqf_javaheader
 
-LETTER = [a-zA-Z_$]
-LETTER_DIGIT = [a-zA-Z_$0-9]
+LETTER = [a-zA-Z_] //can't start with $ because of hex numbers
+LETTER_DIGIT = [$a-zA-Z_$0-9]
 WORD = {LETTER} {LETTER_DIGIT}*
 GLUED_WORD = ("##")? {LETTER_DIGIT} ("##" {LETTER_DIGIT} | {LETTER_DIGIT})* ("##")?
 
@@ -43,7 +43,7 @@ DEC_SIGNIFICAND = "." {DIGITS} | {DIGITS} "." {DIGIT}+
 DEC_EXPONENT = ({DEC_SIGNIFICAND} | {INTEGER_LITERAL}) [Ee] [+-]? {DIGIT}*
 DEC_LITERAL = ({DEC_SIGNIFICAND} | {DEC_EXPONENT})
 
-HEX_LITERAL = [0] [xX] [0]* {HEX_DIGIT} {1,8}
+HEX_LITERAL = ([0] [xX] [0]* {HEX_DIGIT}+) | "$" {HEX_DIGIT}+
 HEX_DIGIT   = [0-9a-fA-F]
 
 STRING_LITERAL = ("\"\""|"\""([^\"]+|\"\")+"\"") | ("''" | "'"([^']+|'')+"'")

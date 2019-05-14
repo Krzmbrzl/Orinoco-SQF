@@ -57,7 +57,13 @@ public class OrinocoLexer implements ProblemListener {
 	private static int nextGlobalVarId = 0;
 	private final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
 	private int nextLocalVarId = 0;
+	/**
+	 * @see #getIdTransformer()
+	 */
 	private final VariableIdTransformer varIdTransformer = new MyVariableIdTransformer();
+	/**
+	 * @see #setPreprocessedResultWriter(Writer)
+	 */
 	private Writer preprocessedResultWriter;
 
 	private enum PreProcessorState {
@@ -74,15 +80,29 @@ public class OrinocoLexer implements ProblemListener {
 		jFlexLexer.setCommandSet(SQFCommands.instance);
 	}
 
+	/**
+	 * @return an id transformer for both local and global variables
+	 */
 	@NotNull
 	public VariableIdTransformer getIdTransformer() {
 		return varIdTransformer;
 	}
 
+	/**
+	 * If non null, all preprocessed text will be written to the specified writer. If null, preprocessed text will be discarded and only
+	 * tokenized versions will be sent through the {@link OrinocoLexerStream}
+	 *
+	 * @param writer writer to use
+	 */
 	protected void setPreprocessedResultWriter(@Nullable Writer writer) {
 		this.preprocessedResultWriter = writer;
 	}
 
+	/**
+	 * Sets the context for the lexer. If null, a default instance will be used that has no text buffering.
+	 *
+	 * @param context context to use, or null to use default instance
+	 */
 	public void setContext(@Nullable OrinocoLexerContext context) {
 		if (context == null) {
 			context = new DefaultLexerContext();
@@ -149,9 +169,6 @@ public class OrinocoLexer implements ProblemListener {
 					}
 				}
 			}
-			if (preprocessedResultWriter != null) {
-				preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
-			}
 			if (type.isCommand) {
 				makeCommand();
 				continue;
@@ -163,6 +180,10 @@ public class OrinocoLexer implements ProblemListener {
 				}
 				case CMD_IFDEF: //fall
 				case CMD_IFNDEF: {
+					if (lexerStream.skipPreProcessing()) {
+						lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
+						break;
+					}
 					Matcher m = pattern_ifdef.matcher(jFlexLexer.yytext());
 					if (m.find()) {
 						String name = m.group(2);
@@ -178,25 +199,25 @@ public class OrinocoLexer implements ProblemListener {
 					break;
 				}
 				case CMD_DEFINE: {
-					makePreProcessorCommand(PreProcessorCommand.Define);
+					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.Define);
 					break;
 				}
 				case CMD_INCLUDE: {
-					makePreProcessorCommand(PreProcessorCommand.Include);
+					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.Include);
 					break;
 				}
 				case CMD_ELSE: {
 					//todo report uneeded #else
-					makePreProcessorCommand(PreProcessorCommand.Else);
+					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.Else);
 					break;
 				}
 				case CMD_ENDIF: {
 					//todo report uneeded #endif
-					makePreProcessorCommand(PreProcessorCommand.EndIf);
+					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.EndIf);
 					break;
 				}
 				case CMD_UNDEF: {
-					makePreProcessorCommand(PreProcessorCommand.Undef);
+					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.Undef);
 					break;
 				}
 				case BLOCK_COMMENT:
@@ -214,8 +235,13 @@ public class OrinocoLexer implements ProblemListener {
 					makeLiteral(OrinocoLexerSQFLiteralType.String);
 					break;
 				}
-				case GLUED_WORD: {
-
+				case GLUED_WORD: //fall
+				case MACRO: {
+					if (lexerStream.skipPreProcessing()) {
+						lexerStream.preProcessorTokenSkipped(originalOffset, originalLength, context);
+					} else {
+						lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+					}
 					break;
 				}
 				case WORD: {
@@ -239,9 +265,6 @@ public class OrinocoLexer implements ProblemListener {
 					}
 					break;
 				}
-				case MACRO: {
-					break;
-				}
 				case BAD_CHARACTER: {
 					break;
 				}
@@ -252,16 +275,15 @@ public class OrinocoLexer implements ProblemListener {
 		}
 	}
 
-	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType number) {
-		lexerStream.acceptLiteral(number, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
-		updateOffsetsAfterMake();
-	}
-
-	private void makePreProcessorCommand(@NotNull PreProcessorCommand command) {
-		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), originalOffset, originalLength);
-		updateOffsetsAfterMake();
-	}
-
+	/**
+	 * Updates in the following order:
+	 * <ol>
+	 * <li>{@link #originalOffset} is += {@link #originalLength}</li>
+	 * <li>{@link #originalLength} is set to 0</li>
+	 * <li>{@link #preprocessedOffset} is += {@link #preprocessedLength}</li>
+	 * <li>{@link #preprocessedLength} is set to 0</li>
+	 * </ol>
+	 */
 	private void updateOffsetsAfterMake() {
 		originalOffset += originalLength;
 		originalLength = 0;
@@ -269,33 +291,107 @@ public class OrinocoLexer implements ProblemListener {
 		preprocessedLength = 0;
 	}
 
-	private void makeWhitespace() {
+	/**
+	 * Makes a literal token and then invokes {@link #updateOffsetsAfterMake()}
+	 *
+	 * @param type literal type
+	 * @throws IOException because of {@link #preprocessedResultWriter}
+	 * @see OrinocoLexerStream#acceptLiteral(OrinocoLexerLiteralType, int, int, int, int, OrinocoLexerContext)
+	 */
+	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType type) throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
+		lexerStream.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		updateOffsetsAfterMake();
+	}
+
+	/**
+	 * Makes a preprocessor command token only if {@link OrinocoLexerStream#skipPreProcessing()} returns false. This method will always
+	 * invoke {@link #updateOffsetsAfterMake()} after token is made or token is skipped.
+	 *
+	 * @param command command to use
+	 * @see OrinocoLexerStream#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
+	 * @see OrinocoLexerStream#preProcessorCommandSkipped(int, int, OrinocoLexerContext)
+	 */
+	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) {
+		if (lexerStream.skipPreProcessing()) {
+			lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
+			updateOffsetsAfterMake();
+			return;
+		}
+		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), jFlexLexer.yystart(), originalLength);
+		updateOffsetsAfterMake();
+	}
+
+	/**
+	 * Makes a whitespace token and then invokes {@link #updateOffsetsAfterMake()}
+	 *
+	 * @throws IOException because of {@link #preprocessedResultWriter}
+	 * @see OrinocoLexerStream#acceptWhitespace(int, int, int, int, OrinocoLexerContext)
+	 */
+	private void makeWhitespace() throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeComment() {
+	/**
+	 * Makes a comment token and then invokes {@link #updateOffsetsAfterMake()}
+	 *
+	 * @throws IOException because of {@link #preprocessedResultWriter}
+	 * @see OrinocoLexerStream#acceptComment(int, int, int, int, OrinocoLexerContext)
+	 */
+	private void makeComment() throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeLocalVariable(int id) {
+	/**
+	 * Makes a local variable token and then invokes {@link #updateOffsetsAfterMake()}
+	 *
+	 * @param id the local variable id
+	 * @throws IOException because of {@link #preprocessedResultWriter}
+	 * @see OrinocoLexerStream#acceptLocalVariable(int, int, int, int, int, OrinocoLexerContext)
+	 */
+	private void makeLocalVariable(int id) throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeGlobalVariable(int id) {
+	/**
+	 * Makes a global variable token and then invokes {@link #updateOffsetsAfterMake()}
+	 *
+	 * @param id global variable id
+	 * @throws IOException because of {@link #preprocessedResultWriter}
+	 */
+	private void makeGlobalVariable(int id) throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
-	private void makeCommand() {
+	/**
+	 * Makes a command token and then invokes {@link #updateOffsetsAfterMake()}
+	 *
+	 * @throws IOException because of {@link #preprocessedResultWriter}
+	 * @see OrinocoLexerStream#acceptCommand(int, int, int, int, int, OrinocoLexerContext)
+	 */
+	private void makeCommand() throws IOException {
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+		}
 		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
-		updateOffsetsAfterMake();
-	}
-
-	private void makePreProcessedText() {
-//		lexerStream.preProcessToken(jFlexLexer.getBuffer(), );
 		updateOffsetsAfterMake();
 	}
 
@@ -326,10 +422,6 @@ public class OrinocoLexer implements ProblemListener {
 		return context;
 	}
 
-	public OrinocoLexerStream getLexerStream() {
-		return lexerStream;
-	}
-
 	/**
 	 * This method implementation is intended for the use by the preprocessor. The included offset is relative to the char-buffer provided
 	 * to it. <b>Do not call this method from outside the preprocessor</b>
@@ -339,10 +431,13 @@ public class OrinocoLexer implements ProblemListener {
 		// TODO process problem and delegate to the actual problem listener
 	}
 
+	/**
+	 * @see OrinocoLexer#getIdTransformer()
+	 */
 	private class MyVariableIdTransformer extends VariableIdTransformer {
 
 		public MyVariableIdTransformer() {
-			super(localVarSet, globalVarSet,  new Function<String,Integer>() {
+			super(localVarSet, globalVarSet, new Function<String, Integer>() {
 				@Override
 				public Integer apply(String s) {
 					if (s.charAt(0) == '_') {
@@ -356,6 +451,9 @@ public class OrinocoLexer implements ProblemListener {
 		}
 	}
 
+	/**
+	 * @see OrinocoLexer#setContext(OrinocoLexerContext)
+	 */
 	private class DefaultLexerContext implements OrinocoLexerContext {
 
 		@Override

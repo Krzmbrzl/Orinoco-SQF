@@ -22,7 +22,12 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Ite
 
 	private void grow() {
 		Group[] copy = new Group[data.length * 2];
-		System.arraycopy(data, 0, copy, 0, copy.length);
+		for (Group group : data) {
+			if (group == null) {
+				continue;
+			}
+			copy[group.hash % copy.length] = group;
+		}
 		data = copy;
 		dataCap = computeDataCap();
 	}
@@ -54,21 +59,30 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Ite
 		Group g = getGroup(cs);
 		for (Object o : g.list) {
 			Cik cik = (Cik) o;
-			if (ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(cik.getKey(), cs) == 0) {
+			if (keyIsEqual(cik, cs)) {
 				return cik;
 			}
 		}
 		return null;
 	}
 
+	private boolean keyIsEqual(@NotNull Cik cik, @NotNull CharSequence cs) {
+		return ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(cik.getKey(), cs) == 0;
+	}
+
 	public boolean put(@NotNull Cik key) {
 		Group g = getGroup(key.getKey());
 
-		boolean removed = g.list.remove(key);
+		for (Object value : g.list) {
+			Cik next = (Cik) value;
+			if (keyIsEqual(key, next.getKey())) {
+				return true;
+			}
+		}
 		g.list.add(key);
 		entryCount++;
 		maybeGrow();
-		return removed;
+		return false;
 	}
 
 	public void remove(@NotNull Cik key) {
@@ -96,10 +110,11 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Ite
 
 	@NotNull
 	private Group getGroup(@NotNull CharSequence cs) {
-		final int ind = Math.abs(computeHash(cs)) % data.length;
+		int hash = computeHash(cs);
+		final int ind = Math.abs(hash) % data.length;
 		Group g = data[ind];
 		if (g == null) {
-			data[ind] = new Group();
+			data[ind] = new Group(hash);
 			g = data[ind];
 			groupCount++;
 		}
@@ -119,27 +134,27 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Ite
 	@NotNull
 	@Override
 	public Iterator<Cik> iterator() {
-		return new MyIterator(this);
+		return new MyIterator();
 	}
 
 	private static class Group<C extends CaseInsentiveKey> {
 		public final LinkedList<C> list = new LinkedList<>();
+		public final int hash;
+
+		public Group(int hash) {
+			this.hash = hash;
+		}
 	}
 
 	private class MyIterator implements Iterator<Cik> {
-		private final CaseInsensitiveHashSet<Cik> set;
 		private int dataInd = 0;
 		private Iterator<Cik> groupIter;
 		private boolean checked = false;
 		private boolean toast = false;
 
-		public MyIterator(@NotNull CaseInsensitiveHashSet<Cik> set) {
-			this.set = set;
-		}
-
 		@Override
 		public boolean hasNext() {
-			if (!checked) {
+			if (!toast && !checked) {
 				checked = true;
 				while (true) {
 					if (groupIter != null) {
@@ -147,17 +162,18 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Ite
 							break;
 						} else {
 							dataInd++;
+							groupIter = null;
 						}
 					}
 					if (dataInd >= data.length) {
 						toast = true;
 						break;
 					}
-					if (set.data[dataInd] == null) {
+					if (data[dataInd] == null) {
 						dataInd++;
 						continue;
 					}
-					groupIter = set.data[dataInd].list.iterator();
+					groupIter = data[dataInd].list.iterator();
 				}
 			}
 			return !toast && groupIter != null && groupIter.hasNext();
