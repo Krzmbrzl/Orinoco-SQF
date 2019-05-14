@@ -307,11 +307,6 @@ public class OrinocoLexer implements ProblemListener {
 		updateOffsetsAfterMake();
 	}
 
-	private void makePreProcessedText() {
-//		lexerStream.preProcessToken(jFlexLexer.getBuffer(), );
-		updateOffsetsAfterMake();
-	}
-
 	/**
 	 * Accepts partially or fully preprocessed text (see Example 1 in class level doc) from the {@link OrinocoLexerStream}.
 	 *
