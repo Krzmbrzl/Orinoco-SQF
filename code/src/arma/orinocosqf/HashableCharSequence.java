@@ -79,6 +79,31 @@ public abstract class HashableCharSequence implements CharSequence {
 		return asString();
 	}
 
+	protected boolean charSequenceEquals(@NotNull CharSequence other) {
+		if (this.length() != other.length()) {
+			return false;
+		}
+		for (int i = 0; i < length(); i++) {
+			if (other.charAt(i) != charAt(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof HashableCharSequence)) {
+			return false;
+		}
+		HashableCharSequence other = (HashableCharSequence) obj;
+
+		return charSequenceEquals(other);
+	}
+
 	private static class CharSequenceImpl extends HashableCharSequence {
 
 		private final CharSequence cs;
