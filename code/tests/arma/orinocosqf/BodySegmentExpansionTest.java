@@ -38,6 +38,10 @@ public class BodySegmentExpansionTest {
 	void assertSegmentNoMacro(@NotNull String input) {
 		assertSegment(input, input, NO_ARGS);
 	}
+	
+	void assertSegment(@NotNull String originalInput, @NotNull String preprocessedInput) {
+		assertSegment(originalInput, preprocessedInput, NO_ARGS);
+	}
 
 	void assertSegment(@NotNull String originalInput, @NotNull String preprocessedInput, @NotNull List<CharSequence> args) {
 		BodySegment segment = segmentParser.parseSegments(originalInput.toCharArray(), 0, originalInput.length(), macroArguments,
@@ -53,6 +57,15 @@ public class BodySegmentExpansionTest {
 	public void no_macros() {
 		assertSegmentNoMacro("test");
 		assertSegmentNoMacro("I can do what (i, want)");
+	}
+	
+	@Test
+	public void simpleExpansion() {
+		macroSet.put("MACRO", new PreProcessorMacro(macroSet, "MACRO", new ArrayList<>(), new TextSegment("Test")));
+		
+		assertSegment("Hello MACRO", "Hello Test");
+		
+		assertSegment("Hello (MACRO)", "Hello (Test)");
 	}
 
 }
