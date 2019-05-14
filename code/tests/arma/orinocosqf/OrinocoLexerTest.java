@@ -695,9 +695,6 @@ public class OrinocoLexerTest {
 			lexer.start();
 			expector.assertTokensMatch();
 		}
-		for (SQFVariable var : OrinocoLexer.globalVarSet) {
-			System.out.println(var.getKey());
-		}
 	}
 
 	@Test
