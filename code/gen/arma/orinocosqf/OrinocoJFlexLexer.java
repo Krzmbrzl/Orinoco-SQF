@@ -362,7 +362,7 @@ public class OrinocoJFlexLexer {
 	private final YYTextHashableCharSequence yytextHashableCharSequence = new YYTextHashableCharSequence(yytextCharSequence);
 	private int latestCommandId = -1;
 
-	private final StringBuilder macroWithArgs = new StringBuilder(32);
+	private final MyStringBuilder macroWithArgs = new MyStringBuilder();
 	private int macroArgLeftParenCount = 0;
 	private int macroArgRightParenCount = 0;
 	private boolean macroHasArgs = false;
@@ -404,11 +404,11 @@ public class OrinocoJFlexLexer {
 		macroWithArgs.append(yytextCharSequence);
 	}
 
-	public StringBuilder getMacroWithArgs() {
+	public MyStringBuilder getMacroWithArgs() {
 		return macroWithArgs;
 	}
 
-	public boolean macroHashArgs() {
+	public boolean macroHasArgs() {
 		return macroHasArgs;
 	}
 
