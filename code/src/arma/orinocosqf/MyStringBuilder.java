@@ -33,4 +33,8 @@ class MyStringBuilder {
 		return chars;
 	}
 
+	public int getLength() {
+		return cursor;
+	}
+
 }
