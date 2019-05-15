@@ -240,8 +240,14 @@ public class OrinocoLexer implements ProblemListener {
 					if (lexerStream.skipPreProcessing()) {
 						lexerStream.preProcessorTokenSkipped(originalOffset, originalLength, context);
 					} else {
-						System.out.println(jFlexLexer.yytext());
-						lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+						if (jFlexLexer.macroHashArgs()) {
+							StringBuilder macroWithArgs = jFlexLexer.getMacroWithArgs();
+							System.out.println("OrinocoLexer.doStart macroWithArgs=" + macroWithArgs);
+							char[] chars = HashableCharSequence.asChars(macroWithArgs);
+							lexerStream.preProcessToken(chars, 0, chars.length);
+						} else {
+							lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+						}
 					}
 					break;
 				}

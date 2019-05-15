@@ -5,8 +5,10 @@
 	private final YYTextHashableCharSequence yytextHashableCharSequence = new YYTextHashableCharSequence(yytextCharSequence);
 	private int latestCommandId = -1;
 
+	private final StringBuilder macroWithArgs = new StringBuilder(32);
 	private int macroArgLeftParenCount = 0;
 	private int macroArgRightParenCount = 0;
+	private boolean macroHasArgs = false;
 
 	private int EQEQ_id;
 	private int NE_id;
@@ -39,6 +41,18 @@
 
 	public int yystart() {
 		return zzStartRead;
+	}
+
+	public void appendTextToMacro() {
+		macroWithArgs.append(yytextCharSequence);
+	}
+
+	public StringBuilder getMacroWithArgs() {
+		return macroWithArgs;
+	}
+
+	public boolean macroHashArgs() {
+		return macroHasArgs;
 	}
 
 	@NotNull

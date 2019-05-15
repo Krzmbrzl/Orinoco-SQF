@@ -65,11 +65,11 @@ public class OrinocoJFlexLexer {
     "\1\24\1\25\1\26\1\27\1\30\1\31\1\32\1\33"+
     "\2\34\1\0\1\35\1\36\1\0\1\3\1\37\6\0"+
     "\2\40\1\0\1\41\1\0\1\41\1\42\1\0\1\43"+
-    "\1\44\1\45\1\46\1\47\1\50\1\51\2\52\1\3"+
-    "\6\0\3\40\10\0\1\53\2\0\1\54\5\0\1\55"+
-    "\1\54\1\56\2\0\1\57\1\60\1\55\1\54\1\56"+
-    "\1\61\1\0\1\57\1\60\1\55\1\56\1\61\1\62"+
-    "\1\57\1\60\1\61\2\62";
+    "\1\44\1\45\1\46\1\47\1\50\1\51\2\33\1\3"+
+    "\6\0\3\40\10\0\1\52\2\0\1\53\5\0\1\54"+
+    "\1\53\1\55\2\0\1\56\1\57\1\54\1\53\1\55"+
+    "\1\60\1\0\1\56\1\57\1\54\1\55\1\60\1\61"+
+    "\1\56\1\57\1\60\2\61";
 
   private static int [] zzUnpackAction() {
     int [] result = new int[116];
@@ -362,8 +362,10 @@ public class OrinocoJFlexLexer {
 	private final YYTextHashableCharSequence yytextHashableCharSequence = new YYTextHashableCharSequence(yytextCharSequence);
 	private int latestCommandId = -1;
 
+	private final StringBuilder macroWithArgs = new StringBuilder(32);
 	private int macroArgLeftParenCount = 0;
 	private int macroArgRightParenCount = 0;
+	private boolean macroHasArgs = false;
 
 	private int EQEQ_id;
 	private int NE_id;
@@ -396,6 +398,18 @@ public class OrinocoJFlexLexer {
 
 	public int yystart() {
 		return zzStartRead;
+	}
+
+	public void appendTextToMacro() {
+		macroWithArgs.append(yytextCharSequence);
+	}
+
+	public StringBuilder getMacroWithArgs() {
+		return macroWithArgs;
+	}
+
+	public boolean macroHashArgs() {
+		return macroHasArgs;
 	}
 
 	@NotNull
@@ -1000,15 +1014,18 @@ public class OrinocoJFlexLexer {
             { return TokenType.BAD_CHARACTER;
             } 
             // fall through
-          case 51: break;
+          case 50: break;
           case 2: 
-            { PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
+            { macroHasArgs = false;
+			PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
 			if(macro != null) {
 				if(!macro.takesArguments()) {
 					return TokenType.MACRO;
 				}
-				System.out.println("OrinocoJFlexLexer.advance args");
+				macroWithArgs.setLength(0);
+				appendTextToMacro();
 				yybegin(MACRO_ARGS);
+				macroHasArgs = true;
 			} else {
 				if(yytextIsCommand()) {
 					return TokenType.COMMAND;
@@ -1018,251 +1035,247 @@ public class OrinocoJFlexLexer {
 			}
             } 
             // fall through
-          case 52: break;
+          case 51: break;
           case 3: 
             { return TokenType.GLUED_WORD;
             } 
             // fall through
-          case 53: break;
+          case 52: break;
           case 4: 
             { latestCommandId = HASH_id; return TokenType.HASH;
             } 
             // fall through
-          case 54: break;
+          case 53: break;
           case 5: 
             { return TokenType.WHITE_SPACE;
             } 
             // fall through
-          case 55: break;
+          case 54: break;
           case 6: 
             { return TokenType.INTEGER_LITERAL;
             } 
             // fall through
-          case 56: break;
+          case 55: break;
           case 7: 
             { latestCommandId = MINUS_id; return TokenType.MINUS;
             } 
             // fall through
-          case 57: break;
+          case 56: break;
           case 8: 
             { latestCommandId = FSLASH_id; return TokenType.FSLASH;
             } 
             // fall through
-          case 58: break;
+          case 57: break;
           case 9: 
             { latestCommandId = ASTERISK_id; return TokenType.ASTERISK;
             } 
             // fall through
-          case 59: break;
+          case 58: break;
           case 10: 
             { latestCommandId = LPAREN_id; return TokenType.LPAREN;
             } 
             // fall through
-          case 60: break;
+          case 59: break;
           case 11: 
             { latestCommandId = RPAREN_id; return TokenType.RPAREN;
             } 
             // fall through
-          case 61: break;
+          case 60: break;
           case 12: 
             { latestCommandId = EQ_id; return TokenType.EQ;
             } 
             // fall through
-          case 62: break;
+          case 61: break;
           case 13: 
             { latestCommandId = EXCL_id; return TokenType.EXCL;
             } 
             // fall through
-          case 63: break;
+          case 62: break;
           case 14: 
             { latestCommandId = GT_id; return TokenType.GT;
             } 
             // fall through
-          case 64: break;
+          case 63: break;
           case 15: 
             { latestCommandId = LT_id; return TokenType.LT;
             } 
             // fall through
-          case 65: break;
+          case 64: break;
           case 16: 
             { latestCommandId = PERC_id; return TokenType.PERC;
             } 
             // fall through
-          case 66: break;
+          case 65: break;
           case 17: 
             { latestCommandId = PLUS_id; return TokenType.PLUS;
             } 
             // fall through
-          case 67: break;
+          case 66: break;
           case 18: 
             { latestCommandId = CARET_id; return TokenType.CARET;
             } 
             // fall through
-          case 68: break;
+          case 67: break;
           case 19: 
             { latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE;
             } 
             // fall through
-          case 69: break;
+          case 68: break;
           case 20: 
             { latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE;
             } 
             // fall through
-          case 70: break;
+          case 69: break;
           case 21: 
             { latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET;
             } 
             // fall through
-          case 71: break;
+          case 70: break;
           case 22: 
             { latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET;
             } 
             // fall through
-          case 72: break;
+          case 71: break;
           case 23: 
             { latestCommandId = COMMA_id; return TokenType.COMMA;
             } 
             // fall through
-          case 73: break;
+          case 72: break;
           case 24: 
             { latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON;
             } 
             // fall through
-          case 74: break;
+          case 73: break;
           case 25: 
             { latestCommandId = QUEST_id; return TokenType.QUEST;
             } 
             // fall through
-          case 75: break;
+          case 74: break;
           case 26: 
             { latestCommandId = COLON_id; return TokenType.COLON;
             } 
             // fall through
-          case 76: break;
+          case 75: break;
           case 27: 
-            { /*do nothing*/
+            { appendTextToMacro();
             } 
             // fall through
-          case 77: break;
+          case 76: break;
           case 28: 
             { if(macroArgRightParenCount == macroArgLeftParenCount) {
 			yybegin(YYINITIAL);
 			macroArgLeftParenCount = macroArgRightParenCount = 0;
+			yypushback(1);
 			return TokenType.MACRO;
 		}
             } 
             // fall through
-          case 78: break;
+          case 77: break;
           case 29: 
-            { macroArgLeftParenCount++;
+            { appendTextToMacro(); macroArgLeftParenCount++;
+            } 
+            // fall through
+          case 78: break;
+          case 30: 
+            { appendTextToMacro(); macroArgRightParenCount++;
             } 
             // fall through
           case 79: break;
-          case 30: 
-            { macroArgRightParenCount++;
-            } 
-            // fall through
-          case 80: break;
           case 31: 
             { return TokenType.HEX_LITERAL;
             } 
             // fall through
-          case 81: break;
+          case 80: break;
           case 32: 
             { return TokenType.DEC_LITERAL;
             } 
             // fall through
-          case 82: break;
+          case 81: break;
           case 33: 
             { return TokenType.STRING_LITERAL;
             } 
             // fall through
-          case 83: break;
+          case 82: break;
           case 34: 
             { return TokenType.INLINE_COMMENT;
             } 
             // fall through
-          case 84: break;
+          case 83: break;
           case 35: 
             { latestCommandId = EQEQ_id; return TokenType.EQEQ;
             } 
             // fall through
-          case 85: break;
+          case 84: break;
           case 36: 
             { latestCommandId = NE_id; return TokenType.NE;
             } 
             // fall through
-          case 86: break;
+          case 85: break;
           case 37: 
             { latestCommandId = GE_id; return TokenType.GE;
             } 
             // fall through
-          case 87: break;
+          case 86: break;
           case 38: 
             { latestCommandId = GTGT_id; return TokenType.GTGT;
             } 
             // fall through
-          case 88: break;
+          case 87: break;
           case 39: 
             { latestCommandId = LE_id; return TokenType.LE;
             } 
             // fall through
-          case 89: break;
+          case 88: break;
           case 40: 
             { latestCommandId = AMPAMP_id; return TokenType.AMPAMP;
             } 
             // fall through
-          case 90: break;
+          case 89: break;
           case 41: 
             { latestCommandId = BARBAR_id; return TokenType.BARBAR;
             } 
             // fall through
-          case 91: break;
+          case 90: break;
           case 42: 
-            { /* do nothing */
-            } 
-            // fall through
-          case 92: break;
-          case 43: 
             { return TokenType.BLOCK_COMMENT;
             } 
             // fall through
-          case 93: break;
-          case 44: 
+          case 91: break;
+          case 43: 
             { return TokenType.CMD_ELSE;
             } 
             // fall through
-          case 94: break;
-          case 45: 
+          case 92: break;
+          case 44: 
             { return TokenType.CMD_ENDIF;
             } 
             // fall through
-          case 95: break;
-          case 46: 
+          case 93: break;
+          case 45: 
             { return TokenType.CMD_IFDEF;
             } 
             // fall through
-          case 96: break;
-          case 47: 
+          case 94: break;
+          case 46: 
             { return TokenType.CMD_UNDEF;
             } 
             // fall through
-          case 97: break;
-          case 48: 
+          case 95: break;
+          case 47: 
             { return TokenType.CMD_DEFINE;
             } 
             // fall through
-          case 98: break;
-          case 49: 
+          case 96: break;
+          case 48: 
             { return TokenType.CMD_IFNDEF;
             } 
             // fall through
-          case 99: break;
-          case 50: 
+          case 97: break;
+          case 49: 
             { return TokenType.CMD_INCLUDE;
             } 
             // fall through
-          case 100: break;
+          case 98: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }

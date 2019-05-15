@@ -68,17 +68,18 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 %%
 
 <MACRO_ARGS> {
-	"(" { macroArgLeftParenCount++; }
-    ")" { macroArgRightParenCount++; }
-    {MACRO_NEXT_LINE} { /* do nothing */ }
+	"(" { appendTextToMacro(); macroArgLeftParenCount++; }
+    ")" { appendTextToMacro(); macroArgRightParenCount++; }
+    {MACRO_NEXT_LINE} { appendTextToMacro(); }
     {WHITE_SPACE_CHAR} {
 		if(macroArgRightParenCount == macroArgLeftParenCount) {
 			yybegin(YYINITIAL);
 			macroArgLeftParenCount = macroArgRightParenCount = 0;
+			yypushback(1);
 			return TokenType.MACRO;
 		}
     }
-    [^()\\]+ { /*do nothing*/ }
+    [^()\\]+ { appendTextToMacro(); }
 
 	<<EOF>> {
 		if (!yymoreStreams()) { yybegin(YYINITIAL);  return TokenType.MACRO; }
@@ -106,13 +107,16 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
 
 	{WORD} {
+      		macroHasArgs = false;
 			PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
 			if(macro != null) {
 				if(!macro.takesArguments()) {
 					return TokenType.MACRO;
 				}
-				System.out.println("OrinocoJFlexLexer.advance args");
+				macroWithArgs.setLength(0);
+				appendTextToMacro();
 				yybegin(MACRO_ARGS);
+				macroHasArgs = true;
 			} else {
 				if(yytextIsCommand()) {
 					return TokenType.COMMAND;
