@@ -5,6 +5,9 @@
 	private final YYTextHashableCharSequence yytextHashableCharSequence = new YYTextHashableCharSequence(yytextCharSequence);
 	private int latestCommandId = -1;
 
+	private int macroArgLeftParenCount = 0;
+	private int macroArgRightParenCount = 0;
+
 	private int EQEQ_id;
 	private int NE_id;
 	private int GTGT_id;

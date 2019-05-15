@@ -1,6 +1,6 @@
 package arma.orinocosqf;
 
-import org.jetbrains.annotations.NotNull;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.HashableCharSequence;
@@ -25,6 +25,8 @@ import arma.orinocosqf.HashableCharSequence;
 
 %include orinocosqf_javaheader
 
+%state MACRO_ARGS
+
 LETTER = [a-zA-Z_] //can't start with $ because of hex numbers
 LETTER_DIGIT = [$a-zA-Z_$0-9]
 WORD = {LETTER} {LETTER_DIGIT}*
@@ -33,7 +35,8 @@ GLUED_WORD = ("##")? {LETTER_DIGIT} ("##" {LETTER_DIGIT} | {LETTER_DIGIT})* ("##
 LINE_TERMINATOR = \n|\r\n|\r
 INPUT_CHARACTER = [^\r\n]
 
-WHITE_SPACE = ({LINE_TERMINATOR} | [ \t\f])+
+WHITE_SPACE_CHAR = {LINE_TERMINATOR} | [ \t\f]
+WHITE_SPACE = {WHITE_SPACE_CHAR}+
 
 DIGIT = [0-9]
 DIGITS = {DIGIT}+
@@ -64,6 +67,19 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 
 %%
 
+<MACRO_ARGS> {
+	"(" { macroArgLeftParenCount++; }
+    ")" { macroArgRightParenCount++; }
+    {MACRO_NEXT_LINE} { /* do nothing */ }
+    {WHITE_SPACE_CHAR} {
+		if(macroArgRightParenCount == macroArgLeftParenCount) {
+			yybegin(YYINITIAL);
+			macroArgLeftParenCount = macroArgRightParenCount = 0;
+			return TokenType.MACRO;
+		}
+    }
+}
+
 <YYINITIAL> {
 
 	{WHITE_SPACE} { return TokenType.WHITE_SPACE; }
@@ -84,16 +100,21 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
 
 	{WORD} {
-		if(macroSet.containsKey(yytextHashableCharSequence)) {
-			return TokenType.MACRO;
-		}
-		if(yytextIsCommand()) {
-			return TokenType.COMMAND;
-		}
+			PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
+			if(macro != null) {
+				if(!macro.takesArguments()) {
+					return TokenType.MACRO;
+				}
+				yybegin(MACRO_ARGS);
+			} else {
+				if(yytextIsCommand()) {
+					return TokenType.COMMAND;
+				}
 
-		return TokenType.WORD;
+				return TokenType.WORD;
+			}
 
-    }
+	}
 
 	{GLUED_WORD} {
 		return TokenType.GLUED_WORD;

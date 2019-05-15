@@ -66,12 +66,12 @@ public class OrinocoLexer implements ProblemListener {
 	 */
 	private Writer preprocessedResultWriter;
 
-	private enum PreProcessorState {
+	private enum PreProcessorIfDefState {
 		IfDef, IfNDef, ElseIfDef, ElseIfNDef
 	}
 
 	@NotNull
-	private Stack<PreProcessorState> preProcessorState = new Stack<>();
+	private final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
 		this.lexerStream = lexerStream;
@@ -137,24 +137,24 @@ public class OrinocoLexer implements ProblemListener {
 			} else {
 				preprocessedLength += jFlexLexer.yylength();
 			}
-			if (!preProcessorState.isEmpty()) {
+			if (!preProcessorIfDefState.isEmpty()) {
 				if (type == OrinocoJFlexLexer.TokenType.CMD_ENDIF) {
-					preProcessorState.pop();
+					preProcessorIfDefState.pop();
 					return;
 				}
-				switch (preProcessorState.peek()) {
+				switch (preProcessorIfDefState.peek()) {
 					case IfDef: { //read tokens until an #else comes along
 						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
-							preProcessorState.pop();
-							preProcessorState.push(PreProcessorState.ElseIfDef);
+							preProcessorIfDefState.pop();
+							preProcessorIfDefState.push(PreProcessorIfDefState.ElseIfDef);
 							return;
 						}
 						break;
 					}
 					case IfNDef: { //skip tokens until an #else comes along or endif
 						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
-							preProcessorState.pop();
-							preProcessorState.push(PreProcessorState.ElseIfNDef);
+							preProcessorIfDefState.pop();
+							preProcessorIfDefState.push(PreProcessorIfDefState.ElseIfNDef);
 						}
 						return;
 					}
@@ -190,9 +190,9 @@ public class OrinocoLexer implements ProblemListener {
 						MacroSet macroSet = lexerStream.getMacroSet();
 						if (macroSet.containsKey(name)) {
 							if (type == OrinocoJFlexLexer.TokenType.CMD_IFDEF) {
-								preProcessorState.push(PreProcessorState.IfDef);
+								preProcessorIfDefState.push(PreProcessorIfDefState.IfDef);
 							} else {
-								preProcessorState.push(PreProcessorState.IfNDef);
+								preProcessorIfDefState.push(PreProcessorIfDefState.IfNDef);
 							}
 						}
 					}
@@ -240,6 +240,7 @@ public class OrinocoLexer implements ProblemListener {
 					if (lexerStream.skipPreProcessing()) {
 						lexerStream.preProcessorTokenSkipped(originalOffset, originalLength, context);
 					} else {
+						System.out.println(jFlexLexer.yytext());
 						lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 					}
 					break;

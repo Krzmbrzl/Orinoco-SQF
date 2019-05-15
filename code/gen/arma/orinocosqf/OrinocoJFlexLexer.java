@@ -2,7 +2,7 @@
 
 package arma.orinocosqf;
 
-import org.jetbrains.annotations.NotNull;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.HashableCharSequence;
@@ -23,6 +23,7 @@ public class OrinocoJFlexLexer {
 
   /** lexical states */
   public static final int YYINITIAL = 0;
+  public static final int MACRO_ARGS = 2;
 
   /**
    * ZZ_LEXSTATE[l] is the state in the DFA for the lexical state l
@@ -31,20 +32,20 @@ public class OrinocoJFlexLexer {
    * l is of the form l = 2*k, k a non negative integer
    */
   private static final int ZZ_LEXSTATE[] = { 
-     0, 0
+     0,  0,  1, 1
   };
 
   /** 
    * Translates characters to character classes
    */
   private static final String ZZ_CMAP_PACKED = 
-    "\11\0\1\6\1\4\1\57\1\6\1\5\22\0\1\6\1\35\1\16"+
-    "\1\3\1\2\1\42\1\40\1\17\1\45\1\46\1\21\1\43\1\53"+
-    "\1\12\1\10\1\20\1\13\11\7\1\56\1\54\1\37\1\34\1\36"+
+    "\11\0\1\6\1\4\1\57\1\6\1\5\22\0\1\6\1\37\1\16"+
+    "\1\3\1\2\1\44\1\42\1\17\1\34\1\35\1\21\1\45\1\53"+
+    "\1\12\1\10\1\20\1\13\11\7\1\56\1\54\1\41\1\36\1\40"+
     "\1\55\1\0\4\15\1\11\1\15\21\1\1\14\2\1\1\51\1\22"+
-    "\1\52\1\44\1\1\1\0\2\15\1\30\1\23\1\24\1\25\2\1"+
+    "\1\52\1\46\1\1\1\0\2\15\1\30\1\23\1\24\1\25\2\1"+
     "\1\26\2\1\1\31\1\1\1\27\4\1\1\33\1\1\1\32\2\1"+
-    "\1\14\2\1\1\47\1\41\1\50\7\0\1\57\u1fa2\0\1\57\1\57"+
+    "\1\14\2\1\1\47\1\43\1\50\7\0\1\57\u1fa2\0\1\57\1\57"+
     "\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\udfe6\0";
 
   /** 
@@ -58,19 +59,20 @@ public class OrinocoJFlexLexer {
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-    "\1\0\1\1\1\2\1\3\1\4\1\5\1\6\1\1"+
+    "\2\0\1\1\1\2\1\3\1\4\1\5\1\6\1\1"+
     "\1\7\1\6\2\1\1\10\1\11\1\12\1\13\1\14"+
-    "\1\15\2\1\1\16\1\17\1\20\1\21\1\22\1\23"+
-    "\1\24\1\25\1\26\1\27\1\30\1\31\1\32\1\0"+
-    "\1\3\1\33\6\0\2\34\1\0\1\35\1\0\1\35"+
-    "\1\36\1\0\1\37\1\40\1\41\1\42\1\43\1\44"+
-    "\1\45\1\3\6\0\3\34\10\0\1\46\2\0\1\47"+
-    "\5\0\1\50\1\47\1\51\2\0\1\52\1\53\1\50"+
-    "\1\47\1\51\1\54\1\0\1\52\1\53\1\50\1\51"+
-    "\1\54\1\55\1\52\1\53\1\54\2\55";
+    "\1\15\1\16\1\17\2\1\1\20\1\21\1\22\1\23"+
+    "\1\24\1\25\1\26\1\27\1\30\1\31\1\32\2\33"+
+    "\1\0\1\34\1\35\1\0\1\3\1\36\6\0\2\37"+
+    "\1\0\1\40\1\0\1\40\1\41\1\0\1\42\1\43"+
+    "\1\44\1\45\1\46\1\47\1\50\2\51\1\3\6\0"+
+    "\3\37\10\0\1\52\2\0\1\53\5\0\1\54\1\53"+
+    "\1\55\2\0\1\56\1\57\1\54\1\53\1\55\1\60"+
+    "\1\0\1\56\1\57\1\54\1\55\1\60\1\61\1\56"+
+    "\1\57\1\60\2\61";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[107];
+    int [] result = new int[115];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -96,22 +98,23 @@ public class OrinocoJFlexLexer {
 
   private static final String ZZ_ROWMAP_PACKED_0 =
     "\0\0\0\60\0\140\0\220\0\300\0\360\0\u0120\0\u0150"+
-    "\0\60\0\u0180\0\u01b0\0\u01e0\0\u0210\0\60\0\u0240\0\u0270"+
-    "\0\u02a0\0\u02d0\0\u0300\0\u0330\0\60\0\60\0\60\0\60"+
-    "\0\60\0\60\0\60\0\60\0\60\0\60\0\60\0\60"+
-    "\0\60\0\u0360\0\u0390\0\220\0\u03c0\0\u03f0\0\u0420\0\u0450"+
-    "\0\u0480\0\u0150\0\u04b0\0\u04e0\0\u01b0\0\u0510\0\u01e0\0\u0540"+
-    "\0\u0570\0\u05a0\0\60\0\60\0\60\0\60\0\60\0\60"+
-    "\0\60\0\u03c0\0\u05d0\0\u0600\0\u0630\0\u0660\0\u0690\0\u06c0"+
-    "\0\u06f0\0\u0720\0\u0750\0\u0780\0\u07b0\0\u07e0\0\u0810\0\u0840"+
-    "\0\u0870\0\u08a0\0\u08d0\0\60\0\u0900\0\u0930\0\u0960\0\u0990"+
-    "\0\u09c0\0\u09f0\0\u0a20\0\u0a50\0\u0a80\0\u0ab0\0\u0ae0\0\u0b10"+
-    "\0\u0b40\0\u0b70\0\u0ba0\0\u0bd0\0\u0c00\0\u0c30\0\u0c60\0\u0c90"+
-    "\0\u0cc0\0\u0cf0\0\u0d20\0\u0d50\0\u0d80\0\u0db0\0\u0de0\0\u0e10"+
-    "\0\u0e40\0\u0e70\0\u0ea0";
+    "\0\u0180\0\140\0\u01b0\0\u01e0\0\u0210\0\u0240\0\140\0\140"+
+    "\0\140\0\u0270\0\u02a0\0\u02d0\0\u0300\0\u0330\0\u0360\0\140"+
+    "\0\140\0\140\0\140\0\140\0\140\0\140\0\140\0\140"+
+    "\0\140\0\140\0\140\0\u0390\0\u03c0\0\140\0\140\0\u03f0"+
+    "\0\u0420\0\300\0\u0450\0\u0480\0\u04b0\0\u04e0\0\u0510\0\u0180"+
+    "\0\u0540\0\u0570\0\u01e0\0\u05a0\0\u0210\0\u05d0\0\u0600\0\u0630"+
+    "\0\140\0\140\0\140\0\140\0\140\0\140\0\140\0\u0660"+
+    "\0\u0690\0\u0450\0\u06c0\0\u06f0\0\u0720\0\u0750\0\u0780\0\u07b0"+
+    "\0\u07e0\0\u0810\0\u0840\0\u0870\0\u08a0\0\u08d0\0\u0900\0\u0930"+
+    "\0\u0960\0\u0990\0\u09c0\0\140\0\u09f0\0\u0a20\0\u0a50\0\u0a80"+
+    "\0\u0ab0\0\u0ae0\0\u0b10\0\u0b40\0\u0b70\0\u0ba0\0\u0bd0\0\u0c00"+
+    "\0\u0c30\0\u0c60\0\u0c90\0\u0cc0\0\u0cf0\0\u0d20\0\u0d50\0\u0d80"+
+    "\0\u0db0\0\u0de0\0\u0e10\0\u0e40\0\u0e70\0\u0ea0\0\u0ed0\0\u0f00"+
+    "\0\u0f30\0\u0f60\0\u0f90";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[107];
+    int [] result = new int[115];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -134,57 +137,60 @@ public class OrinocoJFlexLexer {
   private static final int [] ZZ_TRANS = zzUnpackTrans();
 
   private static final String ZZ_TRANS_PACKED_0 =
-    "\1\2\1\3\1\4\1\5\3\6\1\7\1\10\1\3"+
-    "\1\11\1\12\2\3\1\13\1\14\1\15\1\16\1\2"+
-    "\11\3\1\17\1\20\1\21\1\22\1\23\1\24\1\25"+
-    "\1\26\1\27\1\30\1\31\1\32\1\33\1\34\1\35"+
-    "\1\36\1\37\1\40\1\41\62\0\2\3\1\42\3\0"+
-    "\1\3\1\0\1\3\1\0\3\3\5\0\11\3\25\0"+
-    "\2\43\1\42\3\0\1\44\1\0\1\44\1\0\1\44"+
-    "\1\43\1\44\5\0\3\44\2\43\1\44\3\43\27\0"+
-    "\1\45\17\0\1\46\1\47\1\0\1\50\3\0\1\51"+
-    "\31\0\3\6\52\0\2\43\1\42\3\0\1\7\1\52"+
-    "\1\53\1\0\1\7\2\43\5\0\1\43\1\53\7\43"+
-    "\33\0\1\54\3\0\1\54\45\0\2\43\1\42\3\0"+
-    "\1\7\1\52\1\53\1\0\1\7\1\4\1\43\5\0"+
-    "\1\43\1\53\7\43\24\0\16\55\1\56\41\55\17\57"+
-    "\1\60\40\57\20\0\1\61\1\62\72\0\1\63\57\0"+
-    "\1\64\57\0\1\65\1\0\1\66\55\0\1\67\63\0"+
-    "\1\70\60\0\1\71\21\0\1\72\55\0\2\43\1\42"+
-    "\3\0\1\43\1\0\1\43\1\0\3\43\5\0\11\43"+
-    "\25\0\2\43\4\0\1\43\1\0\1\43\1\0\3\43"+
-    "\5\0\11\43\50\0\1\73\62\0\1\74\1\0\1\75"+
-    "\53\0\1\76\1\0\1\77\57\0\1\100\31\0\2\43"+
-    "\1\42\3\0\1\101\1\0\1\43\1\102\1\101\2\43"+
-    "\5\0\11\43\7\0\1\102\23\0\1\54\1\0\1\103"+
-    "\1\0\1\54\10\0\1\103\51\0\1\55\60\0\1\57"+
-    "\40\0\4\61\2\0\52\61\21\62\1\104\36\62\25\0"+
-    "\1\105\55\0\1\106\67\0\1\107\47\0\1\110\3\0"+
-    "\1\111\60\0\1\112\52\0\1\113\35\0\2\43\1\42"+
-    "\3\0\1\101\1\0\1\43\1\0\1\101\2\43\5\0"+
-    "\11\43\33\0\1\102\3\0\1\102\53\0\1\102\2\0"+
-    "\2\102\27\0\1\102\14\0\20\62\1\114\1\104\36\62"+
-    "\26\0\1\115\57\0\1\116\55\0\1\117\57\0\1\120"+
-    "\56\0\1\121\65\0\1\122\52\0\1\123\62\0\1\124"+
-    "\55\0\1\125\32\0\4\117\2\0\14\117\1\126\35\117"+
-    "\25\0\1\127\56\0\1\130\65\0\1\131\52\0\1\132"+
-    "\56\0\1\133\33\0\4\125\2\0\14\125\1\134\35\125"+
-    "\5\117\1\135\14\117\1\126\35\117\4\127\2\0\14\127"+
-    "\1\136\35\127\25\0\1\137\55\0\1\140\34\0\4\132"+
-    "\2\0\14\132\1\141\35\132\4\133\2\0\14\133\1\142"+
-    "\35\133\5\125\1\143\14\125\1\134\35\125\5\117\1\0"+
-    "\14\117\1\126\35\117\5\127\1\144\14\127\1\136\35\127"+
-    "\4\137\2\0\14\137\1\145\35\137\24\0\1\146\33\0"+
-    "\5\132\1\147\14\132\1\141\35\132\5\133\1\150\14\133"+
-    "\1\142\35\133\5\125\1\0\14\125\1\134\35\125\5\127"+
-    "\1\0\14\127\1\136\35\127\5\137\1\151\14\137\1\145"+
-    "\35\137\4\146\2\0\14\146\1\152\35\146\5\132\1\0"+
-    "\14\132\1\141\35\132\5\133\1\0\14\133\1\142\35\133"+
-    "\5\137\1\0\14\137\1\145\35\137\5\146\1\153\14\146"+
-    "\1\152\42\146\1\0\14\146\1\152\35\146";
+    "\1\3\1\4\1\5\1\6\3\7\1\10\1\11\1\4"+
+    "\1\12\1\13\2\4\1\14\1\15\1\16\1\17\1\3"+
+    "\11\4\1\20\1\21\1\22\1\23\1\24\1\25\1\26"+
+    "\1\27\1\30\1\31\1\32\1\33\1\34\1\35\1\36"+
+    "\1\37\1\40\1\41\1\42\5\0\1\43\1\44\1\43"+
+    "\13\0\1\45\11\0\1\46\1\47\103\0\2\4\1\50"+
+    "\3\0\1\4\1\0\1\4\1\0\3\4\5\0\11\4"+
+    "\25\0\2\51\1\50\3\0\1\52\1\0\1\52\1\0"+
+    "\1\52\1\51\1\52\5\0\3\52\2\51\1\52\3\51"+
+    "\27\0\1\53\17\0\1\54\1\55\1\0\1\56\3\0"+
+    "\1\57\31\0\3\7\52\0\2\51\1\50\3\0\1\10"+
+    "\1\60\1\61\1\0\1\10\2\51\5\0\1\51\1\61"+
+    "\7\51\33\0\1\62\3\0\1\62\45\0\2\51\1\50"+
+    "\3\0\1\10\1\60\1\61\1\0\1\10\1\5\1\51"+
+    "\5\0\1\51\1\61\7\51\24\0\16\63\1\64\41\63"+
+    "\17\65\1\66\40\65\20\0\1\67\1\70\74\0\1\71"+
+    "\57\0\1\72\57\0\1\73\1\0\1\74\55\0\1\75"+
+    "\63\0\1\76\60\0\1\77\20\0\1\43\57\0\1\100"+
+    "\1\101\55\0\1\102\55\0\2\51\1\50\3\0\1\51"+
+    "\1\0\1\51\1\0\3\51\5\0\11\51\25\0\2\51"+
+    "\4\0\1\51\1\0\1\51\1\0\3\51\5\0\11\51"+
+    "\50\0\1\103\62\0\1\104\1\0\1\105\53\0\1\106"+
+    "\1\0\1\107\57\0\1\110\31\0\2\51\1\50\3\0"+
+    "\1\111\1\0\1\51\1\112\1\111\2\51\5\0\11\51"+
+    "\11\0\1\112\21\0\1\62\1\0\1\113\1\0\1\62"+
+    "\10\0\1\113\51\0\1\63\60\0\1\65\40\0\4\67"+
+    "\2\0\52\67\21\70\1\114\36\70\6\0\1\100\55\0"+
+    "\1\100\1\0\1\100\76\0\1\115\55\0\1\116\67\0"+
+    "\1\117\47\0\1\120\3\0\1\121\60\0\1\122\52\0"+
+    "\1\123\35\0\2\51\1\50\3\0\1\111\1\0\1\51"+
+    "\1\0\1\111\2\51\5\0\11\51\33\0\1\112\3\0"+
+    "\1\112\53\0\1\112\2\0\2\112\31\0\1\112\12\0"+
+    "\20\70\1\124\1\114\36\70\26\0\1\125\57\0\1\126"+
+    "\55\0\1\127\57\0\1\130\56\0\1\131\65\0\1\132"+
+    "\52\0\1\133\62\0\1\134\55\0\1\135\32\0\4\127"+
+    "\2\0\14\127\1\136\35\127\25\0\1\137\56\0\1\140"+
+    "\65\0\1\141\52\0\1\142\56\0\1\143\33\0\4\135"+
+    "\2\0\14\135\1\144\35\135\5\127\1\145\14\127\1\136"+
+    "\35\127\4\137\2\0\14\137\1\146\35\137\25\0\1\147"+
+    "\55\0\1\150\34\0\4\142\2\0\14\142\1\151\35\142"+
+    "\4\143\2\0\14\143\1\152\35\143\5\135\1\153\14\135"+
+    "\1\144\35\135\5\127\1\0\14\127\1\136\35\127\5\137"+
+    "\1\154\14\137\1\146\35\137\4\147\2\0\14\147\1\155"+
+    "\35\147\24\0\1\156\33\0\5\142\1\157\14\142\1\151"+
+    "\35\142\5\143\1\160\14\143\1\152\35\143\5\135\1\0"+
+    "\14\135\1\144\35\135\5\137\1\0\14\137\1\146\35\137"+
+    "\5\147\1\161\14\147\1\155\35\147\4\156\2\0\14\156"+
+    "\1\162\35\156\5\142\1\0\14\142\1\151\35\142\5\143"+
+    "\1\0\14\143\1\152\35\143\5\147\1\0\14\147\1\155"+
+    "\35\147\5\156\1\163\14\156\1\162\42\156\1\0\14\156"+
+    "\1\162\35\156";
 
   private static int [] zzUnpackTrans() {
-    int [] result = new int[3792];
+    int [] result = new int[4032];
     int offset = 0;
     offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -222,13 +228,14 @@ public class OrinocoJFlexLexer {
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\11\6\1\1\11\4\1\1\11\6\1\15\11"+
-    "\1\0\2\1\6\0\2\1\1\0\1\1\1\0\2\1"+
-    "\1\0\7\11\1\1\6\0\3\1\10\0\1\11\2\0"+
-    "\1\1\5\0\3\1\2\0\6\1\1\0\13\1";
+    "\2\0\1\11\6\1\1\11\4\1\3\11\6\1\14\11"+
+    "\1\1\1\0\2\11\1\0\2\1\6\0\2\1\1\0"+
+    "\1\1\1\0\2\1\1\0\7\11\3\1\6\0\3\1"+
+    "\10\0\1\11\2\0\1\1\5\0\3\1\2\0\6\1"+
+    "\1\0\13\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[107];
+    int [] result = new int[115];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -353,6 +360,9 @@ public class OrinocoJFlexLexer {
   	private final YYTextCharSequence yytextCharSequence = new YYTextCharSequence();
 	private final YYTextHashableCharSequence yytextHashableCharSequence = new YYTextHashableCharSequence(yytextCharSequence);
 	private int latestCommandId = -1;
+
+	private int macroArgLeftParenCount = 0;
+	private int macroArgRightParenCount = 0;
 
 	private int EQEQ_id;
 	private int NE_id;
@@ -977,234 +987,263 @@ public class OrinocoJFlexLexer {
             { return TokenType.BAD_CHARACTER;
             } 
             // fall through
-          case 46: break;
+          case 50: break;
           case 2: 
-            { if(macroSet.containsKey(yytextHashableCharSequence)) {
-			return TokenType.MACRO;
-		}
-		if(yytextIsCommand()) {
-			return TokenType.COMMAND;
-		}
+            { PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
+			if(macro != null) {
+				if(!macro.takesArguments()) {
+					return TokenType.MACRO;
+				}
+				yybegin(MACRO_ARGS);
+			} else {
+				if(yytextIsCommand()) {
+					return TokenType.COMMAND;
+				}
 
-		return TokenType.WORD;
+				return TokenType.WORD;
+			}
             } 
             // fall through
-          case 47: break;
+          case 51: break;
           case 3: 
             { return TokenType.GLUED_WORD;
             } 
             // fall through
-          case 48: break;
+          case 52: break;
           case 4: 
             { latestCommandId = HASH_id; return TokenType.HASH;
             } 
             // fall through
-          case 49: break;
+          case 53: break;
           case 5: 
             { return TokenType.WHITE_SPACE;
             } 
             // fall through
-          case 50: break;
+          case 54: break;
           case 6: 
             { return TokenType.INTEGER_LITERAL;
             } 
             // fall through
-          case 51: break;
+          case 55: break;
           case 7: 
             { latestCommandId = MINUS_id; return TokenType.MINUS;
             } 
             // fall through
-          case 52: break;
+          case 56: break;
           case 8: 
             { latestCommandId = FSLASH_id; return TokenType.FSLASH;
             } 
             // fall through
-          case 53: break;
+          case 57: break;
           case 9: 
             { latestCommandId = ASTERISK_id; return TokenType.ASTERISK;
             } 
             // fall through
-          case 54: break;
-          case 10: 
-            { latestCommandId = EQ_id; return TokenType.EQ;
-            } 
-            // fall through
-          case 55: break;
-          case 11: 
-            { latestCommandId = EXCL_id; return TokenType.EXCL;
-            } 
-            // fall through
-          case 56: break;
-          case 12: 
-            { latestCommandId = GT_id; return TokenType.GT;
-            } 
-            // fall through
-          case 57: break;
-          case 13: 
-            { latestCommandId = LT_id; return TokenType.LT;
-            } 
-            // fall through
           case 58: break;
-          case 14: 
-            { latestCommandId = PERC_id; return TokenType.PERC;
-            } 
-            // fall through
-          case 59: break;
-          case 15: 
-            { latestCommandId = PLUS_id; return TokenType.PLUS;
-            } 
-            // fall through
-          case 60: break;
-          case 16: 
-            { latestCommandId = CARET_id; return TokenType.CARET;
-            } 
-            // fall through
-          case 61: break;
-          case 17: 
+          case 10: 
             { latestCommandId = LPAREN_id; return TokenType.LPAREN;
             } 
             // fall through
-          case 62: break;
-          case 18: 
+          case 59: break;
+          case 11: 
             { latestCommandId = RPAREN_id; return TokenType.RPAREN;
             } 
             // fall through
+          case 60: break;
+          case 12: 
+            { latestCommandId = EQ_id; return TokenType.EQ;
+            } 
+            // fall through
+          case 61: break;
+          case 13: 
+            { latestCommandId = EXCL_id; return TokenType.EXCL;
+            } 
+            // fall through
+          case 62: break;
+          case 14: 
+            { latestCommandId = GT_id; return TokenType.GT;
+            } 
+            // fall through
           case 63: break;
+          case 15: 
+            { latestCommandId = LT_id; return TokenType.LT;
+            } 
+            // fall through
+          case 64: break;
+          case 16: 
+            { latestCommandId = PERC_id; return TokenType.PERC;
+            } 
+            // fall through
+          case 65: break;
+          case 17: 
+            { latestCommandId = PLUS_id; return TokenType.PLUS;
+            } 
+            // fall through
+          case 66: break;
+          case 18: 
+            { latestCommandId = CARET_id; return TokenType.CARET;
+            } 
+            // fall through
+          case 67: break;
           case 19: 
             { latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE;
             } 
             // fall through
-          case 64: break;
+          case 68: break;
           case 20: 
             { latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE;
             } 
             // fall through
-          case 65: break;
+          case 69: break;
           case 21: 
             { latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET;
             } 
             // fall through
-          case 66: break;
+          case 70: break;
           case 22: 
             { latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET;
             } 
             // fall through
-          case 67: break;
+          case 71: break;
           case 23: 
             { latestCommandId = COMMA_id; return TokenType.COMMA;
             } 
             // fall through
-          case 68: break;
+          case 72: break;
           case 24: 
             { latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON;
             } 
             // fall through
-          case 69: break;
+          case 73: break;
           case 25: 
             { latestCommandId = QUEST_id; return TokenType.QUEST;
             } 
             // fall through
-          case 70: break;
+          case 74: break;
           case 26: 
             { latestCommandId = COLON_id; return TokenType.COLON;
             } 
             // fall through
-          case 71: break;
-          case 27: 
-            { return TokenType.HEX_LITERAL;
-            } 
-            // fall through
-          case 72: break;
-          case 28: 
-            { return TokenType.DEC_LITERAL;
-            } 
-            // fall through
-          case 73: break;
-          case 29: 
-            { return TokenType.STRING_LITERAL;
-            } 
-            // fall through
-          case 74: break;
-          case 30: 
-            { return TokenType.INLINE_COMMENT;
-            } 
-            // fall through
           case 75: break;
-          case 31: 
-            { latestCommandId = EQEQ_id; return TokenType.EQEQ;
+          case 27: 
+            { if(macroArgRightParenCount == macroArgLeftParenCount) {
+			yybegin(YYINITIAL);
+			macroArgLeftParenCount = macroArgRightParenCount = 0;
+			return TokenType.MACRO;
+		}
             } 
             // fall through
           case 76: break;
-          case 32: 
-            { latestCommandId = NE_id; return TokenType.NE;
+          case 28: 
+            { macroArgLeftParenCount++;
             } 
             // fall through
           case 77: break;
-          case 33: 
-            { latestCommandId = GE_id; return TokenType.GE;
+          case 29: 
+            { macroArgRightParenCount++;
             } 
             // fall through
           case 78: break;
-          case 34: 
-            { latestCommandId = GTGT_id; return TokenType.GTGT;
+          case 30: 
+            { return TokenType.HEX_LITERAL;
             } 
             // fall through
           case 79: break;
-          case 35: 
-            { latestCommandId = LE_id; return TokenType.LE;
+          case 31: 
+            { return TokenType.DEC_LITERAL;
             } 
             // fall through
           case 80: break;
-          case 36: 
-            { latestCommandId = AMPAMP_id; return TokenType.AMPAMP;
+          case 32: 
+            { return TokenType.STRING_LITERAL;
             } 
             // fall through
           case 81: break;
-          case 37: 
-            { latestCommandId = BARBAR_id; return TokenType.BARBAR;
+          case 33: 
+            { return TokenType.INLINE_COMMENT;
             } 
             // fall through
           case 82: break;
-          case 38: 
-            { return TokenType.BLOCK_COMMENT;
+          case 34: 
+            { latestCommandId = EQEQ_id; return TokenType.EQEQ;
             } 
             // fall through
           case 83: break;
-          case 39: 
-            { return TokenType.CMD_ELSE;
+          case 35: 
+            { latestCommandId = NE_id; return TokenType.NE;
             } 
             // fall through
           case 84: break;
-          case 40: 
-            { return TokenType.CMD_ENDIF;
+          case 36: 
+            { latestCommandId = GE_id; return TokenType.GE;
             } 
             // fall through
           case 85: break;
-          case 41: 
-            { return TokenType.CMD_IFDEF;
+          case 37: 
+            { latestCommandId = GTGT_id; return TokenType.GTGT;
             } 
             // fall through
           case 86: break;
-          case 42: 
-            { return TokenType.CMD_UNDEF;
+          case 38: 
+            { latestCommandId = LE_id; return TokenType.LE;
             } 
             // fall through
           case 87: break;
-          case 43: 
-            { return TokenType.CMD_DEFINE;
+          case 39: 
+            { latestCommandId = AMPAMP_id; return TokenType.AMPAMP;
             } 
             // fall through
           case 88: break;
-          case 44: 
-            { return TokenType.CMD_IFNDEF;
+          case 40: 
+            { latestCommandId = BARBAR_id; return TokenType.BARBAR;
             } 
             // fall through
           case 89: break;
-          case 45: 
-            { return TokenType.CMD_INCLUDE;
+          case 41: 
+            { /* do nothing */
             } 
             // fall through
           case 90: break;
+          case 42: 
+            { return TokenType.BLOCK_COMMENT;
+            } 
+            // fall through
+          case 91: break;
+          case 43: 
+            { return TokenType.CMD_ELSE;
+            } 
+            // fall through
+          case 92: break;
+          case 44: 
+            { return TokenType.CMD_ENDIF;
+            } 
+            // fall through
+          case 93: break;
+          case 45: 
+            { return TokenType.CMD_IFDEF;
+            } 
+            // fall through
+          case 94: break;
+          case 46: 
+            { return TokenType.CMD_UNDEF;
+            } 
+            // fall through
+          case 95: break;
+          case 47: 
+            { return TokenType.CMD_DEFINE;
+            } 
+            // fall through
+          case 96: break;
+          case 48: 
+            { return TokenType.CMD_IFNDEF;
+            } 
+            // fall through
+          case 97: break;
+          case 49: 
+            { return TokenType.CMD_INCLUDE;
+            } 
+            // fall through
+          case 98: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }
