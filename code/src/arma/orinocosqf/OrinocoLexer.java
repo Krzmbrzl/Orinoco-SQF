@@ -278,15 +278,17 @@ public class OrinocoLexer implements ProblemListener {
 	/**
 	 * Updates in the following order:
 	 * <ol>
-	 * <li>{@link #originalOffset} is += {@link #originalLength}</li>
-	 * <li>{@link #originalLength} is set to 0</li>
+	 * <li>{@link #originalOffset} is += {@link #originalLength} <b>if</b> the lexer isn't lexing preprocessed text</li>
+	 * <li>{@link #originalLength} is set to 0 <b>if</b> the lexer isn't lexing preprocessed text</li>
 	 * <li>{@link #preprocessedOffset} is += {@link #preprocessedLength}</li>
 	 * <li>{@link #preprocessedLength} is set to 0</li>
 	 * </ol>
 	 */
 	private void updateOffsetsAfterMake() {
-		originalOffset += originalLength;
-		originalLength = 0;
+		if (!jFlexLexer.yymoreStreams()) {
+			originalOffset += originalLength;
+			originalLength = 0;
+		}
 		preprocessedOffset += preprocessedLength;
 		preprocessedLength = 0;
 	}
