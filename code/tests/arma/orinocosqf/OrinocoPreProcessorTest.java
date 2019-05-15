@@ -4,8 +4,6 @@ import arma.orinocosqf.helpers.TestOrinocoLexer;
 import arma.orinocosqf.helpers.TokenExpector;
 import arma.orinocosqf.preprocessing.ArmaFilesystem;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
-import arma.orinocosqf.preprocessing.PreProcessorMacro;
-import arma.orinocosqf.preprocessing.bodySegments.TextSegment;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -14,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
@@ -117,7 +114,6 @@ public class OrinocoPreProcessorTest {
 		String text = "MACRO(v,z)";
 		String all = define + "\n" + text;
 		lexerFromText(all, cb);
-		preProcessor.getMacroSet().put("MACRO", new PreProcessorMacro(preProcessor.getMacroSet(), "MACRO", Arrays.asList("arg", "arg2"), new TextSegment("v=z")));
 
 		final int textStart = define.length() + 1; // +1 for \n
 

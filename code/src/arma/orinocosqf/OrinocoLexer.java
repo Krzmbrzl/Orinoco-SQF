@@ -242,7 +242,6 @@ public class OrinocoLexer implements ProblemListener {
 					} else {
 						if (jFlexLexer.macroHashArgs()) {
 							StringBuilder macroWithArgs = jFlexLexer.getMacroWithArgs();
-							System.out.println("OrinocoLexer.doStart macroWithArgs=" + macroWithArgs);
 							char[] chars = HashableCharSequence.asChars(macroWithArgs);
 							lexerStream.preProcessToken(chars, 0, chars.length);
 						} else {
