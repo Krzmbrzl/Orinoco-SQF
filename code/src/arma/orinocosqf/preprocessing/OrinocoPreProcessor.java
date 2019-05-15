@@ -1,10 +1,6 @@
 package arma.orinocosqf.preprocessing;
 
-import arma.orinocosqf.OrinocoLexer;
-import arma.orinocosqf.OrinocoLexerContext;
-import arma.orinocosqf.OrinocoLexerLiteralType;
-import arma.orinocosqf.OrinocoLexerStream;
-import arma.orinocosqf.OrinocoTokenProcessor;
+import arma.orinocosqf.*;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
@@ -158,7 +154,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 								 @NotNull OrinocoLexerContext ctx) {
 		// search for NLs
-		ctx.getTextBuffer().getText(originalOffset, originalLength);
+//		ctx.getTextBuffer().getText(originalOffset, originalLength);
 	}
 
 	@Override

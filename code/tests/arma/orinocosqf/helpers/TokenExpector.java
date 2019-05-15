@@ -62,8 +62,8 @@ public class TokenExpector implements OrinocoLexerStream {
 					String msg = String.format("Missing parameter %s in actual token: %s", entry.getKey(), actualNext.toString());
 					fail(msg);
 				}
-				String msg = String.format("Expected %s for parameter %s, got %s", entry.getValue().toString(), entry.getKey(),
-						o.toString());
+				String msg = String.format("Expected %s for parameter %s, got '%s' in actual token: %s", entry.getValue().toString(), entry.getKey(),
+						o.toString(), actualNext.toString());
 				assertEquals(msg, entry.getValue(), o);
 			}
 		}
