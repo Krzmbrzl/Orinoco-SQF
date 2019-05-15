@@ -129,11 +129,11 @@ public class OrinocoPreProcessorTest {
 
 		tokenFactory.acceptGlobalVariable(0, vInd, textStart, textStart, text.length(), lexer.getContext());
 		tokenFactory.acceptCommand(eqId, eqInd, textStart, textStart, text.length(), lexer.getContext());
-		tokenFactory.acceptGlobalVariable(1, zInd, textStart, text.length(), 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(1, zInd, textStart, textStart, text.length(), lexer.getContext());
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
-		//lexer.assertDidPreProcessing();
+		lexer.assertDidPreProcessing();
 		expector.assertTokensMatch();
 	}
 

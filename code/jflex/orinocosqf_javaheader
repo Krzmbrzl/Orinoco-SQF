@@ -125,6 +125,10 @@
 		public String asString() {
 			return cs.toString();
 		}
+		@Override
+		public int hashCode() {
+			return HashableCharSequence.computeHash(this);
+		}
 	}
 
 	private class YYTextCharSequence implements CharSequence{

@@ -78,6 +78,12 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 			return TokenType.MACRO;
 		}
     }
+    [^()\\]+ { /*do nothing*/ }
+
+	<<EOF>> {
+		if (!yymoreStreams()) { yybegin(YYINITIAL);  return TokenType.MACRO; }
+		yypopStream();
+	}
 }
 
 <YYINITIAL> {
@@ -105,6 +111,7 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 				if(!macro.takesArguments()) {
 					return TokenType.MACRO;
 				}
+				System.out.println("OrinocoJFlexLexer.advance args");
 				yybegin(MACRO_ARGS);
 			} else {
 				if(yytextIsCommand()) {

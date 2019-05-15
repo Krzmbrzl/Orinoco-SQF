@@ -52,7 +52,7 @@ public abstract class HashableCharSequence implements CharSequence {
 	public abstract HashableCharSequence deepCopy();
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return hashcode;
 	}
 
@@ -76,7 +76,7 @@ public abstract class HashableCharSequence implements CharSequence {
 
 	@Override
 	public String toString() {
-		return asString();
+		return "{s=" + asString() + ", hash=" + hashcode + "}";
 	}
 
 	protected boolean charSequenceEquals(@NotNull CharSequence other) {
@@ -100,7 +100,6 @@ public abstract class HashableCharSequence implements CharSequence {
 			return false;
 		}
 		HashableCharSequence other = (HashableCharSequence) obj;
-
 		return charSequenceEquals(other);
 	}
 

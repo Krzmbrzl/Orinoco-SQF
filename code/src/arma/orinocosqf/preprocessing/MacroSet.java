@@ -95,4 +95,9 @@ public class MacroSet implements Map<String, PreProcessorMacro> {
 	public Set<Entry<String, PreProcessorMacro>> entrySet() {
 		return map.entrySet().stream().map(e -> Map.entry(e.getKey().asString(), e.getValue())).collect(Collectors.toSet());
 	}
+
+	@Override
+	public String toString() {
+		return map.toString();
+	}
 }
