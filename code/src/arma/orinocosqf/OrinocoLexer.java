@@ -421,6 +421,7 @@ public class OrinocoLexer implements ProblemListener {
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
 		jFlexLexer.yypushStream(reader);
+		preprocessedLength = 0; //reset the length because something took the place of the most recent token
 	}
 
 	/**
