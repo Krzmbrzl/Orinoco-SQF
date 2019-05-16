@@ -3,23 +3,19 @@ package arma.orinocosqf;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
 
 /**
  * @author K
  * @since 5/12/19
  */
-public class VariableIdTransformer implements IdTransformer<String> {
+public abstract class VariableIdTransformer implements IdTransformer<String> {
 	private final CaseInsensitiveHashSet<SQFVariable> localVars;
 	private final CaseInsensitiveHashSet<SQFVariable> globalVars;
-	private final Function<String, Integer> nextIdFunc;
 
 	public VariableIdTransformer(@NotNull CaseInsensitiveHashSet<SQFVariable> localVars,
-								 @NotNull CaseInsensitiveHashSet<SQFVariable> globalVars,
-								 @NotNull Function<String, Integer> nextIdFunc) {
+								 @NotNull CaseInsensitiveHashSet<SQFVariable> globalVars) {
 		this.localVars = localVars;
 		this.globalVars = globalVars;
-		this.nextIdFunc = nextIdFunc;
 	}
 
 	@NotNull
@@ -41,7 +37,7 @@ public class VariableIdTransformer implements IdTransformer<String> {
 		if (var != null) {
 			return var.getId();
 		}
-		var = new SQFVariable(value, nextIdFunc.apply(value));
+		var = new SQFVariable(value, getNextId(value));
 		if (local) {
 			localVars.put(var);
 		} else {
@@ -49,4 +45,6 @@ public class VariableIdTransformer implements IdTransformer<String> {
 		}
 		return var.getId();
 	}
+
+	protected abstract int getNextId(@NotNull String varName);
 }

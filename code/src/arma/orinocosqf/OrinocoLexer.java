@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Stack;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -445,17 +444,17 @@ public class OrinocoLexer implements ProblemListener {
 	private class MyVariableIdTransformer extends VariableIdTransformer {
 
 		public MyVariableIdTransformer() {
-			super(localVarSet, globalVarSet, new Function<String, Integer>() {
-				@Override
-				public Integer apply(String s) {
-					if (s.charAt(0) == '_') {
-						nextLocalVarId++;
-						return nextLocalVarId - 1;
-					}
-					nextGlobalVarId++;
-					return nextGlobalVarId - 1;
-				}
-			});
+			super(localVarSet, globalVarSet);
+		}
+
+		@Override
+		protected int getNextId(@NotNull String varName) {
+			if (varName.charAt(0) == '_') {
+				nextLocalVarId++;
+				return nextLocalVarId - 1;
+			}
+			nextGlobalVarId++;
+			return nextGlobalVarId - 1;
 		}
 	}
 
