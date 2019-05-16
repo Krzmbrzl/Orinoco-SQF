@@ -5,6 +5,8 @@
 	private final YYTextHashableCharSequence yytextHashableCharSequence = new YYTextHashableCharSequence(yytextCharSequence);
 	private int latestCommandId = -1;
 
+	private int originalLength = 0;
+	private int preprocessedLength = 0;
 	private final MyStringBuilder macroWithArgs = new MyStringBuilder();
 	private final MyStringBuilder preprocessorCommandBuilder = new MyStringBuilder();
 	private TokenType preprocessorCommandMatched = null;
@@ -45,43 +47,28 @@
 		preprocessorCommandBuilder.setLength(0);
 		appendTextToPreProcessorCommand();
 		preprocessorCommandMatched = preprocessorCommand;
-		PreProcessorCommand cmd = null;
-		switch(preprocessorCommand) {
-			case CMD_DEFINE: {
-				cmd = PreProcessorCommand.Define;
-				break;
-			}
-			case CMD_INCLUDE: {
-				cmd = PreProcessorCommand.Include;
-				break;
-			}
-			case CMD_IFDEF: {
-				cmd = PreProcessorCommand.IfDef;
-				break;
-			}
-			case CMD_IFNDEF: {
-				cmd = PreProcessorCommand.IfNDef;
-				break;
-			}
-			case CMD_ELSE: {
-				cmd = PreProcessorCommand.Else;
-				break;
-			}
-			case CMD_ENDIF: {
-				cmd = PreProcessorCommand.EndIf;
-				break;
-			}
-			case CMD_UNDEF: {
-				cmd = PreProcessorCommand.Undef;
-				break;
-			}
-			default: {
-				throw new IllegalArgumentException(preprocessorCommand.toString()); // ??
-			}
-		}
-		//push back all characters that isn't the #command_name
-		//yypushback(yylength() - cmd.commandName().length() + 1); /*plus 1 because of #*/
 		yybegin(PREPROCESSOR_CMD);
+		updateTokenLength(true);
+	}
+
+	public void resetTokenOffsets() {
+		originalLength = 0;
+		preprocessedLength = 0;
+	}
+
+	private void updateTokenLength(boolean pp) {
+		originalLength += yylength();
+		if(pp) {
+			preprocessedLength += yylength();
+		}
+	}
+
+	public int preprocessedLength() {
+		return preprocessedLength;
+	}
+
+	public int originalLength() {
+		return originalLength;
 	}
 
 	public int yystart() {

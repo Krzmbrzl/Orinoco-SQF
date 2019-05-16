@@ -71,12 +71,12 @@ CMD_UNDEF = "#undef"
 %%
 
 <PREPROCESSOR_CMD> {
-	"/*" { yybegin(PREPROCESSOR_CMD_ML_COMMENT); }
-    {INLINE_COMMENT} { yybegin(YYINITIAL); return preprocessorCommandMatched; }
-    [^\r\n\\/*]+ { appendTextToPreProcessorCommand(); }
-    [/|*] { appendTextToPreProcessorCommand(); }
-    {MACRO_NEXT_LINE} { appendTextToPreProcessorCommand(); }
-	{LINE_TERMINATOR} { yybegin(YYINITIAL); return preprocessorCommandMatched; }
+	"/*" { updateTokenLength(false); yybegin(PREPROCESSOR_CMD_ML_COMMENT); }
+    {INLINE_COMMENT} { updateTokenLength(false); yybegin(YYINITIAL); return preprocessorCommandMatched; }
+    [^\r\n\\/*]+ { updateTokenLength(true); appendTextToPreProcessorCommand(); }
+    [/|*] { updateTokenLength(true); appendTextToPreProcessorCommand(); }
+    {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToPreProcessorCommand(); }
+	{LINE_TERMINATOR} { updateTokenLength(true); yybegin(YYINITIAL); updateTokenLength(true); return preprocessorCommandMatched; }
 	<<EOF>> {
 		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
 		yypopStream();
@@ -84,9 +84,9 @@ CMD_UNDEF = "#undef"
 }
 
 <PREPROCESSOR_CMD_ML_COMMENT> {
-	"*/" { yybegin(PREPROCESSOR_CMD); }
-	[^/*]+ { /*do nothing*/ }
-	[/|*] { /*do nothing*/ }
+	"*/" { updateTokenLength(false); yybegin(PREPROCESSOR_CMD); }
+	[^/*]+ { updateTokenLength(true); }
+	[/|*] { updateTokenLength(true); }
 	<<EOF>> {
 		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
 		yypopStream();
@@ -94,18 +94,20 @@ CMD_UNDEF = "#undef"
 }
 
 <MACRO_ARGS> {
-	"(" { appendTextToMacro(); macroArgLeftParenCount++; }
-    ")" { appendTextToMacro(); macroArgRightParenCount++; }
-    {MACRO_NEXT_LINE} { appendTextToMacro(); }
+	"(" { updateTokenLength(true); appendTextToMacro(); macroArgLeftParenCount++; }
+    ")" { updateTokenLength(true); appendTextToMacro(); macroArgRightParenCount++; }
+    {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToMacro(); }
     {WHITE_SPACE_CHAR} {
 		if(macroArgRightParenCount == macroArgLeftParenCount) {
 			yybegin(YYINITIAL);
 			macroArgLeftParenCount = macroArgRightParenCount = 0;
 			yypushback(1);
+			updateTokenLength(true);
 			return TokenType.MACRO;
 		}
+		updateTokenLength(true);
     }
-    [^()\\]+ { appendTextToMacro(); }
+    [^()\\]+ { updateTokenLength(true); appendTextToMacro(); }
 
 	<<EOF>> {
 		if (!yymoreStreams()) { yybegin(YYINITIAL); return TokenType.MACRO; }
@@ -115,7 +117,7 @@ CMD_UNDEF = "#undef"
 
 <YYINITIAL> {
 
-	{WHITE_SPACE} { return TokenType.WHITE_SPACE; }
+	{WHITE_SPACE} { updateTokenLength(true); return TokenType.WHITE_SPACE; }
 
 	{CMD_DEFINE} { beginPreProcessorCommandState(TokenType.CMD_DEFINE); }
 	{CMD_INCLUDE} { beginPreProcessorCommandState(TokenType.CMD_INCLUDE); }
@@ -125,15 +127,16 @@ CMD_UNDEF = "#undef"
 	{CMD_ENDIF} { beginPreProcessorCommandState(TokenType.CMD_ENDIF); }
 	{CMD_UNDEF} { beginPreProcessorCommandState(TokenType.CMD_UNDEF); }
 
-	{BLOCK_COMMENT} { return TokenType.BLOCK_COMMENT; }
-	{INLINE_COMMENT} { return TokenType.INLINE_COMMENT; }
+	{BLOCK_COMMENT} { updateTokenLength(true); return TokenType.BLOCK_COMMENT; }
+	{INLINE_COMMENT} { updateTokenLength(true); return TokenType.INLINE_COMMENT; }
 
-	{HEX_LITERAL} { return TokenType.HEX_LITERAL; }
-	{INTEGER_LITERAL} { return TokenType.INTEGER_LITERAL; }
-	{DEC_LITERAL} { return TokenType.DEC_LITERAL; }
-	{STRING_LITERAL} { return TokenType.STRING_LITERAL; }
+	{HEX_LITERAL} { updateTokenLength(true); return TokenType.HEX_LITERAL; }
+	{INTEGER_LITERAL} { updateTokenLength(true); return TokenType.INTEGER_LITERAL; }
+	{DEC_LITERAL} { updateTokenLength(true); return TokenType.DEC_LITERAL; }
+	{STRING_LITERAL} { updateTokenLength(true); return TokenType.STRING_LITERAL; }
 
 	{WORD} {
+      		updateTokenLength(true);
       		macroHasArgs = false;
 			PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
 			if(macro != null) {
@@ -155,45 +158,46 @@ CMD_UNDEF = "#undef"
 	}
 
 	{GLUED_WORD} {
+      	updateTokenLength(true);
 		return TokenType.GLUED_WORD;
 	}
 
-	"==" { latestCommandId = EQEQ_id; return TokenType.EQEQ; }
-	"!=" { latestCommandId = NE_id; return TokenType.NE; }
-	">>" { latestCommandId = GTGT_id; return TokenType.GTGT; }
-	"<=" { latestCommandId = LE_id; return TokenType.LE; }
-	">=" { latestCommandId = GE_id; return TokenType.GE; }
-	"&&" { latestCommandId = AMPAMP_id; return TokenType.AMPAMP; }
-	"||" { latestCommandId = BARBAR_id; return TokenType.BARBAR; }
+	"==" { updateTokenLength(true); latestCommandId = EQEQ_id; return TokenType.EQEQ; }
+	"!=" { updateTokenLength(true); latestCommandId = NE_id; return TokenType.NE; }
+	">>" { updateTokenLength(true); latestCommandId = GTGT_id; return TokenType.GTGT; }
+	"<=" { updateTokenLength(true); latestCommandId = LE_id; return TokenType.LE; }
+	">=" { updateTokenLength(true); latestCommandId = GE_id; return TokenType.GE; }
+	"&&" { updateTokenLength(true); latestCommandId = AMPAMP_id; return TokenType.AMPAMP; }
+	"||" { updateTokenLength(true); latestCommandId = BARBAR_id; return TokenType.BARBAR; }
 
-	"*" { latestCommandId = ASTERISK_id; return TokenType.ASTERISK; }
-	"=" { latestCommandId = EQ_id; return TokenType.EQ; }
-	"%" { latestCommandId = PERC_id; return TokenType.PERC; }
-	"+" { latestCommandId = PLUS_id; return TokenType.PLUS; }
-	"-" { latestCommandId = MINUS_id; return TokenType.MINUS; }
-	"/" { latestCommandId = FSLASH_id; return TokenType.FSLASH; }
-	"^" { latestCommandId = CARET_id; return TokenType.CARET; }
+	"*" { updateTokenLength(true); latestCommandId = ASTERISK_id; return TokenType.ASTERISK; }
+	"=" { updateTokenLength(true); latestCommandId = EQ_id; return TokenType.EQ; }
+	"%" { updateTokenLength(true); latestCommandId = PERC_id; return TokenType.PERC; }
+	"+" { updateTokenLength(true); latestCommandId = PLUS_id; return TokenType.PLUS; }
+	"-" { updateTokenLength(true); latestCommandId = MINUS_id; return TokenType.MINUS; }
+	"/" { updateTokenLength(true); latestCommandId = FSLASH_id; return TokenType.FSLASH; }
+	"^" { updateTokenLength(true); latestCommandId = CARET_id; return TokenType.CARET; }
 
-	"#" { latestCommandId = HASH_id; return TokenType.HASH; }
+	"#" { updateTokenLength(true); latestCommandId = HASH_id; return TokenType.HASH; }
 
-	"<" { latestCommandId = LT_id; return TokenType.LT; }
-	">" { latestCommandId = GT_id; return TokenType.GT; }
+	"<" { updateTokenLength(true); latestCommandId = LT_id; return TokenType.LT; }
+	">" { updateTokenLength(true); latestCommandId = GT_id; return TokenType.GT; }
 
-	"!" { latestCommandId = EXCL_id; return TokenType.EXCL; }
+	"!" { updateTokenLength(true); latestCommandId = EXCL_id; return TokenType.EXCL; }
 
-	"(" { latestCommandId = LPAREN_id; return TokenType.LPAREN; }
-	")" { latestCommandId = RPAREN_id; return TokenType.RPAREN; }
-	"{" { latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE; }
-	"}" { latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE; }
-	"[" { latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET; }
-	"]" { latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET; }
-	"," { latestCommandId = COMMA_id; return TokenType.COMMA; }
-	";" { latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON; }
+	"(" { updateTokenLength(true); latestCommandId = LPAREN_id; return TokenType.LPAREN; }
+	")" { updateTokenLength(true); latestCommandId = RPAREN_id; return TokenType.RPAREN; }
+	"{" { updateTokenLength(true); latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE; }
+	"}" { updateTokenLength(true); latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE; }
+	"[" { updateTokenLength(true); latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET; }
+	"]" { updateTokenLength(true); latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET; }
+	"," { updateTokenLength(true); latestCommandId = COMMA_id; return TokenType.COMMA; }
+	";" { updateTokenLength(true); latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON; }
 
-	"?" { latestCommandId = QUEST_id; return TokenType.QUEST; }
-	":" { latestCommandId = COLON_id; return TokenType.COLON; }
+	"?" { updateTokenLength(true); latestCommandId = QUEST_id; return TokenType.QUEST; }
+	":" { updateTokenLength(true); latestCommandId = COLON_id; return TokenType.COLON; }
 
-	. { return TokenType.BAD_CHARACTER; }
+	. { updateTokenLength(true); return TokenType.BAD_CHARACTER; }
 }
 
 <<EOF>> {

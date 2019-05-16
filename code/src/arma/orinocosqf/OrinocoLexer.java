@@ -123,6 +123,7 @@ public class OrinocoLexer implements ProblemListener {
 
 	private void doStart() throws IOException {
 		while (true) {
+			jFlexLexer.resetTokenOffsets();
 			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
 			if (type == null) {
 				throw new IllegalStateException(); //?
@@ -131,10 +132,10 @@ public class OrinocoLexer implements ProblemListener {
 				return;
 			}
 			if (!jFlexLexer.yymoreStreams()) {
-				preprocessedLength = jFlexLexer.yylength();
-				originalLength = jFlexLexer.yylength();
+				preprocessedLength = jFlexLexer.preprocessedLength();
+				originalLength = jFlexLexer.originalLength();
 			} else {
-				preprocessedLength += jFlexLexer.yylength();
+				preprocessedLength += jFlexLexer.preprocessedLength();
 			}
 			if (!preProcessorIfDefState.isEmpty()) {
 				if (type == OrinocoJFlexLexer.TokenType.CMD_ENDIF) {
