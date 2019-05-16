@@ -21,7 +21,7 @@ class MyStringBuilder {
 			grow();
 		}
 		for (int i = 0; i < cs.length(); i++) {
-			chars[cursor + i] = cs.charAt(i);
+			chars[cursor++] = cs.charAt(i);
 		}
 	}
 
@@ -37,4 +37,7 @@ class MyStringBuilder {
 		return cursor;
 	}
 
+	public String asString() {
+		return new String(chars, 0, cursor);
+	}
 }

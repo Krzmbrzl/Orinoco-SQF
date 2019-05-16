@@ -327,7 +327,9 @@ public class OrinocoLexer implements ProblemListener {
 			updateOffsetsAfterMake();
 			return;
 		}
-		lexerStream.acceptPreProcessorCommand(command, jFlexLexer.getBuffer(), jFlexLexer.yystart(), originalLength);
+		MyStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
+		System.out.println("OrinocoLexer.makePreProcessorCommandIfPreProcessingEnabled cmd.asString()=" + cmd.asString());
+		lexerStream.acceptPreProcessorCommand(command, cmd.getCharsReadOnly(), 0, cmd.getLength());
 		updateOffsetsAfterMake();
 	}
 

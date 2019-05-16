@@ -4,6 +4,7 @@ import arma.orinocosqf.preprocessing.PreProcessorMacro;import org.jetbrains.anno
 import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.HashableCharSequence;
+import arma.orinocosqf.preprocessing.PreProcessorCommand;
 
 %%
 
@@ -26,6 +27,8 @@ import arma.orinocosqf.HashableCharSequence;
 %include orinocosqf_javaheader
 
 %state MACRO_ARGS
+%state PREPROCESSOR_CMD
+%state PREPROCESSOR_CMD_ML_COMMENT
 
 LETTER = [a-zA-Z_] //can't start with $ because of hex numbers
 LETTER_DIGIT = [$a-zA-Z_$0-9]
@@ -57,15 +60,38 @@ INLINE_COMMENT = "//" {INPUT_CHARACTER}*
 MACRO_NEXT_LINE = (("\\\n" | "\\\r\n" | "\\\r") [ \t\f]*)
 MACRO_CHARACTER = [^\r\n] | {MACRO_NEXT_LINE}
 MACRO_TEXT = {MACRO_CHARACTER}+
-CMD_DEFINE = "#define" {MACRO_TEXT}?
-CMD_INCLUDE = "#include" {MACRO_TEXT}?
-CMD_IFDEF = "#ifdef" {MACRO_TEXT}?
-CMD_IFNDEF = "#ifndef" {MACRO_TEXT}?
-CMD_ELSE = "#else" {MACRO_TEXT}?
-CMD_ENDIF = "#endif" {MACRO_TEXT}?
-CMD_UNDEF = "#undef" {MACRO_TEXT}?
+CMD_DEFINE = "#define"
+CMD_INCLUDE = "#include"
+CMD_IFDEF = "#ifdef"
+CMD_IFNDEF = "#ifndef"
+CMD_ELSE = "#else"
+CMD_ENDIF = "#endif"
+CMD_UNDEF = "#undef"
 
 %%
+
+<PREPROCESSOR_CMD> {
+	"/*" { yybegin(PREPROCESSOR_CMD_ML_COMMENT); }
+    {INLINE_COMMENT} { yybegin(YYINITIAL); return preprocessorCommandMatched; }
+    [^\r\n\\/*]+ { appendTextToPreProcessorCommand(); }
+    [/|*] { appendTextToPreProcessorCommand(); }
+    {MACRO_NEXT_LINE} { appendTextToPreProcessorCommand(); }
+	{LINE_TERMINATOR} { yybegin(YYINITIAL); return preprocessorCommandMatched; }
+	<<EOF>> {
+		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
+		yypopStream();
+	}
+}
+
+<PREPROCESSOR_CMD_ML_COMMENT> {
+	"*/" { yybegin(PREPROCESSOR_CMD); }
+	[^/*]+ { /*do nothing*/ }
+	[/|*] { /*do nothing*/ }
+	<<EOF>> {
+		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
+		yypopStream();
+	}
+}
 
 <MACRO_ARGS> {
 	"(" { appendTextToMacro(); macroArgLeftParenCount++; }
@@ -82,7 +108,7 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
     [^()\\]+ { appendTextToMacro(); }
 
 	<<EOF>> {
-		if (!yymoreStreams()) { yybegin(YYINITIAL);  return TokenType.MACRO; }
+		if (!yymoreStreams()) { yybegin(YYINITIAL); return TokenType.MACRO; }
 		yypopStream();
 	}
 }
@@ -90,13 +116,14 @@ CMD_UNDEF = "#undef" {MACRO_TEXT}?
 <YYINITIAL> {
 
 	{WHITE_SPACE} { return TokenType.WHITE_SPACE; }
-	{CMD_DEFINE} { return TokenType.CMD_DEFINE; }
-	{CMD_INCLUDE} { return TokenType.CMD_INCLUDE; }
-	{CMD_IFDEF} { return TokenType.CMD_IFDEF; }
-	{CMD_IFNDEF} { return TokenType.CMD_IFNDEF; }
-	{CMD_ELSE} { return TokenType.CMD_ELSE; }
-	{CMD_ENDIF} { return TokenType.CMD_ENDIF; }
-	{CMD_UNDEF} { return TokenType.CMD_UNDEF; }
+
+	{CMD_DEFINE} { beginPreProcessorCommandState(TokenType.CMD_DEFINE); }
+	{CMD_INCLUDE} { beginPreProcessorCommandState(TokenType.CMD_INCLUDE); }
+	{CMD_IFDEF} { beginPreProcessorCommandState(TokenType.CMD_IFDEF); }
+	{CMD_IFNDEF} { beginPreProcessorCommandState(TokenType.CMD_IFNDEF); }
+	{CMD_ELSE} { beginPreProcessorCommandState(TokenType.CMD_ELSE); }
+	{CMD_ENDIF} { beginPreProcessorCommandState(TokenType.CMD_ENDIF); }
+	{CMD_UNDEF} { beginPreProcessorCommandState(TokenType.CMD_UNDEF); }
 
 	{BLOCK_COMMENT} { return TokenType.BLOCK_COMMENT; }
 	{INLINE_COMMENT} { return TokenType.INLINE_COMMENT; }
