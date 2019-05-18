@@ -5,6 +5,8 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
+
 /**
  * A segment which has a # in it ("#define MACRO #segment"). When {@link #applyArguments(List)} is invoked, it returns the segment following
  * the # with quotes wrapped around it
@@ -22,7 +24,7 @@ public class StringifySegment extends BodySegment {
 
 	@NotNull
 	@Override
-	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws OrinocoPreprocessorException {
 		return segment != null ? "\"" + segment.applyArguments(args) + "\"" : "";
 	}
 

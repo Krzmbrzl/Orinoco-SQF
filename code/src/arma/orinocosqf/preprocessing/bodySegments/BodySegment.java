@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
@@ -39,9 +40,11 @@ public abstract class BodySegment {
 	 * 
 	 * @param args the arguments of the macro's invocation, or empty list if no arguments were passed (see class level doc)
 	 * @return the preprocessed result
+	 * 
+	 * @throws OrinocoPreprocessorException If something goes wrong when expanding this segment
 	 */
 	@NotNull
-	public abstract CharSequence applyArguments(@NotNull List<CharSequence> args);
+	public abstract CharSequence applyArguments(@NotNull List<CharSequence> args) throws OrinocoPreprocessorException;
 
 	/**
 	 * @return the unpreprocessed segment as it would appear in text/the #define

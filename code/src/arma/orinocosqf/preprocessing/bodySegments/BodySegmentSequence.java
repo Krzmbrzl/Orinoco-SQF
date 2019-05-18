@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
@@ -33,7 +34,7 @@ public class BodySegmentSequence extends BodySegment {
 
 	@NotNull
 	@Override
-	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws OrinocoPreprocessorException {
 		if (!isValid()) {
 			// invalid macros return empty texts
 			return "";

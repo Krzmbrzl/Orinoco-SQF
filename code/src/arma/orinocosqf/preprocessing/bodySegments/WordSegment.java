@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
@@ -32,7 +33,7 @@ public class WordSegment extends BodySegment {
 
 	@NotNull
 	@Override
-	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws OrinocoPreprocessorException {
 		PreProcessorMacro macro = ownerMacro.getMacroSet().get(word);
 		if (macro != null) {
 			return macro.getBody().applyArguments(args);

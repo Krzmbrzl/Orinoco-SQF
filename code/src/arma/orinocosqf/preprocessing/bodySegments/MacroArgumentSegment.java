@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.exceptions.MissingMacroArgumentException;
+
 /**
  * A segment used to distinguish when a parameter of a macro is appearing in the body of a macro.
  * 
@@ -44,7 +46,10 @@ public class MacroArgumentSegment extends BodySegment {
 
 	@NotNull
 	@Override
-	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws MissingMacroArgumentException {
+		if (args.size() <= argIndex) {
+			throw new MissingMacroArgumentException(argumentName);
+		}
 		return args.get(argIndex);
 	}
 

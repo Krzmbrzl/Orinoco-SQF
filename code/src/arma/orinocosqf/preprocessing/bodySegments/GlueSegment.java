@@ -5,6 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
@@ -39,7 +40,7 @@ public class GlueSegment extends BodySegment {
 
 	@NotNull
 	@Override
-	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws OrinocoPreprocessorException {
 		StringBuilder sb = new StringBuilder();
 		if (left != null) {
 			sb.append(left.applyArguments(args));

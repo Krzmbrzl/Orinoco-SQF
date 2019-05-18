@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
+
 /**
  * This segment represents a special type of {@link BodySegmentSequence} representing an expression in parenthesis like
  * <code>(ONE,TWO,Three and five)</code>. All elements in this segment are expected to have been separated by a comma and surrounded by
@@ -53,7 +55,7 @@ public class ParenSegment extends BodySegmentSequence {
 
 	@NotNull
 	@Override
-	public CharSequence applyArguments(@NotNull List<CharSequence> args) {
+	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws OrinocoPreprocessorException {
 		if (wasUsedAsMacroArgument) {
 			// if this paren-expression has been used as the argument to some macro, it has been expanded there. Therefore it must not be
 			// expanded on its own
