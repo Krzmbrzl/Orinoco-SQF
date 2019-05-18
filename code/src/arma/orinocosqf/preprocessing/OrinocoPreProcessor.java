@@ -245,7 +245,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 					String strCurrentArg = currentArg.toString().trim();
 					currentArg.setLength(0);
 
-					if (currentArg.length() == 0) {
+					if (strCurrentArg.length() == 0) {
 						lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
 								startOffset + i - 1 - originalLength, originalLength, -1);
 					}
