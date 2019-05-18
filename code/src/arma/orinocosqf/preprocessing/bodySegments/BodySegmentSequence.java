@@ -1,9 +1,11 @@
 package arma.orinocosqf.preprocessing.bodySegments;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.exceptions.NoMacroArgumentsGivenException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
@@ -41,8 +43,34 @@ public class BodySegmentSequence extends BodySegment {
 		}
 
 		StringBuilder sb = new StringBuilder();
-		for (BodySegment bs : segments) {
-			sb.append(bs.applyArguments(args));
+		for (int i = 0; i < segments.size(); i++) {
+			BodySegment currentSegment = segments.get(i);
+
+			if (currentSegment instanceof WordSegment) {
+				if (((WordSegment) currentSegment).takesArguments()) {
+					if (i + 1 < segments.size() && segments.get(i + 1) instanceof ParenSegment) {
+						i++;
+						ParenSegment argSegment = (ParenSegment) segments.get(i);
+
+						// Set flag that this segment was used as macro argument
+						argSegment.useAsMacroArgument();
+
+						// Preprocess all arguments in order to obtain the actual arguments for the macro
+						List<CharSequence> argList = new ArrayList<>(argSegment.segments.size());
+						for (int k = 0; k < argSegment.segments.size(); k++) {
+							argList.add(argSegment.segments.get(k).applyArguments(args));
+						}
+
+						sb.append(currentSegment.applyArguments(argList));
+					} else {
+						throw new NoMacroArgumentsGivenException(currentSegment.toStringNoPreProcessing().toString());
+					}
+				} else {
+					sb.append(currentSegment.applyArguments(args));
+				}
+			} else {
+				sb.append(currentSegment.applyArguments(args));
+			}
 		}
 		return sb;
 	}

@@ -66,4 +66,18 @@ public class WordSegment extends BodySegment {
 
 		return other.word.equals(this.word);
 	}
+
+	/**
+	 * @return Whether the macro represented by this segment (if any) needs any arguments to be expanded. If this segment doesn't represent
+	 *         a macro, this method will return <code>false</code>
+	 */
+	protected boolean takesArguments() {
+		PreProcessorMacro macro = ownerMacro.getMacroSet().get(word);
+
+		if (macro != null) {
+			return macro.takesArguments();
+		} else {
+			return false;
+		}
+	}
 }
