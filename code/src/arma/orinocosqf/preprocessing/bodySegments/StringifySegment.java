@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
  * A segment which has a # in it ("#define MACRO #segment"). When {@link #applyArguments(List)} is invoked, it returns the segment following
@@ -52,5 +53,14 @@ public class StringifySegment extends BodySegment {
 		}
 
 		return other.segment.equals(this.segment);
+	}
+	
+	@Override
+	public void setOwner(@NotNull PreProcessorMacro macro) {
+		super.setOwner(macro);
+		
+		if (segment != null) {
+			segment.setOwner(macro);
+		}
 	}
 }
