@@ -108,6 +108,36 @@ public class BodySegmentExpansionTest {
 		
 		assertSegment("MACRO3(a,test,here)", "|a|test|here|");
 	}
+	
+	@Test
+	public void stringification() throws OrinocoPreprocessorException {
+		defineMacro("QUOTE(a) #a");
+		
+		assertSegment("#test", "\"test\"");
+		assertSegment(" #test", " \"test\"");
+		assertSegment("#test ", "\"test\" ");
+		assertSegment(" #test ", " \"test\" ");
+		
+		assertSegment("QUOTE(test)", "\"test\"");
+		assertSegment("QUOTE(test )", "\"test \"");
+		assertSegment("QUOTE( test)", "\" test\"");
+		assertSegment("QUOTE( test )", "\" test \"");
+	}
+	
+	@Test
+	public void glueing() throws OrinocoPreprocessorException {
+		defineMacro("GLUE(a,b) a##b");
+		
+		assertSegment("A##Test", "ATest");
+		assertSegment("A3##Test", "A3Test");
+		assertSegment("##Test", "Test");
+		assertSegment("A##", "A");
+		assertSegment("A## ", "A ");
+		assertSegment("A ##", "A ");
+		assertSegment(" ##B", " B");
+		
+		assertSegment("GLUE(Some,Test)", "SomeTest");
+	}
 
 	@Test
 	public void expectedExceptions() throws OrinocoPreprocessorException {
