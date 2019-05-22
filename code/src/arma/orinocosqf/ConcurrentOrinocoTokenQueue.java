@@ -50,20 +50,7 @@ public class ConcurrentOrinocoTokenQueue implements OrinocoTokenQueue {
 	@NotNull
 	@Override
 	public Iterator<OrinocoToken> iterator() {
-		return new MyIterator();
+		return q.iterator();
 	}
 
-	private class MyIterator implements Iterator<OrinocoToken> {
-		private final Iterator<OrinocoToken> iter = q.iterator();
-
-		@Override
-		public boolean hasNext() {
-			return iter.hasNext();
-		}
-
-		@Override
-		public OrinocoToken next() {
-			return iter.next();
-		}
-	}
 }
