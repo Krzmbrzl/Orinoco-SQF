@@ -44,9 +44,15 @@ public class BodySegmentParserTest {
 		BodySegment produced = parser.parseSegments(input.toCharArray(), 0, input.length(), params,
 				(c, isFirstLetter) -> p.isMacroNamePart(c, isFirstLetter));
 
-		assertEquals("Incorrect parsing!", expected, produced);
-		assertEquals("A call to the segment's toStringNoPreprocessing() didn't result in the original input", input,
+		assertEquals("A call to the produced segment's toStringNoPreprocessing() didn't result in the original input", input,
 				produced.toStringNoPreProcessing().toString());
+		assertEquals("A call to the expected segment's toStringNoPreprocessing() didn't result in the original input", input,
+				expected.toStringNoPreProcessing().toString());
+
+		if (!expected.equals(produced)) {
+			assertEquals("Incorrect parsing", expected.toString(), produced.toString());
+			fail("The expected and produced segments don't match, but their string representation does");
+		}
 	}
 
 	void assertSingleWordSegment(@NotNull String input) {
@@ -469,6 +475,24 @@ public class BodySegmentParserTest {
 		segments.add(new TextSegment(" "));
 		parenSegments.add(new MacroArgumentSegment(DefaultParams.get(0), 0));
 		parenSegments.add(new TextSegment("\"(there, and,there)\""));
+		segments.add(new ParenSegment(parenSegments));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
+
+		input = "DOUBLE(QUOTE(a),MACRO)";
+		segments.add(new WordSegment("DOUBLE"));
+		parenSegments.add(new BodySegmentSequence(new ArrayList<BodySegment>() {
+			{
+				add(new WordSegment("QUOTE"));
+				add(new ParenSegment(new ArrayList<BodySegment>() {
+					{
+						add(new WordSegment("a"));
+					}
+				}));
+			}
+		}));
+		parenSegments.add(new WordSegment("MACRO"));
 		segments.add(new ParenSegment(parenSegments));
 		assertSegment(input, new BodySegmentSequence(segments));
 		segments.clear();
