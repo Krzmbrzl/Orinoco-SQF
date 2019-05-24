@@ -15,6 +15,6 @@ public class NoMacroArgumentsGivenException extends OrinocoPreprocessorException
 	 * @param macroName The name of the macro that was tried to be expanded without arguments although it does require arguments
 	 */
 	public NoMacroArgumentsGivenException(@NotNull String macroName) {
-		super("Trying to expand the macro \"" + macroName + "\" without proding the required macro arguments");
+		super("Trying to expand the macro \"" + macroName + "\" without providing the required macro arguments");
 	}
 }
