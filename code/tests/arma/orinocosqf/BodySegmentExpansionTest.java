@@ -143,9 +143,11 @@ public class BodySegmentExpansionTest {
 	public void mixed() throws OrinocoPreprocessorException {
 		defineMacro("QUOTE(a) #a");
 		defineMacro("DOUBLE(a,b) a##b");
+		defineMacro("MODULE MyModule");
+		defineMacro("FUNC(a) MyMod_##MODULE##_fnc_##a");
 		defineMacro("MACRO MyMacro");
 		defineMacro("NESTED1(a,b,c) DOUBLE(QUOTE(a),MACRO)");
-		defineMacro("NESTED2(a,b,c) DOUBLE(QUOTE(a),MACRO)##b"); // TODO: The glueing segment most likely swallows the ParenSegment so that it won't be considered for macro parameters
+		defineMacro("NESTED2(a,b,c) DOUBLE(QUOTE(a),MACRO)##b");
 		defineMacro("NESTED3(a,b,c) DOUBLE(QUOTE(a),MACRO)##b#c");
 		
 		assertSegment("DOUBLE(one,two)", "onetwo");
@@ -154,6 +156,7 @@ public class BodySegmentExpansionTest {
 		assertSegment("NESTED1(one,two,three)", "\"one\"MyMacro");
 		assertSegment("NESTED2(one,two,three)", "\"one\"MyMacrotwo");
 		assertSegment("NESTED3(one,two,three)", "\"one\"MyMacrotwo\"three\"");
+		assertSegment("FUNC(test)", "MyMod_MyModule_fnc_test");
 	}
 
 	@Test

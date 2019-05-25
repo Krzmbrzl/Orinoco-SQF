@@ -497,5 +497,15 @@ public class BodySegmentParserTest {
 		assertSegment(input, new BodySegmentSequence(segments));
 		segments.clear();
 		parenSegments.clear();
+		
+		input = "DOUBLE(a,MACRO)##b";
+		segments.add(new WordSegment("DOUBLE"));
+		parenSegments.add(new WordSegment("a"));
+		parenSegments.add(new WordSegment("MACRO"));
+		segments.add(new ParenSegment(parenSegments));
+		segments.add(new GlueSegment(null, new WordSegment("b")));
+		assertSegment(input, new BodySegmentSequence(segments));
+		segments.clear();
+		parenSegments.clear();
 	}
 }
