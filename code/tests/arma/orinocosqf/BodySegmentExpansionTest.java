@@ -149,6 +149,8 @@ public class BodySegmentExpansionTest {
 		defineMacro("NESTED1(a,b,c) DOUBLE(QUOTE(a),MACRO)");
 		defineMacro("NESTED2(a,b,c) DOUBLE(QUOTE(a),MACRO)##b");
 		defineMacro("NESTED3(a,b,c) DOUBLE(QUOTE(a),MACRO)##b#c");
+		defineMacro("NESTED4(a,b,c) DOUBLE(QUOTE(DOUBLE(a##c,b)),MACRO)");
+		defineMacro("TEST(MACRO) MACRO");
 		
 		assertSegment("DOUBLE(one,two)", "onetwo");
 		assertSegment("DOUBLE(one,MACRO)", "oneMyMacro");
@@ -157,6 +159,8 @@ public class BodySegmentExpansionTest {
 		assertSegment("NESTED2(one,two,three)", "\"one\"MyMacrotwo");
 		assertSegment("NESTED3(one,two,three)", "\"one\"MyMacrotwo\"three\"");
 		assertSegment("FUNC(test)", "MyMod_MyModule_fnc_test");
+		assertSegment("NESTED4(one,two,three)", "\"onethreetwo\"MyMacro");
+		assertSegment("TEST(Test here)", "Test here");
 	}
 
 	@Test
