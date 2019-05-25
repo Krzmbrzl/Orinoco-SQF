@@ -107,7 +107,7 @@ public class OrinocoPreProcessorTest {
 	@Test
 	public void simpleParamMacro() {
 		// This test is for a simple macro with parameters
-		final String expected = "\nv=z";
+		final String expected = "v=z";
 		Consumer<CharSequence> cb = s -> assertEquals(expected, s.toString());
 
 		String define = "#define MACRO(arg,arg2) arg=arg2";
@@ -263,7 +263,7 @@ public class OrinocoPreProcessorTest {
 	public void multilineDefine_withMultiLineComment() {
 		// This test is for a macro spanning multiple lines
 
-		String[] expected = { "Hello world" };
+		String[] expected = { "Hello\n\nworld" };
 		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s.toString());
 
@@ -309,7 +309,7 @@ public class OrinocoPreProcessorTest {
 	public void stringify() {
 		// This test is for stringify
 
-		String[] expected = {"\"123\";", "\"456\";"};
+		String[] expected = {"\"123\";", "\"FOO\";"};
 		int[] expectedInd = { 0 };
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s.toString());
 
