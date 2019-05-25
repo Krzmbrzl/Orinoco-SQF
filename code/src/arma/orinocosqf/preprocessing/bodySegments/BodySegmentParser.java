@@ -457,6 +457,14 @@ public class BodySegmentParser {
 						if (nextC == '#') {
 							// glue segment
 							BodySegment leftArg = segmentContainer.size() > 0 ? segmentContainer.remove(segmentContainer.size() - 1) : null;
+							if (!(leftArg instanceof WordSegment || leftArg instanceof TextSegment || leftArg instanceof MacroArgumentSegment)) {
+								// only use WordSegments, TextSegments or MacroArgumentSegments as the left argument of a GlueSegment
+								if (leftArg != null) {
+									// put the segment back to where it came from
+									segmentContainer.add(leftArg);
+								}
+								leftArg = null;
+							}
 							segmentContainer.add(new GlueSegment(leftArg, nextSegment));
 						} else {
 							// stringify segment
