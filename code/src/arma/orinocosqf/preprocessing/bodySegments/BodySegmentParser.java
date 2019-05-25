@@ -148,8 +148,24 @@ public class BodySegmentParser {
 				}
 
 				letters++;
-				targetBuf.append(c);
-				c = nextChar();
+
+				if (c == '\\') {
+					// handle escaped newlines
+					char nextC = nextChar();
+
+					if (nextC == '\n' || nextC == '\n') {
+						targetBuf.append(nextC);
+
+						c = nextChar();
+					} else {
+						targetBuf.append(c);
+
+						c = nextC;
+					}
+				} else {
+					targetBuf.append(c);
+					c = nextChar();
+				}
 			}
 
 			// "unread" last character as this one wasn't part of the word anymore
@@ -422,8 +438,8 @@ public class BodySegmentParser {
 
 						if (nextC != ')') {
 							// Report error
-							problemListener.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "Unclosed parenthesis", parenStartOffset,
-									reader.offset() - parenStartOffset, -1);
+							problemListener.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "Unclosed parenthesis",
+									parenStartOffset, reader.offset() - parenStartOffset, -1);
 
 							// Add the whole paren-expression as an error-segment
 							StringBuilder builder = new StringBuilder();
@@ -457,7 +473,8 @@ public class BodySegmentParser {
 						if (nextC == '#') {
 							// glue segment
 							BodySegment leftArg = segmentContainer.size() > 0 ? segmentContainer.remove(segmentContainer.size() - 1) : null;
-							if (!(leftArg instanceof WordSegment || leftArg instanceof TextSegment || leftArg instanceof MacroArgumentSegment)) {
+							if (!(leftArg instanceof WordSegment || leftArg instanceof TextSegment
+									|| leftArg instanceof MacroArgumentSegment)) {
 								// only use WordSegments, TextSegments or MacroArgumentSegments as the left argument of a GlueSegment
 								if (leftArg != null) {
 									// put the segment back to where it came from
@@ -519,7 +536,8 @@ public class BodySegmentParser {
 
 					default:
 						// Notify problem listener about invalid character
-						problemListener.problemEncountered(Problems.ERROR_INVALID_CHARACTER, "Invalid character " + c, reader.offset(), 1, -1);
+						problemListener.problemEncountered(Problems.ERROR_INVALID_CHARACTER, "Invalid character " + c, reader.offset(), 1,
+								-1);
 
 						// Apart from the error message the character shall be ignored
 				}
@@ -534,8 +552,8 @@ public class BodySegmentParser {
 		} else {
 			if (segmentContainer.size() == 0) {
 				// notify problem listener
-				problemListener.problemEncountered(Problems.ERROR_INTERNAL, "Trying to return an empty element inside BodySegmentParser", -1, -1,
-						-1);
+				problemListener.problemEncountered(Problems.ERROR_INTERNAL, "Trying to return an empty element inside BodySegmentParser",
+						-1, -1, -1);
 				// throw exception nonetheless
 				throw new IllegalStateException("Trying to return empty element");
 			}
