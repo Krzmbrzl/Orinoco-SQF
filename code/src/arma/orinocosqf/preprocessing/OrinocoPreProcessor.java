@@ -3,12 +3,15 @@ package arma.orinocosqf.preprocessing;
 import arma.orinocosqf.*;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
+import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
+import arma.orinocosqf.preprocessing.bodySegments.TextSegment;
 import arma.orinocosqf.problems.Problems;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,6 +43,11 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	 */
 	protected ArmaFilesystem fileSystem;
 	/**
+	 * A dummy macro used for preprocessing a sequence of text (outside a macro body). It is needed for providing the macro set for the
+	 * preprocessing
+	 */
+	protected PreProcessorMacro dummyMacro;
+	/**
 	 * The {@link OrinocoPreprocessorConfiguration} holding all preferences for this preprocessor
 	 */
 	protected OrinocoPreprocessorConfiguration configuration;
@@ -50,12 +58,13 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 	}
 
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor processor, @NotNull ArmaFilesystem fileSystem,
-							   @NotNull OrinocoPreprocessorConfiguration configuration) {
+			@NotNull OrinocoPreprocessorConfiguration configuration) {
 		this.processor = processor;
 		this.fileSystem = fileSystem;
 		this.configuration = configuration;
 		this.macroSet = new MacroSet();
 		this.segmentParser = new BodySegmentParser(lexer);
+		this.dummyMacro = new PreProcessorMacro(macroSet, "__________________", Collections.emptyList(), new TextSegment(""));
 	}
 
 	@Override
@@ -103,7 +112,17 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void preProcessToken(@NotNull char[] bufReadOnly, int offset, int length) {
-		// TODO
+		BodySegment segment = segmentParser.parseSegments(bufReadOnly, offset, length, Collections.emptyList(),
+				(c, isFirstLetter) -> this.isMacroNamePart(c, isFirstLetter));
+
+		segment.setOwner(dummyMacro);
+
+		try {
+			this.lexer.acceptPreProcessedText(segment.applyArguments(Collections.emptyList()));
+		} catch (OrinocoPreprocessorException e) {
+			// TODO Create problem marker
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -113,25 +132,25 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptCommand(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-							  @NotNull OrinocoLexerContext ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptCommand(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptLocalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-									@NotNull OrinocoLexerContext ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptGlobalVariable(int id, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength,
-									 @NotNull OrinocoLexerContext ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-							  int originalLength, @NotNull OrinocoLexerContext ctx) {
+			int originalLength, @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
@@ -152,14 +171,14 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptWhitespace(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-								 @NotNull OrinocoLexerContext ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 		// search for NLs
-//		ctx.getTextBuffer().getText(originalOffset, originalLength);
+		// ctx.getTextBuffer().getText(originalOffset, originalLength);
 	}
 
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-							  @NotNull OrinocoLexerContext ctx) {
+			@NotNull OrinocoLexerContext ctx) {
 		if (configuration.keepComments()) {
 			// TODO: feed comments back to special method in lexer to prevent endless loop
 		} else {
