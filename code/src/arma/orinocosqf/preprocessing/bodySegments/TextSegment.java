@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
+
 /**
  * The simplest type of {@link BodySegment}. When {@link #applyArguments(List)} is invoked, it returns a hardcoded String
  */
@@ -33,6 +35,12 @@ public class TextSegment extends BodySegment {
 	@Override
 	public String toString() {
 		return "TextSegment{" + text + '}';
+	}
+
+	@Override
+	public void setOwner(PreProcessorMacro owner) {
+		// Don't set an owner as text-segments don't need it and it would cause trouble because of the singleton
+		// used in the BodySegmentParser for empty segments
 	}
 
 	@Override
