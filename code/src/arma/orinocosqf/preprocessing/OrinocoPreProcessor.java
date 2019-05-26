@@ -1,5 +1,6 @@
 package arma.orinocosqf.preprocessing;
 
+import arma.orinocosqf.OrinocoReader;
 import arma.orinocosqf.OrinocoTokenProcessor;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;

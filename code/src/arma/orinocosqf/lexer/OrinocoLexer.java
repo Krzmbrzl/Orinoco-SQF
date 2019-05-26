@@ -380,14 +380,14 @@ public class OrinocoLexer implements ProblemListener {
 	 * Makes a comment token and then invokes {@link #updateOffsetsAfterMake()}
 	 *
 	 * @throws IOException because of {@link #preprocessedResultWriter}
-	 * @see OrinocoLexerStream#acceptComment(int, int, int, int, OrinocoLexerContext)
+	 * @see OrinocoLexerStream#acceptComment(int, int, int, int, OrinocoLexerContext, int)
 	 */
 	private void makeComment() throws IOException {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
 		// TODO: also provide newlineCount
-		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context, 0/*todo*/);
 		updateOffsetsAfterMake();
 	}
 
