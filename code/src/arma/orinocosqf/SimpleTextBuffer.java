@@ -17,12 +17,7 @@ public class SimpleTextBuffer implements TextBuffer {
 	@NotNull
 	public String getText(int offset, int length) throws IndexOutOfBoundsException {
 		char[] chars = new char[length];
-		System.out.println("SimpleTextBuffer.getText cs.length()=" + cs.length());
-		System.out.println("SimpleTextBuffer.getText cs=" + cs);
-		System.out.println("SimpleTextBuffer.getText offset=" + offset);
-		System.out.println("SimpleTextBuffer.getText length=" + length);
 		for (int i = 0; i < length; i++) {
-			System.out.println(cs.charAt(i + offset));
 			chars[i] = cs.charAt(i + offset);
 		}
 
