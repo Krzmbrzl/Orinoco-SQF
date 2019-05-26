@@ -63,7 +63,7 @@ public class MacroSet implements Map<String, PreProcessorMacro> {
 
 	@Override
 	public PreProcessorMacro remove(Object o) {
-		return map.remove(o);
+		return map.remove(HashableCharSequence.fromString(o.toString()));
 	}
 
 	@Override
