@@ -192,10 +192,9 @@ public class OrinocoPreProcessorTest {
 
 	@Test
 	public void simpleDefineWithParamMissingGlue() {
-		// This test is for a simple macro with a single parameter,
-		// but there is no preprocessing because of missing ##
-
-		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess, got " + s);
+		// test for missing ## in body of macro that should come after a nested macro invocation, but preprocessing
+		// happens anyways
+		Consumer<CharSequence> cb = s -> assertEquals("Hello number 0word", s.toString());
 
 		String[] lines = { "#define N(NUMBER) number NUMBER", "#define MAC Hello N(0)word", "MAC" };
 
@@ -210,9 +209,7 @@ public class OrinocoPreProcessorTest {
 		// This test is for a simple macro with a single parameter,
 		// and there is a ## between the macro and a word.
 
-		String[] expected = {"Hello number 0word"};
-		int[] expectedInd = { 0 };
-		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s.toString());
+		Consumer<CharSequence> cb = s -> assertEquals("Hello number 0word", s.toString());
 
 		String[] lines = { "#define N(NUMBER) number NUMBER", "#define MAC Hello N(0)##word", "MAC" };
 

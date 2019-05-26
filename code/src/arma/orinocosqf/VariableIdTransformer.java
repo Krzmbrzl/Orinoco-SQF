@@ -21,7 +21,12 @@ public abstract class VariableIdTransformer implements IdTransformer<String> {
 	@NotNull
 	@Override
 	public String fromId(int id) throws UnknownIdException {
-		for (SQFVariable var : new DoubleIterable<>(localVars, globalVars)) {
+		for (SQFVariable var : localVars) {
+			if (var.getId() == id) {
+				return var.getName();
+			}
+		}
+		for (SQFVariable var : globalVars) {
 			if (var.getId() == id) {
 				return var.getName();
 			}
