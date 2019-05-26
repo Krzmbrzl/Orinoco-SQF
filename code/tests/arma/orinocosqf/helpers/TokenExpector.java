@@ -155,8 +155,8 @@ public class TokenExpector implements OrinocoLexerStream {
 
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-							  @NotNull OrinocoLexerContext ctx) {
-		acceptFactory.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, ctx);
+							  @NotNull OrinocoLexerContext ctx, int newlineCount) {
+		acceptFactory.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, ctx, newlineCount);
 	}
 
 	@Override
@@ -391,7 +391,7 @@ public class TokenExpector implements OrinocoLexerStream {
 
 		@Override
 		public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-								  @NotNull OrinocoLexerContext ctx) {
+								  @NotNull OrinocoLexerContext ctx, int newlineCount) {
 			q.add(AcceptedToken.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
 					ctx.getTextBuffer().getText(originalOffset, originalLength)));
 		}
