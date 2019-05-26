@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 5/14/19
  */
-class MyStringBuilder implements CharSequence {
+class LightweightStringBuilder implements CharSequence {
 	private char[] chars = new char[256];
 	private int cursor = 0;
 

@@ -2,7 +2,8 @@
 
 package arma.orinocosqf;
 
-import arma.orinocosqf.preprocessing.PreProcessorMacro;import org.jetbrains.annotations.NotNull;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.HashableCharSequence;
@@ -360,8 +361,8 @@ public class OrinocoJFlexLexer {
 
 	private int originalLength = 0;
 	private int preprocessedLength = 0;
-	private final MyStringBuilder macroWithArgs = new MyStringBuilder();
-	private final MyStringBuilder preprocessorCommandBuilder = new MyStringBuilder();
+	private final LightweightStringBuilder macroWithArgs = new LightweightStringBuilder();
+	private final LightweightStringBuilder preprocessorCommandBuilder = new LightweightStringBuilder();
 	private TokenType preprocessorCommandMatched = null;
 	private int macroArgLeftParenCount = 0;
 	private int macroArgRightParenCount = 0;
@@ -445,11 +446,11 @@ public class OrinocoJFlexLexer {
 		preprocessorCommandBuilder.append(yytextCharSequence);
 	}
 
-	public MyStringBuilder getPreProcessorCommand() {
+	public LightweightStringBuilder getPreProcessorCommand() {
 		return preprocessorCommandBuilder;
 	}
 
-	public MyStringBuilder getMacroWithArgs() {
+	public LightweightStringBuilder getMacroWithArgs() {
 		return macroWithArgs;
 	}
 

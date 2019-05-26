@@ -1,6 +1,7 @@
 package arma.orinocosqf;
 
-import arma.orinocosqf.preprocessing.PreProcessorMacro;import org.jetbrains.annotations.NotNull;
+import arma.orinocosqf.preprocessing.PreProcessorMacro;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.HashableCharSequence;

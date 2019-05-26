@@ -7,8 +7,8 @@
 
 	private int originalLength = 0;
 	private int preprocessedLength = 0;
-	private final MyStringBuilder macroWithArgs = new MyStringBuilder();
-	private final MyStringBuilder preprocessorCommandBuilder = new MyStringBuilder();
+	private final LightweightStringBuilder macroWithArgs = new LightweightStringBuilder();
+	private final LightweightStringBuilder preprocessorCommandBuilder = new LightweightStringBuilder();
 	private TokenType preprocessorCommandMatched = null;
 	private int macroArgLeftParenCount = 0;
 	private int macroArgRightParenCount = 0;
@@ -92,11 +92,11 @@
 		preprocessorCommandBuilder.append(yytextCharSequence);
 	}
 
-	public MyStringBuilder getPreProcessorCommand() {
+	public LightweightStringBuilder getPreProcessorCommand() {
 		return preprocessorCommandBuilder;
 	}
 
-	public MyStringBuilder getMacroWithArgs() {
+	public LightweightStringBuilder getMacroWithArgs() {
 		return macroWithArgs;
 	}
 

@@ -264,7 +264,7 @@ public class OrinocoLexer implements ProblemListener {
 						lexerStream.preProcessorTokenSkipped(originalOffset, originalLength, context);
 					} else {
 						if (jFlexLexer.macroHasArgs()) {
-							MyStringBuilder macroWithArgs = jFlexLexer.getMacroWithArgs();
+							LightweightStringBuilder macroWithArgs = jFlexLexer.getMacroWithArgs();
 							char[] chars = macroWithArgs.getCharsReadOnly();
 							lexerStream.preProcessToken(chars, 0, macroWithArgs.length());
 						} else {
@@ -347,7 +347,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 */
 	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) throws IOException {
-		MyStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
+		LightweightStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(cmd.getCharsReadOnly(), 0, cmd.length());
 		}
