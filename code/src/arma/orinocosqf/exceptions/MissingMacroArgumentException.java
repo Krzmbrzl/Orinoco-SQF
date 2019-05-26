@@ -13,8 +13,10 @@ public class MissingMacroArgumentException extends OrinocoPreprocessorException 
 
 	/**
 	 * @param argumentName The name of the argument that wasn't supplied
+	 * @param offset The offset at which this exception occured
+	 * @param length The length of the affected area
 	 */
-	public MissingMacroArgumentException(@NotNull String argumentName) {
-		super("Trying to expand macro without providing a value for the argument \"" + argumentName + "\"");
+	public MissingMacroArgumentException(@NotNull String argumentName, int offset, int length) {
+		super("Trying to expand macro without providing a value for the argument \"" + argumentName + "\"", offset, length);
 	}
 }
