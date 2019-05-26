@@ -384,6 +384,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
+		// TODO: also provide newlineCount
 		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
