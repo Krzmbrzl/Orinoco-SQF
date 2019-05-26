@@ -512,7 +512,7 @@ public class OrinocoJFlexLexer {
 		private final YYTextCharSequence cs;
 
 		public YYTextHashableCharSequence(@NotNull YYTextCharSequence cs) {
-			super(HashableCharSequence.computeHash(cs));
+			super(0);
 			this.cs = cs;
 		}
 
