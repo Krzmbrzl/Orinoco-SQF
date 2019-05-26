@@ -42,10 +42,12 @@ public class OrinocoPreProcessorTest {
 	}
 
 	@Test
-	public void noPreProcessing_globalVariable() {
+	public void noPreProcessing_globalVariable() throws Exception {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
-		lexerFromText("text1", cb);
-		tokenFactory.acceptGlobalVariable(0, 0, 5, 0, 5, lexer.getContext());
+		String text = "text1";
+		lexerFromText(text, cb);
+		final int varId = lexer.getIdTransformer().toId(text);
+		tokenFactory.acceptGlobalVariable(varId, 0, 5, 0, 5, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();

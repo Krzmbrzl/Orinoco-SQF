@@ -140,10 +140,7 @@ public class OrinocoLexer implements ProblemListener {
 	private void doStart() throws IOException {
 		while (true) {
 			jFlexLexer.resetTokenOffsets();
-			System.out.println("OrinocoLexer.doStart old originalOffset=" + originalOffset);
 			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
-			System.out.println("OrinocoLexer.doStart originalOffset=" + originalOffset);
-			System.out.println("OrinocoLexer.doStart type=" + type);
 			if (type == null) {
 				throw new IllegalStateException(); //?
 			}
