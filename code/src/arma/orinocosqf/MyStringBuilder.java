@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 5/14/19
  */
-class MyStringBuilder {
+class MyStringBuilder implements CharSequence {
 	private char[] chars = new char[256];
 	private int cursor = 0;
 
@@ -33,11 +33,24 @@ class MyStringBuilder {
 		return chars;
 	}
 
-	public int getLength() {
+	@Override
+	@NotNull
+	public String toString() {
+		return new String(chars, 0, cursor);
+	}
+
+	@Override
+	public int length() {
 		return cursor;
 	}
 
-	public String asString() {
-		return new String(chars, 0, cursor);
+	@Override
+	public char charAt(int i) {
+		return chars[i];
+	}
+
+	@Override
+	public CharSequence subSequence(int i, int endInd) {
+		return new String(chars, i, endInd - i);
 	}
 }

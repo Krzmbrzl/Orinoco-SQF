@@ -95,14 +95,17 @@ CMD_UNDEF = "#undef"
 
 <MACRO_ARGS> {
 	"(" { updateTokenLength(true); appendTextToMacro(); macroArgLeftParenCount++; }
-    ")" { updateTokenLength(true); appendTextToMacro(); macroArgRightParenCount++; }
+    ")" {
+    	updateTokenLength(true);
+    	appendTextToMacro();
+    	macroArgRightParenCount++;
+    	if(macroArgParenCountBalanced()) {
+			return TokenType.MACRO;
+		}
+    }
     {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToMacro(); }
     {WHITE_SPACE_CHAR} {
-		if(macroArgRightParenCount == macroArgLeftParenCount) {
-			yybegin(YYINITIAL);
-			macroArgLeftParenCount = macroArgRightParenCount = 0;
-			yypushback(1);
-			updateTokenLength(true);
+		if(macroArgParenCountBalanced()) {
 			return TokenType.MACRO;
 		}
 		updateTokenLength(true);

@@ -42,7 +42,7 @@ public class OrinocoLexer implements ProblemListener {
 		return SQFCommands.instance.getId(command);
 	}
 
-	private static final Pattern pattern_ifdef = Pattern.compile("^#(ifdef|ifndef) ([a-zA-Z0-9_$]+)");
+	private static final Pattern pattern_ifdef = Pattern.compile("#if[n]?def ([a-zA-Z0-9_$]+)");
 
 	private OrinocoLexerContext context = new DefaultLexerContext();
 
@@ -66,7 +66,23 @@ public class OrinocoLexer implements ProblemListener {
 	private Writer preprocessedResultWriter;
 
 	private enum PreProcessorIfDefState {
-		IfDef, IfNDef, ElseIfDef, ElseIfNDef
+		/** This state occurs when #ifdef of #ifndef results in a true condition and everything before #else is lexed */
+		LexToElse,
+		/**
+		 * This state occurs when the condition of #ifdef or #ifndef results in a true condition and everything after to #else should be
+		 * skipped
+		 */
+		SkipElseBlock,
+		/**
+		 * This method should occurs when the condition of #ifdef or #ifndef results in a false condition and everything before #else should
+		 * be skipped
+		 */
+		SkipToElse,
+		/**
+		 * This state happens when an #else block has been discovered and the current state is {@link #SkipToElse}. All tokens between #else
+		 * and #endif will be lexed
+		 */
+		LexToEndIf
 	}
 
 	@NotNull
@@ -140,28 +156,29 @@ public class OrinocoLexer implements ProblemListener {
 			if (!preProcessorIfDefState.isEmpty()) {
 				if (type == OrinocoJFlexLexer.TokenType.CMD_ENDIF) {
 					preProcessorIfDefState.pop();
-					return;
+					continue;
 				}
 				switch (preProcessorIfDefState.peek()) {
-					case IfDef: { //read tokens until an #else comes along
+					case LexToElse: { //read tokens until an #else comes along
 						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
 							preProcessorIfDefState.pop();
-							preProcessorIfDefState.push(PreProcessorIfDefState.ElseIfDef);
-							return;
+							preProcessorIfDefState.push(PreProcessorIfDefState.SkipElseBlock);
+							continue;
 						}
 						break;
 					}
-					case IfNDef: { //skip tokens until an #else comes along or endif
-						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
-							preProcessorIfDefState.pop();
-							preProcessorIfDefState.push(PreProcessorIfDefState.ElseIfNDef);
+					case SkipElseBlock: {
+						continue;
+					}
+					case SkipToElse: {
+						if (type != OrinocoJFlexLexer.TokenType.CMD_ELSE) {
+							continue;
 						}
-						return;
+						preProcessorIfDefState.pop();
+						preProcessorIfDefState.push(PreProcessorIfDefState.LexToEndIf);
+						break;
 					}
-					case ElseIfDef: {
-						return; //skip tokens
-					}
-					case ElseIfNDef: {
+					case LexToEndIf: {
 						break;
 					}
 					default: {
@@ -184,15 +201,21 @@ public class OrinocoLexer implements ProblemListener {
 						lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
 						break;
 					}
-					Matcher m = pattern_ifdef.matcher(jFlexLexer.yytext());
+					Matcher m = pattern_ifdef.matcher(jFlexLexer.getPreProcessorCommand());
 					if (m.find()) {
-						String name = m.group(2);
+						String name = m.group(1);
 						MacroSet macroSet = lexerStream.getMacroSet();
 						if (macroSet.containsKey(name)) {
 							if (type == OrinocoJFlexLexer.TokenType.CMD_IFDEF) {
-								preProcessorIfDefState.push(PreProcessorIfDefState.IfDef);
+								preProcessorIfDefState.push(PreProcessorIfDefState.LexToElse);
 							} else {
-								preProcessorIfDefState.push(PreProcessorIfDefState.IfNDef);
+								preProcessorIfDefState.push(PreProcessorIfDefState.SkipToElse);
+							}
+						} else {
+							if (type == OrinocoJFlexLexer.TokenType.CMD_IFDEF) {
+								preProcessorIfDefState.push(PreProcessorIfDefState.SkipToElse);
+							} else {
+								preProcessorIfDefState.push(PreProcessorIfDefState.LexToElse);
 							}
 						}
 					}
@@ -243,7 +266,7 @@ public class OrinocoLexer implements ProblemListener {
 						if (jFlexLexer.macroHasArgs()) {
 							MyStringBuilder macroWithArgs = jFlexLexer.getMacroWithArgs();
 							char[] chars = macroWithArgs.getCharsReadOnly();
-							lexerStream.preProcessToken(chars, 0, macroWithArgs.getLength());
+							lexerStream.preProcessToken(chars, 0, macroWithArgs.length());
 						} else {
 							lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 						}
@@ -329,7 +352,7 @@ public class OrinocoLexer implements ProblemListener {
 			return;
 		}
 		MyStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
-		lexerStream.acceptPreProcessorCommand(command, cmd.getCharsReadOnly(), 0, cmd.getLength());
+		lexerStream.acceptPreProcessorCommand(command, cmd.getCharsReadOnly(), 0, cmd.length());
 		updateOffsetsAfterMake();
 	}
 

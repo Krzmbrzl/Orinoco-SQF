@@ -396,6 +396,17 @@ public class OrinocoJFlexLexer {
 	private int QUEST_id;
 	private int COLON_id;
 
+	private boolean macroArgParenCountBalanced() {
+		if(macroArgRightParenCount == macroArgLeftParenCount) {
+			yybegin(YYINITIAL);
+			macroArgLeftParenCount = macroArgRightParenCount = 0;
+			yypushback(1);
+			updateTokenLength(true);
+			return true;
+		}
+		return false;
+	}
+
 	private void beginPreProcessorCommandState(TokenType preprocessorCommand) {
 		preprocessorCommandBuilder.setLength(0);
 		appendTextToPreProcessorCommand();
@@ -1210,11 +1221,7 @@ public class OrinocoJFlexLexer {
             // fall through
           case 82: break;
           case 28: 
-            { if(macroArgRightParenCount == macroArgLeftParenCount) {
-			yybegin(YYINITIAL);
-			macroArgLeftParenCount = macroArgRightParenCount = 0;
-			yypushback(1);
-			updateTokenLength(true);
+            { if(macroArgParenCountBalanced()) {
 			return TokenType.MACRO;
 		}
 		updateTokenLength(true);
@@ -1227,7 +1234,12 @@ public class OrinocoJFlexLexer {
             // fall through
           case 84: break;
           case 30: 
-            { updateTokenLength(true); appendTextToMacro(); macroArgRightParenCount++;
+            { updateTokenLength(true);
+    	appendTextToMacro();
+    	macroArgRightParenCount++;
+    	if(macroArgParenCountBalanced()) {
+			return TokenType.MACRO;
+		}
             } 
             // fall through
           case 85: break;

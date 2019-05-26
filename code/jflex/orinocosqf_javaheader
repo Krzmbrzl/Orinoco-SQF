@@ -43,6 +43,17 @@
 	private int QUEST_id;
 	private int COLON_id;
 
+	private boolean macroArgParenCountBalanced() {
+		if(macroArgRightParenCount == macroArgLeftParenCount) {
+			yybegin(YYINITIAL);
+			macroArgLeftParenCount = macroArgRightParenCount = 0;
+			yypushback(1);
+			updateTokenLength(true);
+			return true;
+		}
+		return false;
+	}
+
 	private void beginPreProcessorCommandState(TokenType preprocessorCommand) {
 		preprocessorCommandBuilder.setLength(0);
 		appendTextToPreProcessorCommand();
