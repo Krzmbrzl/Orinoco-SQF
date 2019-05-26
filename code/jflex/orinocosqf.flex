@@ -76,7 +76,7 @@ CMD_UNDEF = "#undef"
     [^\r\n\\/*]+ { updateTokenLength(true); appendTextToPreProcessorCommand(); }
     [/|*] { updateTokenLength(true); appendTextToPreProcessorCommand(); }
     {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToPreProcessorCommand(); }
-	{LINE_TERMINATOR} { updateTokenLength(true); yybegin(YYINITIAL); updateTokenLength(true); return preprocessorCommandMatched; }
+	{LINE_TERMINATOR} { yypushback(1); yybegin(YYINITIAL); return preprocessorCommandMatched; }
 	<<EOF>> {
 		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
 		yypopStream();
@@ -85,8 +85,8 @@ CMD_UNDEF = "#undef"
 
 <PREPROCESSOR_CMD_ML_COMMENT> {
 	"*/" { updateTokenLength(false); yybegin(PREPROCESSOR_CMD); }
-	[^/*]+ { updateTokenLength(true); }
-	[/|*] { updateTokenLength(true); }
+	[^/*]+ { updateTokenLength(false); }
+	[/|*] { updateTokenLength(false); }
 	<<EOF>> {
 		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
 		yypopStream();
@@ -106,6 +106,7 @@ CMD_UNDEF = "#undef"
     {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToMacro(); }
     {WHITE_SPACE_CHAR} {
 		if(macroArgParenCountBalanced()) {
+			yypushback(1); //pushback the whitespace
 			return TokenType.MACRO;
 		}
 		updateTokenLength(true);

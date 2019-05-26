@@ -400,8 +400,6 @@ public class OrinocoJFlexLexer {
 		if(macroArgRightParenCount == macroArgLeftParenCount) {
 			yybegin(YYINITIAL);
 			macroArgLeftParenCount = macroArgRightParenCount = 0;
-			yypushback(1);
-			updateTokenLength(true);
 			return true;
 		}
 		return false;
@@ -1222,6 +1220,7 @@ public class OrinocoJFlexLexer {
           case 82: break;
           case 28: 
             { if(macroArgParenCountBalanced()) {
+			yypushback(1); //pushback the whitespace
 			return TokenType.MACRO;
 		}
 		updateTokenLength(true);
@@ -1249,12 +1248,12 @@ public class OrinocoJFlexLexer {
             // fall through
           case 86: break;
           case 32: 
-            { updateTokenLength(true); yybegin(YYINITIAL); updateTokenLength(true); return preprocessorCommandMatched;
+            { yypushback(1); yybegin(YYINITIAL); return preprocessorCommandMatched;
             } 
             // fall through
           case 87: break;
           case 33: 
-            { updateTokenLength(true);
+            { updateTokenLength(false);
             } 
             // fall through
           case 88: break;

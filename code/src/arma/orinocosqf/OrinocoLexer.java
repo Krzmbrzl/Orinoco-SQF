@@ -140,7 +140,10 @@ public class OrinocoLexer implements ProblemListener {
 	private void doStart() throws IOException {
 		while (true) {
 			jFlexLexer.resetTokenOffsets();
+			System.out.println("OrinocoLexer.doStart old originalOffset=" + originalOffset);
 			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
+			System.out.println("OrinocoLexer.doStart originalOffset=" + originalOffset);
+			System.out.println("OrinocoLexer.doStart type=" + type);
 			if (type == null) {
 				throw new IllegalStateException(); //?
 			}
@@ -148,8 +151,8 @@ public class OrinocoLexer implements ProblemListener {
 				return;
 			}
 			if (!jFlexLexer.yymoreStreams()) {
-				preprocessedLength = jFlexLexer.preprocessedLength();
 				originalLength = jFlexLexer.originalLength();
+				preprocessedLength = jFlexLexer.preprocessedLength();
 			} else {
 				preprocessedLength += jFlexLexer.preprocessedLength();
 			}
@@ -344,14 +347,18 @@ public class OrinocoLexer implements ProblemListener {
 	 * @param command command to use
 	 * @see OrinocoLexerStream#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
 	 * @see OrinocoLexerStream#preProcessorCommandSkipped(int, int, OrinocoLexerContext)
+	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 */
-	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) {
+	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) throws IOException {
+		MyStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
+		if (preprocessedResultWriter != null) {
+			preprocessedResultWriter.write(cmd.getCharsReadOnly(), 0, cmd.length());
+		}
 		if (lexerStream.skipPreProcessing()) {
 			lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
 			updateOffsetsAfterMake();
 			return;
 		}
-		MyStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
 		lexerStream.acceptPreProcessorCommand(command, cmd.getCharsReadOnly(), 0, cmd.length());
 		updateOffsetsAfterMake();
 	}
