@@ -10,6 +10,8 @@ import arma.orinocosqf.preprocessing.bodySegments.TextSegment;
 import arma.orinocosqf.problems.Problems;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -178,11 +180,13 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-			@NotNull OrinocoLexerContext ctx) {
+			@NotNull OrinocoLexerContext ctx, int newlineCount) {
 		if (configuration.keepComments()) {
 			// TODO: feed comments back to special method in lexer to prevent endless loop
 		} else {
-			// TODO: extract NLs and feed them back to lexer
+			if (configuration.preserveNewlines()) {
+				lexer.acceptPreservedNewlines(newlineCount);
+			}
 		}
 	}
 
@@ -309,24 +313,19 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 			i++;
 		}
 
-		StringBuilder macroBody = new StringBuilder();
-
 		int remainingLength = maxOffset - i;
-		boolean usesCRLF = false;
-		int NLCount = 0;
 
-		for (int k = 0; k < remainingLength; k++) {
-			macroBody.append(readOnlyBuf[i + k]);
-
-			// Check for any
-			switch (readOnlyBuf[k + 1]) {
-				case '\r':
-					usesCRLF = true;
-					break;
-				case '\n':
+		if (configuration.preserveNewlines()) {
+			// Feed back preserved newlines if enabled
+			int NLCount = 0;
+			for (int k = 0; k < remainingLength; k++) {
+				if (readOnlyBuf[k + 1] == '\n') {
 					NLCount++;
-				default:
-					break;
+				}
+			}
+
+			if (NLCount > 0) {
+				lexer.acceptPreservedNewlines(NLCount);
 			}
 		}
 
@@ -344,14 +343,6 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 		}
 
 		getMacroSet().put(macroName.toString(), macro);
-
-		if (configuration.preserveNewlines()) {
-			// Feed Newlines from macro body back to the lexer in order to preserve them
-			String nl = usesCRLF ? "\r\n" : "\n";
-			for (int k = 0; k < NLCount; k++) {
-				lexer.acceptPreProcessedText(nl);
-			}
-		}
 	}
 
 	/**
@@ -513,11 +504,14 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 						includePath.length() + 2, -1);
 			}
 
-			// TODO: Create OrinocoReader and feed into lexer
-			// Maybe create a buffered-inputReader -> Depends on how the lexer works
+			lexer.acceptIncludedReader(OrinocoReader.fromStream(includeFle.getStream(), Charset.forName("utf-8")));
 		} catch (InvalidPathException e) {
-			lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Invalid path\"" + includePath.toString() + "\": " + e.getMessage(),
+			lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Invalid path \"" + includePath.toString() + "\": " + e.getMessage(),
 					pathStartOffset, includePath.length() + 2, -1);
+		} catch (FileNotFoundException e) {
+			lexer.problemEncountered(Problems.ERROR_INVALID_PATH,
+					"Resolved include-path to \"" + includePath.toString() + "\" but it doesn't seem to exist.", pathStartOffset,
+					includePath.length() + 2, -1);
 		}
 	}
 }
