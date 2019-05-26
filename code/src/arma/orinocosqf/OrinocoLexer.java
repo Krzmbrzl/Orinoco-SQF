@@ -275,6 +275,7 @@ public class OrinocoLexer implements ProblemListener {
 				}
 				case WORD: {
 					CharSequence cs = jFlexLexer.getTokenCharSequence();
+
 					if (cs.charAt(0) == '_') {
 						SQFVariable var = localVarSet.getKeyForCharSequence(cs);
 						if (var == null) {

@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Orinoco Lexer &amp; PreProcessor Tests" type="JUnit" factoryName="JUnit">
+    <module name="Orinoco SQF" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="pattern" />
+    <option name="PARAMETERS" value="" />
+    <patterns>
+      <pattern testClass="arma.orinocosqf.OrinocoLexerTest" />
+      <pattern testClass="arma.orinocosqf.OrinocoPreProcessorTest" />
+    </patterns>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

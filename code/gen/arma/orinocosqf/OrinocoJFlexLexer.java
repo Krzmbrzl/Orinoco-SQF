@@ -63,20 +63,20 @@ public class OrinocoJFlexLexer {
   private static final int [] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-    "\4\0\1\1\1\2\1\3\1\4\1\5\1\6\1\1"+
-    "\1\7\1\6\2\1\1\10\1\11\1\1\1\12\1\13"+
-    "\1\14\1\15\1\16\1\17\1\1\1\20\1\21\1\22"+
-    "\1\23\1\24\1\25\1\26\1\27\1\30\1\31\1\32"+
-    "\1\33\2\34\1\0\1\35\1\36\1\37\2\40\2\37"+
-    "\1\0\3\41\1\0\1\3\1\42\6\0\2\43\1\0"+
-    "\1\44\1\0\1\44\1\45\1\0\1\46\1\47\1\50"+
-    "\1\51\1\52\1\53\1\54\2\33\1\55\1\56\2\37"+
-    "\1\57\1\3\6\0\3\43\10\0\1\60\2\0\1\61"+
-    "\5\0\1\62\1\63\2\0\1\64\1\65\1\66\1\0"+
-    "\1\67";
+    "\4\0\1\1\1\2\1\1\1\3\1\4\1\5\1\1"+
+    "\1\6\1\5\2\1\1\7\1\10\1\1\1\11\1\12"+
+    "\1\13\1\14\1\15\1\16\1\1\1\17\1\20\1\21"+
+    "\1\22\1\23\1\24\1\25\1\26\1\27\1\30\1\31"+
+    "\1\32\2\33\1\0\1\34\1\35\1\36\2\37\2\36"+
+    "\1\0\3\40\2\0\1\41\6\0\2\42\2\0\1\43"+
+    "\1\0\1\43\1\44\1\0\1\45\1\46\1\47\1\50"+
+    "\1\51\1\52\1\53\2\32\1\54\1\55\2\36\1\56"+
+    "\7\0\3\42\1\0\1\57\7\0\1\60\3\0\1\61"+
+    "\4\0\1\57\1\0\1\62\1\63\2\0\1\64\1\65"+
+    "\1\66\1\0\1\67";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[118];
+    int [] result = new int[122];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -108,17 +108,18 @@ public class OrinocoJFlexLexer {
     "\0\300\0\300\0\300\0\300\0\u03f0\0\u03f0\0\u0420\0\u0450"+
     "\0\300\0\300\0\u0480\0\300\0\u04b0\0\u04e0\0\300\0\u0510"+
     "\0\u0540\0\300\0\u0570\0\u05a0\0\u05d0\0\u0120\0\u0600\0\u0630"+
-    "\0\u0660\0\u0690\0\u06c0\0\u01e0\0\u06f0\0\u0720\0\u0240\0\u0750"+
-    "\0\u0270\0\u0780\0\u07b0\0\u07e0\0\300\0\300\0\300\0\300"+
-    "\0\300\0\300\0\300\0\u0810\0\u0840\0\u0870\0\300\0\u08a0"+
-    "\0\u08d0\0\300\0\u0600\0\u0900\0\u0930\0\u0960\0\u0990\0\u09c0"+
+    "\0\u0660\0\u0690\0\u06c0\0\u01e0\0\u06f0\0\u0720\0\u0120\0\u0240"+
+    "\0\u0750\0\u0270\0\u0780\0\u07b0\0\u07e0\0\300\0\300\0\300"+
+    "\0\300\0\300\0\300\0\300\0\u0810\0\u0840\0\u0870\0\300"+
+    "\0\u08a0\0\u08d0\0\300\0\u0900\0\u0930\0\u0960\0\u0990\0\u09c0"+
     "\0\u09f0\0\u0a20\0\u0a50\0\u0a80\0\u0ab0\0\u0ae0\0\u0b10\0\u0b40"+
-    "\0\u0b70\0\u0ba0\0\u0bd0\0\u0c00\0\300\0\u0c30\0\u0c60\0\300"+
-    "\0\u0c90\0\u0cc0\0\u0cf0\0\u0d20\0\u0d50\0\300\0\300\0\u0d80"+
-    "\0\u0db0\0\300\0\300\0\300\0\u0de0\0\300";
+    "\0\u0b70\0\u0ba0\0\u0bd0\0\u0c00\0\u0c30\0\u0c60\0\300\0\u0c90"+
+    "\0\u0cc0\0\u0cf0\0\300\0\u0d20\0\u0d50\0\u0d80\0\u0db0\0\u0900"+
+    "\0\u0de0\0\300\0\300\0\u0e10\0\u0e40\0\300\0\300\0\300"+
+    "\0\u0e70\0\300";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[118];
+    int [] result = new int[122];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -156,38 +157,41 @@ public class OrinocoJFlexLexer {
     "\3\11\52\0\2\65\1\64\3\0\1\12\1\74\1\75"+
     "\1\0\1\12\2\65\5\0\1\65\1\75\7\65\33\0"+
     "\1\76\3\0\1\76\45\0\2\65\1\64\3\0\1\12"+
-    "\1\74\1\75\1\0\1\12\1\7\1\65\5\0\1\65"+
-    "\1\75\7\65\24\0\16\77\1\100\41\77\17\101\1\102"+
-    "\40\101\20\0\1\103\1\104\72\0\1\105\62\0\1\106"+
-    "\57\0\1\107\57\0\1\110\1\0\1\111\55\0\1\112"+
-    "\63\0\1\113\14\0\22\45\1\0\12\45\2\0\25\45"+
-    "\1\46\15\45\1\0\12\45\2\0\21\45\4\0\1\114"+
-    "\1\115\52\0\4\53\2\0\12\53\3\0\35\53\4\0"+
-    "\1\54\73\0\1\116\1\117\42\0\1\120\1\121\52\0"+
-    "\20\61\2\0\36\61\20\0\1\122\42\0\1\123\55\0"+
+    "\1\74\1\75\1\0\1\12\1\77\1\65\5\0\1\65"+
+    "\1\75\7\65\24\0\16\100\1\101\41\100\17\102\1\103"+
+    "\40\102\20\0\1\104\1\105\72\0\1\106\62\0\1\107"+
+    "\57\0\1\110\57\0\1\111\1\0\1\112\55\0\1\113"+
+    "\63\0\1\114\14\0\22\45\1\0\12\45\2\0\25\45"+
+    "\1\46\15\45\1\0\12\45\2\0\21\45\4\0\1\115"+
+    "\1\116\52\0\4\53\2\0\12\53\3\0\35\53\4\0"+
+    "\1\54\73\0\1\117\1\120\42\0\1\121\1\122\52\0"+
+    "\20\61\2\0\36\61\20\0\1\123\42\0\1\124\55\0"+
     "\2\65\1\64\3\0\1\65\1\0\1\65\1\0\3\65"+
     "\5\0\11\65\25\0\2\65\4\0\1\65\1\0\1\65"+
-    "\1\0\3\65\5\0\11\65\50\0\1\124\62\0\1\125"+
-    "\1\0\1\126\53\0\1\127\1\0\1\130\57\0\1\131"+
-    "\31\0\2\65\1\64\3\0\1\132\1\0\1\65\1\133"+
-    "\1\132\2\65\5\0\11\65\11\0\1\133\21\0\1\76"+
-    "\1\0\1\134\1\0\1\76\10\0\1\134\51\0\1\77"+
-    "\60\0\1\101\40\0\4\103\2\0\52\103\21\104\1\135"+
-    "\36\104\6\0\1\114\55\0\1\114\1\0\1\114\51\0"+
-    "\4\116\2\0\52\116\6\0\1\120\55\0\1\120\1\0"+
-    "\1\120\76\0\1\136\55\0\1\137\67\0\1\140\47\0"+
-    "\1\141\3\0\1\142\60\0\1\143\52\0\1\144\35\0"+
-    "\2\65\1\64\3\0\1\132\1\0\1\65\1\0\1\132"+
-    "\2\65\5\0\11\65\33\0\1\133\3\0\1\133\53\0"+
-    "\1\133\2\0\2\133\31\0\1\133\12\0\20\104\1\145"+
-    "\1\135\36\104\26\0\1\146\57\0\1\147\55\0\1\150"+
-    "\57\0\1\151\56\0\1\152\65\0\1\153\52\0\1\154"+
-    "\62\0\1\155\55\0\1\156\57\0\1\157\56\0\1\160"+
-    "\65\0\1\161\52\0\1\162\56\0\1\163\60\0\1\164"+
-    "\55\0\1\165\60\0\1\166\33\0";
+    "\1\0\3\65\5\0\11\65\50\0\1\125\62\0\1\126"+
+    "\1\0\1\127\53\0\1\130\1\0\1\131\57\0\1\132"+
+    "\31\0\2\65\1\64\3\0\1\133\1\0\1\65\1\134"+
+    "\1\133\2\65\5\0\11\65\11\0\1\134\21\0\1\76"+
+    "\1\0\1\135\1\0\1\76\10\0\1\135\51\0\1\100"+
+    "\60\0\1\102\40\0\4\104\2\0\52\104\21\105\1\136"+
+    "\36\105\6\0\1\115\55\0\1\115\1\0\1\115\51\0"+
+    "\4\117\2\0\52\117\6\0\1\121\55\0\1\121\1\0"+
+    "\1\121\52\0\2\137\4\0\1\137\1\0\1\137\1\0"+
+    "\3\137\5\0\11\137\51\0\1\140\55\0\1\141\67\0"+
+    "\1\142\47\0\1\143\3\0\1\144\60\0\1\145\52\0"+
+    "\1\146\35\0\2\65\1\64\3\0\1\133\1\0\1\65"+
+    "\1\0\1\133\2\65\5\0\11\65\33\0\1\134\3\0"+
+    "\1\134\53\0\1\134\2\0\2\134\31\0\1\134\12\0"+
+    "\20\105\1\147\1\136\36\105\1\0\2\137\1\150\3\0"+
+    "\1\137\1\0\1\137\1\0\3\137\5\0\11\137\52\0"+
+    "\1\151\57\0\1\152\55\0\1\153\57\0\1\154\56\0"+
+    "\1\155\65\0\1\156\52\0\1\157\36\0\1\160\103\0"+
+    "\1\161\55\0\1\162\57\0\1\163\56\0\1\164\65\0"+
+    "\1\165\52\0\1\166\56\0\1\167\60\0\1\170\55\0"+
+    "\1\171\60\0\1\172\33\0";
 
   private static int [] zzUnpackTrans() {
-    int [] result = new int[3600];
+    int [] result = new int[3744];
     int offset = 0;
     offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -227,13 +231,14 @@ public class OrinocoJFlexLexer {
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
     "\4\0\1\11\6\1\1\11\4\1\1\11\1\1\2\11"+
     "\5\1\13\11\3\1\1\0\2\11\1\1\1\11\2\1"+
-    "\1\11\1\0\1\1\1\11\1\1\1\0\2\1\6\0"+
-    "\2\1\1\0\1\1\1\0\2\1\1\0\7\11\3\1"+
-    "\1\11\2\1\1\11\1\1\6\0\3\1\10\0\1\11"+
-    "\2\0\1\11\5\0\2\11\2\0\3\11\1\0\1\11";
+    "\1\11\1\0\1\1\1\11\1\1\2\0\1\1\6\0"+
+    "\2\1\2\0\1\1\1\0\2\1\1\0\7\11\3\1"+
+    "\1\11\2\1\1\11\7\0\3\1\1\0\1\1\7\0"+
+    "\1\11\3\0\1\11\4\0\1\1\1\0\2\11\2\0"+
+    "\3\11\1\0\1\11";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[118];
+    int [] result = new int[122];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -1043,20 +1048,34 @@ public class OrinocoJFlexLexer {
             zzDoEOF();
             switch (zzLexicalState) {
             case MACRO_ARGS: {
-              if (!yymoreStreams()) { yybegin(YYINITIAL); return TokenType.MACRO; }
-		yypopStream();
+              if (yymoreStreams()) {
+			yypopStream();
+		}
+		if(macroArgParenCountBalanced()) {
+			yybegin(YYINITIAL);
+			return TokenType.MACRO;
+		} else{
+			yybegin(YYINITIAL);
+			yypushback(macroWithArgs.length() - macroWithArgs.toString().indexOf('('));
+		}
             }  // fall though
-            case 119: break;
+            case 123: break;
             case PREPROCESSOR_CMD: {
-              if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
-		yypopStream();
+              if (yymoreStreams()) {
+			yypopStream();
+		}
+		yybegin(YYINITIAL);
+		return preprocessorCommandMatched;
             }  // fall though
-            case 120: break;
+            case 124: break;
             case PREPROCESSOR_CMD_ML_COMMENT: {
-              if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
-		yypopStream();
+              if (yymoreStreams()) {
+      		yypopStream();
+		}
+		yybegin(YYINITIAL);
+		return preprocessorCommandMatched;
             }  // fall though
-            case 121: break;
+            case 125: break;
             default:
               {
                 if (!yymoreStreams()) { return TokenType.EOF;}
@@ -1094,132 +1113,126 @@ public class OrinocoJFlexLexer {
             // fall through
           case 57: break;
           case 3: 
-            { updateTokenLength(true);
-		return TokenType.GLUED_WORD;
+            { updateTokenLength(true); latestCommandId = HASH_id; return TokenType.HASH;
             } 
             // fall through
           case 58: break;
           case 4: 
-            { updateTokenLength(true); latestCommandId = HASH_id; return TokenType.HASH;
+            { updateTokenLength(true); return TokenType.WHITE_SPACE;
             } 
             // fall through
           case 59: break;
           case 5: 
-            { updateTokenLength(true); return TokenType.WHITE_SPACE;
+            { updateTokenLength(true); return TokenType.INTEGER_LITERAL;
             } 
             // fall through
           case 60: break;
           case 6: 
-            { updateTokenLength(true); return TokenType.INTEGER_LITERAL;
+            { updateTokenLength(true); latestCommandId = MINUS_id; return TokenType.MINUS;
             } 
             // fall through
           case 61: break;
           case 7: 
-            { updateTokenLength(true); latestCommandId = MINUS_id; return TokenType.MINUS;
+            { updateTokenLength(true); latestCommandId = FSLASH_id; return TokenType.FSLASH;
             } 
             // fall through
           case 62: break;
           case 8: 
-            { updateTokenLength(true); latestCommandId = FSLASH_id; return TokenType.FSLASH;
+            { updateTokenLength(true); latestCommandId = ASTERISK_id; return TokenType.ASTERISK;
             } 
             // fall through
           case 63: break;
           case 9: 
-            { updateTokenLength(true); latestCommandId = ASTERISK_id; return TokenType.ASTERISK;
+            { updateTokenLength(true); latestCommandId = LPAREN_id; return TokenType.LPAREN;
             } 
             // fall through
           case 64: break;
           case 10: 
-            { updateTokenLength(true); latestCommandId = LPAREN_id; return TokenType.LPAREN;
+            { updateTokenLength(true); latestCommandId = RPAREN_id; return TokenType.RPAREN;
             } 
             // fall through
           case 65: break;
           case 11: 
-            { updateTokenLength(true); latestCommandId = RPAREN_id; return TokenType.RPAREN;
+            { updateTokenLength(true); latestCommandId = EQ_id; return TokenType.EQ;
             } 
             // fall through
           case 66: break;
           case 12: 
-            { updateTokenLength(true); latestCommandId = EQ_id; return TokenType.EQ;
+            { updateTokenLength(true); latestCommandId = EXCL_id; return TokenType.EXCL;
             } 
             // fall through
           case 67: break;
           case 13: 
-            { updateTokenLength(true); latestCommandId = EXCL_id; return TokenType.EXCL;
+            { updateTokenLength(true); latestCommandId = GT_id; return TokenType.GT;
             } 
             // fall through
           case 68: break;
           case 14: 
-            { updateTokenLength(true); latestCommandId = GT_id; return TokenType.GT;
+            { updateTokenLength(true); latestCommandId = LT_id; return TokenType.LT;
             } 
             // fall through
           case 69: break;
           case 15: 
-            { updateTokenLength(true); latestCommandId = LT_id; return TokenType.LT;
+            { updateTokenLength(true); latestCommandId = PERC_id; return TokenType.PERC;
             } 
             // fall through
           case 70: break;
           case 16: 
-            { updateTokenLength(true); latestCommandId = PERC_id; return TokenType.PERC;
+            { updateTokenLength(true); latestCommandId = PLUS_id; return TokenType.PLUS;
             } 
             // fall through
           case 71: break;
           case 17: 
-            { updateTokenLength(true); latestCommandId = PLUS_id; return TokenType.PLUS;
+            { updateTokenLength(true); latestCommandId = CARET_id; return TokenType.CARET;
             } 
             // fall through
           case 72: break;
           case 18: 
-            { updateTokenLength(true); latestCommandId = CARET_id; return TokenType.CARET;
+            { updateTokenLength(true); latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE;
             } 
             // fall through
           case 73: break;
           case 19: 
-            { updateTokenLength(true); latestCommandId = L_CURLY_BRACE_id; return TokenType.L_CURLY_BRACE;
+            { updateTokenLength(true); latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE;
             } 
             // fall through
           case 74: break;
           case 20: 
-            { updateTokenLength(true); latestCommandId = R_CURLY_BRACE_id; return TokenType.R_CURLY_BRACE;
+            { updateTokenLength(true); latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET;
             } 
             // fall through
           case 75: break;
           case 21: 
-            { updateTokenLength(true); latestCommandId = L_SQ_BRACKET_id; return TokenType.L_SQ_BRACKET;
+            { updateTokenLength(true); latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET;
             } 
             // fall through
           case 76: break;
           case 22: 
-            { updateTokenLength(true); latestCommandId = R_SQ_BRACKET_id; return TokenType.R_SQ_BRACKET;
+            { updateTokenLength(true); latestCommandId = COMMA_id; return TokenType.COMMA;
             } 
             // fall through
           case 77: break;
           case 23: 
-            { updateTokenLength(true); latestCommandId = COMMA_id; return TokenType.COMMA;
+            { updateTokenLength(true); latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON;
             } 
             // fall through
           case 78: break;
           case 24: 
-            { updateTokenLength(true); latestCommandId = SEMICOLON_id; return TokenType.SEMICOLON;
+            { updateTokenLength(true); latestCommandId = QUEST_id; return TokenType.QUEST;
             } 
             // fall through
           case 79: break;
           case 25: 
-            { updateTokenLength(true); latestCommandId = QUEST_id; return TokenType.QUEST;
+            { updateTokenLength(true); latestCommandId = COLON_id; return TokenType.COLON;
             } 
             // fall through
           case 80: break;
           case 26: 
-            { updateTokenLength(true); latestCommandId = COLON_id; return TokenType.COLON;
+            { updateTokenLength(true); appendTextToMacro();
             } 
             // fall through
           case 81: break;
           case 27: 
-            { updateTokenLength(true); appendTextToMacro();
-            } 
-            // fall through
-          case 82: break;
-          case 28: 
             { if(macroArgParenCountBalanced()) {
 			yypushback(1); //pushback the whitespace
 			return TokenType.MACRO;
@@ -1227,13 +1240,13 @@ public class OrinocoJFlexLexer {
 		updateTokenLength(true);
             } 
             // fall through
-          case 83: break;
-          case 29: 
+          case 82: break;
+          case 28: 
             { updateTokenLength(true); appendTextToMacro(); macroArgLeftParenCount++;
             } 
             // fall through
-          case 84: break;
-          case 30: 
+          case 83: break;
+          case 29: 
             { updateTokenLength(true);
     	appendTextToMacro();
     	macroArgRightParenCount++;
@@ -1242,89 +1255,95 @@ public class OrinocoJFlexLexer {
 		}
             } 
             // fall through
+          case 84: break;
+          case 30: 
+            { updateTokenLength(true); appendTextToPreProcessorCommand();
+            } 
+            // fall through
           case 85: break;
           case 31: 
-            { updateTokenLength(true); appendTextToPreProcessorCommand();
+            { yypushback(1); yybegin(YYINITIAL); return preprocessorCommandMatched;
             } 
             // fall through
           case 86: break;
           case 32: 
-            { yypushback(1); yybegin(YYINITIAL); return preprocessorCommandMatched;
+            { updateTokenLength(false);
             } 
             // fall through
           case 87: break;
           case 33: 
-            { updateTokenLength(false);
+            { updateTokenLength(true); return TokenType.HEX_LITERAL;
             } 
             // fall through
           case 88: break;
           case 34: 
-            { updateTokenLength(true); return TokenType.HEX_LITERAL;
+            { updateTokenLength(true); return TokenType.DEC_LITERAL;
             } 
             // fall through
           case 89: break;
           case 35: 
-            { updateTokenLength(true); return TokenType.DEC_LITERAL;
+            { updateTokenLength(true); return TokenType.STRING_LITERAL;
             } 
             // fall through
           case 90: break;
           case 36: 
-            { updateTokenLength(true); return TokenType.STRING_LITERAL;
+            { updateTokenLength(true); return TokenType.INLINE_COMMENT;
             } 
             // fall through
           case 91: break;
           case 37: 
-            { updateTokenLength(true); return TokenType.INLINE_COMMENT;
+            { updateTokenLength(true); latestCommandId = BARBAR_id; return TokenType.BARBAR;
             } 
             // fall through
           case 92: break;
           case 38: 
-            { updateTokenLength(true); latestCommandId = BARBAR_id; return TokenType.BARBAR;
+            { updateTokenLength(true); latestCommandId = EQEQ_id; return TokenType.EQEQ;
             } 
             // fall through
           case 93: break;
           case 39: 
-            { updateTokenLength(true); latestCommandId = EQEQ_id; return TokenType.EQEQ;
+            { updateTokenLength(true); latestCommandId = NE_id; return TokenType.NE;
             } 
             // fall through
           case 94: break;
           case 40: 
-            { updateTokenLength(true); latestCommandId = NE_id; return TokenType.NE;
+            { updateTokenLength(true); latestCommandId = GE_id; return TokenType.GE;
             } 
             // fall through
           case 95: break;
           case 41: 
-            { updateTokenLength(true); latestCommandId = GE_id; return TokenType.GE;
+            { updateTokenLength(true); latestCommandId = GTGT_id; return TokenType.GTGT;
             } 
             // fall through
           case 96: break;
           case 42: 
-            { updateTokenLength(true); latestCommandId = GTGT_id; return TokenType.GTGT;
+            { updateTokenLength(true); latestCommandId = LE_id; return TokenType.LE;
             } 
             // fall through
           case 97: break;
           case 43: 
-            { updateTokenLength(true); latestCommandId = LE_id; return TokenType.LE;
+            { updateTokenLength(true); latestCommandId = AMPAMP_id; return TokenType.AMPAMP;
             } 
             // fall through
           case 98: break;
           case 44: 
-            { updateTokenLength(true); latestCommandId = AMPAMP_id; return TokenType.AMPAMP;
+            { updateTokenLength(false); yybegin(YYINITIAL); return preprocessorCommandMatched;
             } 
             // fall through
           case 99: break;
           case 45: 
-            { updateTokenLength(false); yybegin(YYINITIAL); return preprocessorCommandMatched;
+            { updateTokenLength(false); yybegin(PREPROCESSOR_CMD_ML_COMMENT);
             } 
             // fall through
           case 100: break;
           case 46: 
-            { updateTokenLength(false); yybegin(PREPROCESSOR_CMD_ML_COMMENT);
+            { updateTokenLength(false); yybegin(PREPROCESSOR_CMD);
             } 
             // fall through
           case 101: break;
           case 47: 
-            { updateTokenLength(false); yybegin(PREPROCESSOR_CMD);
+            { updateTokenLength(true);
+		return TokenType.GLUED_WORD;
             } 
             // fall through
           case 102: break;

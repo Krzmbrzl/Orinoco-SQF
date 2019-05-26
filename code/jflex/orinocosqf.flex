@@ -34,7 +34,7 @@ import arma.orinocosqf.preprocessing.PreProcessorCommand;
 LETTER = [a-zA-Z_] //can't start with $ because of hex numbers
 LETTER_DIGIT = [$a-zA-Z_$0-9]
 WORD = {LETTER} {LETTER_DIGIT}*
-GLUED_WORD = ("##")? {LETTER_DIGIT} ("##" {LETTER_DIGIT} | {LETTER_DIGIT})* ("##")?
+GLUED_WORD = ("##")? {LETTER_DIGIT}+ (("##") {LETTER_DIGIT}+)+ ("##")?
 
 LINE_TERMINATOR = \n|\r\n|\r
 INPUT_CHARACTER = [^\r\n]
@@ -79,8 +79,11 @@ CMD_UNDEF = "#undef"
     {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToPreProcessorCommand(); }
 	{LINE_TERMINATOR} { yypushback(1); yybegin(YYINITIAL); return preprocessorCommandMatched; }
 	<<EOF>> {
-		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
-		yypopStream();
+		if (yymoreStreams()) {
+			yypopStream();
+		}
+		yybegin(YYINITIAL);
+		return preprocessorCommandMatched;
 	}
 }
 
@@ -89,8 +92,11 @@ CMD_UNDEF = "#undef"
 	[^/*]+ { updateTokenLength(false); }
 	[/|*] { updateTokenLength(false); }
 	<<EOF>> {
-		if (!yymoreStreams()) { yybegin(YYINITIAL); return preprocessorCommandMatched; }
-		yypopStream();
+		if (yymoreStreams()) {
+      		yypopStream();
+		}
+		yybegin(YYINITIAL);
+		return preprocessorCommandMatched;
 	}
 }
 
@@ -115,8 +121,16 @@ CMD_UNDEF = "#undef"
     [^()\\]+ { updateTokenLength(true); appendTextToMacro(); }
 
 	<<EOF>> {
-		if (!yymoreStreams()) { yybegin(YYINITIAL); return TokenType.MACRO; }
-		yypopStream();
+      	if (yymoreStreams()) {
+			yypopStream();
+		}
+		if(macroArgParenCountBalanced()) {
+			yybegin(YYINITIAL);
+			return TokenType.MACRO;
+		} else{
+			yybegin(YYINITIAL);
+			yypushback(macroWithArgs.length() - macroWithArgs.toString().indexOf('('));
+		}
 	}
 }
 
@@ -141,7 +155,7 @@ CMD_UNDEF = "#undef"
 	{STRING_LITERAL} { updateTokenLength(true); return TokenType.STRING_LITERAL; }
 
 	{WORD} {
-      		updateTokenLength(true);
+      	updateTokenLength(true);
       		macroHasArgs = false;
 			PreProcessorMacro macro = macroSet.get(yytextHashableCharSequence);
 			if(macro != null) {
