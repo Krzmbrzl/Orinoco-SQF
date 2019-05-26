@@ -3,6 +3,8 @@ package arma.orinocosqf;
 import org.jetbrains.annotations.NotNull;
 
 /**
+ * A lightweight version of {@link StringBuilder}. This implementation has a non-shrinkable buffer
+ * and direct access to the underlying char[] buffer ({@link #getCharsReadOnly()}) to prevent unneeded {@link #toString()} invocations.
  * @author K
  * @since 5/14/19
  */
