@@ -8,9 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -30,15 +27,6 @@ public class OrinocoPreProcessorTest {
 		preProcessor = new OrinocoPreProcessor(expector, fs);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(text)));
-		tokenFactory = new TokenExpector.AcceptedTokenFactory();
-	}
-
-	private void lexerFromFile(@NotNull File f, @NotNull Consumer<CharSequence> preprocessTextCb) throws FileNotFoundException {
-		expector = new TokenExpector();
-		preProcessor = new OrinocoPreProcessor(expector, fs);
-		lexer = new TestOrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), preProcessor,
-				preprocessTextCb);
-		//todo lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(text)));
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 

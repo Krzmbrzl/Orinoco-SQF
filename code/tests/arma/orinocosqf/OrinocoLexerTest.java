@@ -5,11 +5,6 @@ import arma.orinocosqf.helpers.TokenExpector;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.Assert.assertEquals;
 
 public class OrinocoLexerTest {
@@ -22,12 +17,6 @@ public class OrinocoLexerTest {
 		expector = new TokenExpector(true);
 		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), expector);
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(text)));
-		tokenFactory = new TokenExpector.AcceptedTokenFactory();
-	}
-
-	private void lexerFromFile(@NotNull File f) throws FileNotFoundException {
-		expector = new TokenExpector(true);
-		lexer = new OrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), expector);
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
