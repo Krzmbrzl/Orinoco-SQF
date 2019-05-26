@@ -29,6 +29,7 @@ public class OrinocoPreProcessorTest {
 		expector = new TokenExpector();
 		preProcessor = new OrinocoPreProcessor(expector, fs);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromCharSequence(text), preProcessor, preprocessTextCb);
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(text)));
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
@@ -37,6 +38,7 @@ public class OrinocoPreProcessorTest {
 		preProcessor = new OrinocoPreProcessor(expector, fs);
 		lexer = new TestOrinocoLexer(OrinocoReader.fromStream(new FileInputStream(f), StandardCharsets.UTF_8), preProcessor,
 				preprocessTextCb);
+		//todo lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(text)));
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 
@@ -355,7 +357,7 @@ public class OrinocoPreProcessorTest {
 	public void embodiedMacro() {
 		// This test is for testing if a macro inside the body of another macro will be properly invoked
 
-		Consumer<CharSequence> cb = s -> assertEquals("Foo=1;", s.toString());
+		Consumer<CharSequence> cb = s -> assertEquals("Foo=1", s.toString());
 
 		String[] lines = { "#define ASSIGN(NAME,VAL) NAME=VAL", "#define SET_TO_ONE(NAME) ASSIGN(NAME,1)", "SET_TO_ONE(Foo);" };
 
