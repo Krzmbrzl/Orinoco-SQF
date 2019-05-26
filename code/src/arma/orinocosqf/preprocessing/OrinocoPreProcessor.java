@@ -3,6 +3,8 @@ package arma.orinocosqf.preprocessing;
 import arma.orinocosqf.*;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
+import arma.orinocosqf.exceptions.MissingMacroArgumentException;
+import arma.orinocosqf.exceptions.NoMacroArgumentsGivenException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
@@ -121,9 +123,12 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		try {
 			this.lexer.acceptPreProcessedText(segment.applyArguments(Collections.emptyList()));
-		} catch (OrinocoPreprocessorException e) {
-			// TODO Create problem marker
-			e.printStackTrace();
+		} catch (NoMacroArgumentsGivenException e) {
+			lexer.problemEncountered(Problems.ERROR_NO_MACRO_ARGUMENTS_PROVIDED, e.getMessage(), e.getOffset(), e.getLength(), -1);
+		} catch (MissingMacroArgumentException e) {
+			lexer.problemEncountered(Problems.ERROR_WRONG_ARGUMENT_COUNT, e.getMessage(), e.getOffset(), e.getLength(), -1);
+		}catch (OrinocoPreprocessorException e) {
+			lexer.problemEncountered(Problems.ERROR_PREPROCESSOR, e.getMessage(), e.getOffset(), e.getLength(), -1);
 		}
 	}
 
