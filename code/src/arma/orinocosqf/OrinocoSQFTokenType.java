@@ -1,5 +1,9 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
+import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
+import arma.orinocosqf.lexer.OrinocoLexerStream;
+
 /**
  * @author K
  * @see OrinocoLexerStream

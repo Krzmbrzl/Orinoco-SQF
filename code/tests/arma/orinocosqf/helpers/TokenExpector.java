@@ -1,9 +1,9 @@
 package arma.orinocosqf.helpers;
 
-import arma.orinocosqf.OrinocoLexer;
-import arma.orinocosqf.OrinocoLexerContext;
-import arma.orinocosqf.OrinocoLexerLiteralType;
-import arma.orinocosqf.OrinocoLexerStream;
+import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.lexer.OrinocoLexerContext;
+import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
+import arma.orinocosqf.lexer.OrinocoLexerStream;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import org.jetbrains.annotations.NotNull;

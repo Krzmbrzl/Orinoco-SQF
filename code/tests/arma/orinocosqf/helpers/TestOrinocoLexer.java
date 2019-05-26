@@ -1,8 +1,8 @@
 package arma.orinocosqf.helpers;
 
-import arma.orinocosqf.OrinocoLexer;
-import arma.orinocosqf.OrinocoLexerStream;
 import arma.orinocosqf.OrinocoReader;
+import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.lexer.OrinocoLexerStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;

@@ -1,4 +1,4 @@
-package arma.orinocosqf;
+package arma.orinocosqf.lexer;
 
 /**
  * This interface describes objects representing literal types inside the

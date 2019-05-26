@@ -1,5 +1,7 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.lexer.OrinocoLexerContext;
+import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -32,7 +34,7 @@ public abstract class OrinocoTokenProcessorAdapter implements OrinocoTokenProces
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-			int originalLength, @NotNull OrinocoLexerContext ctx) {
+							  int originalLength, @NotNull OrinocoLexerContext ctx) {
 	}
 
 	@Override

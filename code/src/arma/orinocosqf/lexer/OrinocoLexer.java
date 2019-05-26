@@ -1,5 +1,6 @@
-package arma.orinocosqf;
+package arma.orinocosqf.lexer;
 
+import arma.orinocosqf.*;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;

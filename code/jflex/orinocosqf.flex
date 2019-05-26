@@ -1,4 +1,4 @@
-package arma.orinocosqf;
+package arma.orinocosqf.lexer;
 
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 import org.jetbrains.annotations.NotNull;
@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.HashableCharSequence;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
+import arma.orinocosqf.CommandSet;
+import arma.orinocosqf.LightweightStringBuilder;
 
 %%
 

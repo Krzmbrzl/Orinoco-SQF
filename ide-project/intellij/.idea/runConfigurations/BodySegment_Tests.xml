@@ -3,7 +3,7 @@
     <module name="Orinoco SQF" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="arma.orinocosqf.*" />
+        <option name="PATTERN" value="arma.orinocosqf.lexer.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

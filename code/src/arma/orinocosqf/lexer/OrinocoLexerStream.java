@@ -1,9 +1,9 @@
-package arma.orinocosqf;
+package arma.orinocosqf.lexer;
 
-import org.jetbrains.annotations.NotNull;
-
+import arma.orinocosqf.OrinocoTokenProcessor;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This interface describes a stream-object that will process everything {@link OrinocoLexer} lexes. Additionally it is also responsible for
@@ -22,8 +22,8 @@ public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	/**
 	 * This method is invoked once at the beginning of each lex. If true,
 	 * {@link #acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)} will never be invoked. Also, if true,
-	 * {@link #preProcessorTokenSkipped(String, int)} will be invoked for each whitespace separated "word"/token that wasn't preprocessed.
-	 * Also, each command will be sent to {@link #preProcessorCommandSkipped(String, int)}
+	 * {@link #preProcessorTokenSkipped(int, int, OrinocoLexerContext)} will be invoked for each whitespace separated "word"/token that wasn't preprocessed.
+	 * Also, each command will be sent to {@link #preProcessorCommandSkipped(int, int, OrinocoLexerContext)}
 	 *
 	 * @return true if skip preprocessing, or false to do preprocessing
 	 */

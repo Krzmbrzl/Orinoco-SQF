@@ -3,6 +3,8 @@ package arma.orinocosqf;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.TestOrinocoLexer;
 import arma.orinocosqf.helpers.TokenExpector;
+import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.lexer.SimpleOrinocoLexerContext;
 import arma.orinocosqf.preprocessing.ArmaFilesystem;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
 import org.jetbrains.annotations.NotNull;

@@ -1,5 +1,6 @@
-package arma.orinocosqf;
+package arma.orinocosqf.lexer;
 
+import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

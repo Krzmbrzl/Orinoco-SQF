@@ -1,9 +1,13 @@
 package arma.orinocosqf.preprocessing;
 
-import arma.orinocosqf.*;
+import arma.orinocosqf.OrinocoTokenProcessor;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
 import arma.orinocosqf.exceptions.InvalidPathException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
+import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.lexer.OrinocoLexerContext;
+import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
+import arma.orinocosqf.lexer.OrinocoLexerStream;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
 import arma.orinocosqf.preprocessing.bodySegments.TextSegment;
@@ -150,7 +154,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-			int originalLength, @NotNull OrinocoLexerContext ctx) {
+							  int originalLength, @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 

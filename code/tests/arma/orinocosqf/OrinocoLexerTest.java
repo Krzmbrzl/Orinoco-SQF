@@ -2,6 +2,9 @@ package arma.orinocosqf;
 
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.TokenExpector;
+import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
+import arma.orinocosqf.lexer.SimpleOrinocoLexerContext;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
