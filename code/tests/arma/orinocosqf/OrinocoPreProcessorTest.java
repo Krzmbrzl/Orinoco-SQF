@@ -259,7 +259,7 @@ public class OrinocoPreProcessorTest {
 	public void multilineDefine_withMultiLineComment() {
 		// This test is for a macro spanning multiple lines
 
-		String[] expected = {"Hello\n\nworld"};
+		String[] expected = {"Hello\nworld"};
 		int[] expectedInd = {0};
 		Consumer<CharSequence> cb = s -> assertEquals(expected[expectedInd[0]++], s.toString());
 
