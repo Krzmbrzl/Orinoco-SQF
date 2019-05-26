@@ -386,6 +386,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
+		// TODO: also provide newlineCount
 		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
@@ -451,6 +452,16 @@ public class OrinocoLexer implements ProblemListener {
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
 		jFlexLexer.yypushStream(reader);
 		preprocessedLength = 0; //reset the length because something took the place of the most recent token
+	}
+	
+	/**
+	 * Accepts newlines that are being preserved (by the preprocessor). Preserving in this contexts simply means, that the newlines are read
+	 * back into the input
+	 * 
+	 * @param amount The amount of newlines to preserve
+	 */
+	public void acceptPreservedNewlines(int amount) {
+		// TODO: implement and also take care of LF vs CRLF
 	}
 
 	/**

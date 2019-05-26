@@ -78,9 +78,10 @@ public interface OrinocoLexerStream extends OrinocoTokenProcessor {
 	 *        emitting (error) messages.</b><br>
 	 *        Note that a comment can only be inserted by preprocessing if the preprocessor is instructed to keep comments.
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
+	 * @param newlineCount The amount of newlines in this comment
 	 */
 	void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-					   @NotNull OrinocoLexerContext ctx);
+					   @NotNull OrinocoLexerContext ctx, int newlineCount);
 
 	@NotNull
 	MacroSet getMacroSet();

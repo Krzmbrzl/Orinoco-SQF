@@ -1051,7 +1051,7 @@ public class OrinocoLexerTest {
 		String input = "//";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1060,7 +1060,7 @@ public class OrinocoLexerTest {
 		input = "// I am a comment";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1071,7 +1071,7 @@ public class OrinocoLexerTest {
 		String input = "//#`}^°<>~,;.:-_äöü";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1080,7 +1080,7 @@ public class OrinocoLexerTest {
 		input = "// ĀǢŒÞ¢ǿ"; // unicode
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1091,7 +1091,7 @@ public class OrinocoLexerTest {
 		String input = "// I am a comment\n";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length() - 1, 0, input.length() - 1, lexer.getContext());
+		tokenFactory.acceptComment(0, input.length() - 1, 0, input.length() - 1, lexer.getContext(), 0);
 		tokenFactory.acceptWhitespace(input.length() - 1, 1, input.length() - 1, 1, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
@@ -1103,7 +1103,7 @@ public class OrinocoLexerTest {
 		String input = "/**/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1112,7 +1112,7 @@ public class OrinocoLexerTest {
 		input = "/* I am a comment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1123,7 +1123,7 @@ public class OrinocoLexerTest {
 		String input = "/*\n*/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1132,7 +1132,7 @@ public class OrinocoLexerTest {
 		input = "/* I am \na \ncomment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1143,7 +1143,7 @@ public class OrinocoLexerTest {
 		String input = "/*\r\n*/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1152,7 +1152,7 @@ public class OrinocoLexerTest {
 		input = "/* I am \r\na \r\ncomment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1163,7 +1163,7 @@ public class OrinocoLexerTest {
 		String input = "/***/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1172,7 +1172,7 @@ public class OrinocoLexerTest {
 		input = "/* I am *a *comment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1183,7 +1183,7 @@ public class OrinocoLexerTest {
 		String input = "/*\n*\n*/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1192,7 +1192,7 @@ public class OrinocoLexerTest {
 		input = "/* I am \n*a *com\nment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1203,7 +1203,7 @@ public class OrinocoLexerTest {
 		String input = "/*/**/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1212,7 +1212,7 @@ public class OrinocoLexerTest {
 		input = "/* I am /*a \n/*comment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1223,7 +1223,7 @@ public class OrinocoLexerTest {
 		String input = "/** /*/";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1232,7 +1232,7 @@ public class OrinocoLexerTest {
 		input = "/* I am *\n/a *\t/ * /comment */";
 		lexerFromText(input);
 
-		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext());
+		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1292,8 +1292,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "atan2";
 		lexerFromText(input);
 
@@ -1429,7 +1429,7 @@ public class OrinocoLexerTest {
 		lexer.start();
 		expector.assertTokensMatch();
 	}
-	
+
 	@Test
 	public void commands_operators() throws UnknownIdException {
 		String input = "+";
@@ -1475,8 +1475,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "%";
 		lexerFromText(input);
 
@@ -1493,8 +1493,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "(";
 		lexerFromText(input);
 
@@ -1502,8 +1502,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ")";
 		lexerFromText(input);
 
@@ -1511,8 +1511,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "[";
 		lexerFromText(input);
 
@@ -1520,8 +1520,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "]";
 		lexerFromText(input);
 
@@ -1529,8 +1529,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "{";
 		lexerFromText(input);
 
@@ -1538,8 +1538,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "}";
 		lexerFromText(input);
 
@@ -1547,8 +1547,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ",";
 		lexerFromText(input);
 
@@ -1556,8 +1556,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ";";
 		lexerFromText(input);
 
@@ -1565,8 +1565,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "!";
 		lexerFromText(input);
 
@@ -1574,8 +1574,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "&&";
 		lexerFromText(input);
 
@@ -1583,8 +1583,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "||";
 		lexerFromText(input);
 
@@ -1592,8 +1592,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ":";
 		lexerFromText(input);
 
@@ -1601,8 +1601,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "=";
 		lexerFromText(input);
 
@@ -1610,8 +1610,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "==";
 		lexerFromText(input);
 
@@ -1619,8 +1619,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "!=";
 		lexerFromText(input);
 
@@ -1628,8 +1628,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "<";
 		lexerFromText(input);
 
@@ -1637,8 +1637,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = "<=";
 		lexerFromText(input);
 
@@ -1646,8 +1646,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ">";
 		lexerFromText(input);
 
@@ -1655,8 +1655,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ">=";
 		lexerFromText(input);
 
@@ -1664,8 +1664,8 @@ public class OrinocoLexerTest {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
-		
-		
+
+
 		input = ">>";
 		lexerFromText(input);
 
