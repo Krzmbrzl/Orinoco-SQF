@@ -1,5 +1,6 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.TestOrinocoLexer;
 import arma.orinocosqf.helpers.TokenExpector;
 import arma.orinocosqf.preprocessing.ArmaFilesystem;
@@ -64,7 +65,7 @@ public class OrinocoPreProcessorTest {
 	}
 
 	@Test
-	public void noPreProcessing_macroUnmatched() {
+	public void noPreProcessing_macroUnmatched() throws UnknownIdException {
 		Consumer<CharSequence> cb = s -> fail("Expected no text to preprocess. Got " + s);
 
 		String define = "#define Macro(arg,arg2) arg=arg2";
@@ -72,24 +73,27 @@ public class OrinocoPreProcessorTest {
 		String all = define + "\n" + text;
 		lexerFromText(all, cb);
 
+		final int varId_v = lexer.getIdTransformer().toId("v");
+		final int varId_z = lexer.getIdTransformer().toId("z");
+		final int varId_MACRO = lexer.getIdTransformer().toId("MACRO");
+
 		final int textStart = define.length() + 1; // +1 for \n
-		final int lparenStart = text.indexOf('(');
-		final int vStart = text.indexOf('v');
-		final int commaStart = text.indexOf(',');
-		final int zStart = text.indexOf('z');
-		final int rparenStart = text.indexOf(')');
-		final int offset = define.length();
+		final int lparenStart = textStart + text.indexOf('(');
+		final int vStart = textStart + text.indexOf('v');
+		final int commaStart = textStart + text.indexOf(',');
+		final int zStart = textStart + text.indexOf('z');
+		final int rparenStart = textStart + text.indexOf(')');
 
 		final int lparenId = OrinocoLexer.getCommandId("(");
 		final int rparenId = OrinocoLexer.getCommandId(")");
 		final int commaId = OrinocoLexer.getCommandId(",");
 
-		tokenFactory.acceptGlobalVariable(0, 0, textStart, 5, 1, lexer.getContext());
-		tokenFactory.acceptCommand(lparenId, lparenStart - offset, lparenStart, 1, 1, lexer.getContext());
-		tokenFactory.acceptGlobalVariable(1, vStart - offset, vStart, 1, 1, lexer.getContext());
-		tokenFactory.acceptCommand(commaId, commaStart - offset, commaStart, 1, 1, lexer.getContext());
-		tokenFactory.acceptGlobalVariable(2, zStart - offset, zStart, 1, 1, lexer.getContext());
-		tokenFactory.acceptCommand(rparenId, rparenStart - offset, rparenStart, 1, 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(varId_MACRO, textStart, 5, textStart, 5, lexer.getContext());
+		tokenFactory.acceptCommand(lparenId, lparenStart, 1, lparenStart, 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(varId_v, vStart, 1, vStart, 1, lexer.getContext());
+		tokenFactory.acceptCommand(commaId, commaStart, 1, commaStart, 1, lexer.getContext());
+		tokenFactory.acceptGlobalVariable(varId_z, zStart, 1, zStart, 1, lexer.getContext());
+		tokenFactory.acceptCommand(rparenId, rparenStart, 1, rparenStart, 1, lexer.getContext());
 
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
