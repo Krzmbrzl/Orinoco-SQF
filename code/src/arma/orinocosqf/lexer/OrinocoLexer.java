@@ -383,11 +383,18 @@ public class OrinocoLexer implements ProblemListener {
 	 * @see OrinocoLexerStream#acceptComment(int, int, int, int, OrinocoLexerContext, int)
 	 */
 	private void makeComment() throws IOException {
+		char[] buffer = jFlexLexer.getBuffer();
 		if (preprocessedResultWriter != null) {
-			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+			preprocessedResultWriter.write(buffer, jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		// TODO: also provide newlineCount
-		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context, 0/*todo*/);
+		int count = 0;
+		final int start = jFlexLexer.yystart();
+		for (int i = 0; i < jFlexLexer.yylength(); i++) {
+			if (buffer[start + i] == '\n') {
+				count++;
+			}
+		}
+		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context, count);
 		updateOffsetsAfterMake();
 	}
 
