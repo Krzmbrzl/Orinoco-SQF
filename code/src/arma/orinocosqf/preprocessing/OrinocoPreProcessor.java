@@ -13,9 +13,11 @@ import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import arma.orinocosqf.lexer.OrinocoLexerStream;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
+import arma.orinocosqf.preprocessing.bodySegments.BodySegmentSequence;
 import arma.orinocosqf.preprocessing.bodySegments.TextSegment;
 import arma.orinocosqf.problems.Problems;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
@@ -128,13 +130,63 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 		try {
 			this.lexer.acceptPreProcessedText(segment.applyArguments(Collections.emptyList()));
-		} catch (NoMacroArgumentsGivenException e) {
-			lexer.problemEncountered(Problems.ERROR_NO_MACRO_ARGUMENTS_PROVIDED, e.getMessage(), e.getOffset(), e.getLength(), -1);
-		} catch (MissingMacroArgumentException e) {
-			lexer.problemEncountered(Problems.ERROR_WRONG_ARGUMENT_COUNT, e.getMessage(), e.getOffset(), e.getLength(), -1);
-		}catch (OrinocoPreprocessorException e) {
-			lexer.problemEncountered(Problems.ERROR_PREPROCESSOR, e.getMessage(), e.getOffset(), e.getLength(), -1);
+		} catch (OrinocoPreprocessorException e) {
+			int[] location = getContextLocation(segment, e.getContext());
+
+			int contextOffset, contextLength;
+
+			if (location != null) {
+				contextOffset = location[0];
+				contextLength = location[1];
+			} else {
+				// The context couldn't be found -> use the whole segment as a location
+				contextOffset = 0;
+				contextLength = segment.toStringNoPreProcessing().length();
+			}
+
+			if (e instanceof NoMacroArgumentsGivenException) {
+				lexer.problemEncountered(Problems.ERROR_NO_MACRO_ARGUMENTS_PROVIDED, e.getMessage(), contextOffset, contextLength, -1);
+			} else if (e instanceof MissingMacroArgumentException) {
+				lexer.problemEncountered(Problems.ERROR_WRONG_ARGUMENT_COUNT, e.getMessage(), contextOffset, contextLength, -1);
+			} else {
+				lexer.problemEncountered(Problems.ERROR_PREPROCESSOR, e.getMessage(), contextOffset, contextLength, -1);
+			}
 		}
+	}
+
+	/**
+	 * Gets the location of the context segment inside the rootsegment
+	 * 
+	 * @param rootSegment The root segment ot search in
+	 * @param context The context segment to search for
+	 * @return An int-array of length two {offset, length} or <code>null</code> if it couldn't be found
+	 */
+	@Nullable
+	private static int[] getContextLocation(BodySegment rootSegment, BodySegment context) {
+		int offset = 0;
+		int length = context.toStringNoPreProcessing().length();
+
+		if (rootSegment == context) {
+			return new int[] { offset, length };
+		} else {
+			if (rootSegment instanceof BodySegmentSequence) {
+				BodySegmentSequence seq = (BodySegmentSequence) rootSegment;
+
+				for (BodySegment currentSegment : seq) {
+					int[] result = getContextLocation(currentSegment, context);
+
+					if (result != null) {
+						result[0] += offset;
+						return result;
+					} else {
+						offset += currentSegment.toStringNoPreProcessing().length();
+					}
+				}
+			}
+		}
+
+		// not found
+		return null;
 	}
 
 	@Override
@@ -162,7 +214,7 @@ public class OrinocoPreProcessor implements OrinocoLexerStream {
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-							  int originalLength, @NotNull OrinocoLexerContext ctx) {
+			int originalLength, @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
