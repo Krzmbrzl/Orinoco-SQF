@@ -5,6 +5,9 @@ import arma.orinocosqf.helpers.TokenExpector;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
 import arma.orinocosqf.lexer.SimpleOrinocoLexerContext;
+import arma.orinocosqf.sqf.SQFCommands;
+import arma.orinocosqf.util.SimpleTextBuffer;
+
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 

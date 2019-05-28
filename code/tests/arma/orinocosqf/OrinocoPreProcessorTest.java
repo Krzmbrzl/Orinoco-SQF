@@ -7,6 +7,8 @@ import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.SimpleOrinocoLexerContext;
 import arma.orinocosqf.preprocessing.ArmaFilesystem;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.util.SimpleTextBuffer;
+
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
