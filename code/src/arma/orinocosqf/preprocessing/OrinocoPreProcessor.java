@@ -10,7 +10,7 @@ import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
-import arma.orinocosqf.lexer.OrinocoLexerStream;
+import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentSequence;
@@ -26,12 +26,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A {@link OrinocoLexerStream} implementation that fully preprocesses tokens.
+ * A {@link OrinocoTokenDelegator} implementation that fully preprocesses tokens.
  *
  * @author Raven
  * @since 02/20/2019
  */
-public class OrinocoPreProcessor implements OrinocoLexerStream {
+public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	/**
 	 * The lexer that is being used to feed tokens into this preprocessor
 	 */

@@ -3,7 +3,7 @@ package arma.orinocosqf.helpers;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
-import arma.orinocosqf.lexer.OrinocoLexerStream;
+import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
  * @author K
  * @since 3/10/19
  */
-public class TokenExpector implements OrinocoLexerStream {
+public class TokenExpector implements OrinocoTokenDelegator {
 	private final AcceptedTokenFactory acceptFactory;
 	private final List<AcceptedToken> expectedTokens;
 	private boolean skipPreprocessing;
@@ -317,7 +317,7 @@ public class TokenExpector implements OrinocoLexerStream {
 		}
 	}
 
-	public static class AcceptedTokenFactory implements OrinocoLexerStream {
+	public static class AcceptedTokenFactory implements OrinocoTokenDelegator {
 		private final List<AcceptedToken> q = new ArrayList<>();
 		private final MacroSet macroSet = new MacroSet();
 

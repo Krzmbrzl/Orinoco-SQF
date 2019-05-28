@@ -2,11 +2,11 @@ package arma.orinocosqf;
 
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
-import arma.orinocosqf.lexer.OrinocoLexerStream;
+import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 
 /**
  * @author K
- * @see OrinocoLexerStream
+ * @see OrinocoTokenDelegator
  * @since 02/21/2019
  */
 public enum OrinocoSQFTokenType implements OrinocoTokenType {

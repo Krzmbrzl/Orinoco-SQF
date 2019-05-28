@@ -23,10 +23,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoLexerStream}. This lexer also has a
- * cyclic dependency on a preprocessor (in shape of a {@link OrinocoLexerStream}). Due to the fact that each token may have a macro inside
+ * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoTokenDelegator}. This lexer also has a
+ * cyclic dependency on a preprocessor (in shape of a {@link OrinocoTokenDelegator}). Due to the fact that each token may have a macro inside
  * it, the lexer stores a set of macro's as a reference to know when the preprocessor is needed. When a preprocessor is needed for a token,
- * it submits the token to {@link OrinocoLexerStream#preProcessToken(char[], int, int)}. Subsequently, the preprocessed result re-enters the
+ * it submits the token to {@link OrinocoTokenDelegator#preProcessToken(char[], int, int)}. Subsequently, the preprocessed result re-enters the
  * lexer for re-lexing via {@link #acceptPreProcessedText(CharSequence)}.
  *
  * Example 1:
@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  * // The lexer sees ASSIGN(hello), which matches a macro. It feeds "ASSIGN(hello)" to the preprocessor.
  * // The preprocessor then fully preprocesses ASSIGN(hello), thus yielding "hello = 1;".
  * // The lexer then receives that text via {@link #acceptPreProcessedText(CharSequence)}. The lexer lexes "hello", "=", "1", and ";" and
- * // submits them to the proper {@link OrinocoLexerStream} accept method that doesn't involve preprocessing.
+ * // submits them to the proper {@link OrinocoTokenDelegator} accept method that doesn't involve preprocessing.
  * </pre>
  *
  * @author K
@@ -54,7 +54,7 @@ public class OrinocoLexer implements ProblemListener {
 
 	private OrinocoLexerContext context = new DefaultLexerContext();
 
-	private final OrinocoLexerStream lexerStream;
+	private final OrinocoTokenDelegator lexerStream;
 	private int originalOffset = 0;
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
@@ -96,7 +96,7 @@ public class OrinocoLexer implements ProblemListener {
 	@NotNull
 	private final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
 
-	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoLexerStream lexerStream) {
+	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoTokenDelegator lexerStream) {
 		this.lexerStream = lexerStream;
 		lexerStream.setLexer(this);
 		jFlexLexer = new OrinocoJFlexLexer(r, lexerStream.getMacroSet());
@@ -113,7 +113,7 @@ public class OrinocoLexer implements ProblemListener {
 
 	/**
 	 * If non null, all preprocessed text will be written to the specified writer. If null, preprocessed text will be discarded and only
-	 * tokenized versions will be sent through the {@link OrinocoLexerStream}
+	 * tokenized versions will be sent through the {@link OrinocoTokenDelegator}
 	 *
 	 * @param writer writer to use
 	 */
@@ -336,7 +336,7 @@ public class OrinocoLexer implements ProblemListener {
 	 *
 	 * @param type literal type
 	 * @throws IOException because of {@link #preprocessedResultWriter}
-	 * @see OrinocoLexerStream#acceptLiteral(OrinocoLexerLiteralType, int, int, int, int, OrinocoLexerContext)
+	 * @see OrinocoTokenDelegator#acceptLiteral(OrinocoLexerLiteralType, int, int, int, int, OrinocoLexerContext)
 	 */
 	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType type) throws IOException {
 		if (preprocessedResultWriter != null) {
@@ -347,12 +347,12 @@ public class OrinocoLexer implements ProblemListener {
 	}
 
 	/**
-	 * Makes a preprocessor command token only if {@link OrinocoLexerStream#skipPreProcessing()} returns false. This method will always
+	 * Makes a preprocessor command token only if {@link OrinocoTokenDelegator#skipPreProcessing()} returns false. This method will always
 	 * invoke {@link #updateOffsetsAfterMake()} after token is made or token is skipped.
 	 *
 	 * @param command command to use
-	 * @see OrinocoLexerStream#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
-	 * @see OrinocoLexerStream#preProcessorCommandSkipped(int, int, OrinocoLexerContext)
+	 * @see OrinocoTokenDelegator#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
+	 * @see OrinocoTokenDelegator#preProcessorCommandSkipped(int, int, OrinocoLexerContext)
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 */
 	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) throws IOException {
@@ -373,7 +373,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * Makes a whitespace token and then invokes {@link #updateOffsetsAfterMake()}
 	 *
 	 * @throws IOException because of {@link #preprocessedResultWriter}
-	 * @see OrinocoLexerStream#acceptWhitespace(int, int, int, int, OrinocoLexerContext)
+	 * @see OrinocoTokenDelegator#acceptWhitespace(int, int, int, int, OrinocoLexerContext)
 	 */
 	private void makeWhitespace() throws IOException {
 		if (preprocessedResultWriter != null) {
@@ -387,7 +387,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * Makes a comment token and then invokes {@link #updateOffsetsAfterMake()}
 	 *
 	 * @throws IOException because of {@link #preprocessedResultWriter}
-	 * @see OrinocoLexerStream#acceptComment(int, int, int, int, OrinocoLexerContext, int)
+	 * @see OrinocoTokenDelegator#acceptComment(int, int, int, int, OrinocoLexerContext, int)
 	 */
 	private void makeComment() throws IOException {
 		char[] buffer = jFlexLexer.getBuffer();
@@ -410,7 +410,7 @@ public class OrinocoLexer implements ProblemListener {
 	 *
 	 * @param id the local variable id
 	 * @throws IOException because of {@link #preprocessedResultWriter}
-	 * @see OrinocoLexerStream#acceptLocalVariable(int, int, int, int, int, OrinocoLexerContext)
+	 * @see OrinocoTokenDelegator#acceptLocalVariable(int, int, int, int, int, OrinocoLexerContext)
 	 */
 	private void makeLocalVariable(int id) throws IOException {
 		if (preprocessedResultWriter != null) {
@@ -438,7 +438,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * Makes a command token and then invokes {@link #updateOffsetsAfterMake()}
 	 *
 	 * @throws IOException because of {@link #preprocessedResultWriter}
-	 * @see OrinocoLexerStream#acceptCommand(int, int, int, int, int, OrinocoLexerContext)
+	 * @see OrinocoTokenDelegator#acceptCommand(int, int, int, int, int, OrinocoLexerContext)
 	 */
 	private void makeCommand() throws IOException {
 		if (preprocessedResultWriter != null) {
@@ -449,7 +449,7 @@ public class OrinocoLexer implements ProblemListener {
 	}
 
 	/**
-	 * Accepts partially or fully preprocessed text (see Example 1 in class level doc) from the {@link OrinocoLexerStream}.
+	 * Accepts partially or fully preprocessed text (see Example 1 in class level doc) from the {@link OrinocoTokenDelegator}.
 	 *
 	 * @param text the preprocessed, untokenized text
 	 */

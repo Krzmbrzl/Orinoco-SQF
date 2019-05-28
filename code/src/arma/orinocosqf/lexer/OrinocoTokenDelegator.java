@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 02/20/2019
  */
-public interface OrinocoLexerStream extends OrinocoTokenProcessor {
+public interface OrinocoTokenDelegator extends OrinocoTokenProcessor {
 	/**
 	 * Sets the lexer for this lexer stream. When a {@link OrinocoLexer} is constructed, this method will be invoked automatically by the
 	 * {@link OrinocoLexer}.

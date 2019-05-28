@@ -3,7 +3,7 @@ package arma.orinocosqf;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
-import arma.orinocosqf.lexer.OrinocoLexerStream;
+import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import org.jetbrains.annotations.NotNull;
 
@@ -107,8 +107,8 @@ public interface OrinocoTokenProcessor {
 	 * @param length The length of the preprocessor command token
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 * @see PreProcessorCommand
-	 * @see OrinocoLexerStream#skipPreProcessing()
-	 * @see OrinocoLexerStream#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
+	 * @see OrinocoTokenDelegator#skipPreProcessing()
+	 * @see OrinocoTokenDelegator#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
 	 */
 	void preProcessorCommandSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx);
 
