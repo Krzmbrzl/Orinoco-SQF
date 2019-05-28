@@ -1,6 +1,9 @@
-package arma.orinocosqf;
+package arma.orinocosqf.queue;
 
 import org.jetbrains.annotations.NotNull;
+
+import arma.orinocosqf.OrinocoToken;
+import arma.orinocosqf.OrinocoTokenQueue;
 
 import java.util.Collection;
 import java.util.Iterator;
