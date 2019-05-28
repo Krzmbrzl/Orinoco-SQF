@@ -1,5 +1,9 @@
 package arma.orinocosqf.exceptions;
 
+import org.jetbrains.annotations.Nullable;
+
+import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
+
 /**
  * An exception thrown during preprocessing
  * 
@@ -9,21 +13,18 @@ package arma.orinocosqf.exceptions;
 public class OrinocoPreprocessorException extends OrinocoException {
 	private static final long serialVersionUID = -673179213828861313L;
 
-	int offset;
-	int length;
+	BodySegment context;
 
 	/**
 	 * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may subsequently be initialized
 	 * by a call to {@link #initCause}.
 	 * 
-	 * @param offset The offset at which this exception occured
-	 * @param length The length of the affected area
+	 * @param context The {@link BodySegment} in whose context this exception occurred
 	 */
-	public OrinocoPreprocessorException(int offset, int length) {
+	public OrinocoPreprocessorException(@Nullable BodySegment context) {
 		super();
 
-		this.offset = offset;
-		this.length = length;
+		this.context = context;
 	}
 
 	/**
@@ -31,14 +32,12 @@ public class OrinocoPreprocessorException extends OrinocoException {
 	 * call to {@link #initCause}.
 	 *
 	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
-	 * @param offset The offset at which this exception occured
-	 * @param length The length of the affected area
+	 * @param context The {@link BodySegment} in whose context this exception occurred
 	 */
-	public OrinocoPreprocessorException(String message, int offset, int length) {
+	public OrinocoPreprocessorException(String message, @Nullable BodySegment context) {
 		super(message);
 
-		this.offset = offset;
-		this.length = length;
+		this.context = context;
 	}
 
 	/**
@@ -50,14 +49,12 @@ public class OrinocoPreprocessorException extends OrinocoException {
 	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
 	 *        and indicates that the cause is nonexistent or unknown.)
-	 * @param offset The offset at which this exception occured
-	 * @param length The length of the affected area
+	 * @param context The {@link BodySegment} in whose context this exception occurred
 	 */
-	public OrinocoPreprocessorException(String message, Throwable cause, int offset, int length) {
+	public OrinocoPreprocessorException(String message, Throwable cause, @Nullable BodySegment context) {
 		super(message, cause);
 
-		this.offset = offset;
-		this.length = length;
+		this.context = context;
 	}
 
 	/**
@@ -67,14 +64,12 @@ public class OrinocoPreprocessorException extends OrinocoException {
 	 *
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
 	 *        and indicates that the cause is nonexistent or unknown.)
-	 * @param offset The offset at which this exception occured
-	 * @param length The length of the affected area
+	 * @param context The {@link BodySegment} in whose context this exception occurred
 	 */
-	public OrinocoPreprocessorException(Throwable cause, int offset, int length) {
+	public OrinocoPreprocessorException(Throwable cause, @Nullable BodySegment context) {
 		super(cause);
 
-		this.offset = offset;
-		this.length = length;
+		this.context = context;
 	}
 
 	/**
@@ -85,28 +80,20 @@ public class OrinocoPreprocessorException extends OrinocoException {
 	 * @param cause the cause. (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 * @param enableSuppression whether or not suppression is enabled or disabled
 	 * @param writableStackTrace whether or not the stack trace should be writable
-	 * @param offset The offset at which this exception occured
-	 * @param length The length of the affected areas
+	 * @param context The {@link BodySegment} in whose context this exception occurred
 	 */
 	protected OrinocoPreprocessorException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace,
-			int offset, int length) {
+			@Nullable BodySegment context) {
 		super(message, cause, enableSuppression, writableStackTrace);
 
-		this.offset = offset;
-		this.length = length;
+		this.context = context;
 	}
 
 	/**
-	 * @return The offset at which this exception occurred
+	 * @return The context {@link BodySegment} of this exception
 	 */
-	public int getOffset() {
-		return offset;
-	}
-
-	/**
-	 * @return The length of the area this exception occurred in
-	 */
-	public int getLength() {
-		return length;
+	@Nullable
+	public BodySegment getContext() {
+		return context;
 	}
 }

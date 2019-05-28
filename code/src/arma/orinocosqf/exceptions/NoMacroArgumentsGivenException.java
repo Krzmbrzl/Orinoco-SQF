@@ -1,6 +1,9 @@
 package arma.orinocosqf.exceptions;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 
 /**
  * An exception thrown whenever a macro requiring arguments is tried to be expanded without supplying any arguments for it
@@ -13,10 +16,9 @@ public class NoMacroArgumentsGivenException extends OrinocoPreprocessorException
 
 	/**
 	 * @param macroName The name of the macro that was tried to be expanded without arguments although it does require arguments
-	 * @param offset The offset at which this exception occured
-	 * @param length The length of the affected area
+	 * @param context The {@link BodySegment} in whose context this exception occurred
 	 */
-	public NoMacroArgumentsGivenException(@NotNull String macroName, int offset, int length) {
-		super("Trying to expand the macro \"" + macroName + "\" without providing the required macro arguments", offset, length);
+	public NoMacroArgumentsGivenException(@NotNull String macroName, @Nullable BodySegment context) {
+		super("Trying to expand the macro \"" + macroName + "\" without providing the required macro arguments", context);
 	}
 }
