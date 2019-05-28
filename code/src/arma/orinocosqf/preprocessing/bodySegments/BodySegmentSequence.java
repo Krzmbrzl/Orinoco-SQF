@@ -1,6 +1,7 @@
 package arma.orinocosqf.preprocessing.bodySegments;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import arma.orinocosqf.preprocessing.PreProcessorMacro;
  * A type of {@link BodySegment} in that it contains a sequence/list of segments. When {@link #applyArguments(List)} is invoked, each
  * {@link BodySegment#applyArguments(List)} is invoked and appended one after the other with no delimeter.
  */
-public class BodySegmentSequence extends BodySegment {
+public class BodySegmentSequence extends BodySegment implements Iterable<BodySegment> {
 
 	protected final List<BodySegment> segments;
 
@@ -63,7 +64,7 @@ public class BodySegmentSequence extends BodySegment {
 
 						sb.append(currentSegment.applyArguments(argList));
 					} else {
-						throw new NoMacroArgumentsGivenException(currentSegment.toStringNoPreProcessing().toString());
+						throw new NoMacroArgumentsGivenException(currentSegment.toStringNoPreProcessing().toString(), currentSegment);
 					}
 				} else {
 					sb.append(currentSegment.applyArguments(args));
@@ -122,5 +123,10 @@ public class BodySegmentSequence extends BodySegment {
 		}
 
 		return true;
+	}
+
+	@Override
+	public Iterator<BodySegment> iterator() {
+		return segments.iterator();
 	}
 }
