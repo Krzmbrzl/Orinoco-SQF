@@ -1,7 +1,8 @@
 package arma.orinocosqf.preprocessing;
 
-import arma.orinocosqf.HashableCharSequence;
 import org.jetbrains.annotations.NotNull;
+
+import arma.orinocosqf.util.HashableCharSequence;
 
 import java.util.Collection;
 import java.util.HashMap;

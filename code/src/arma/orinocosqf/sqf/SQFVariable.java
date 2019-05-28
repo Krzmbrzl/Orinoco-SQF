@@ -1,6 +1,8 @@
-package arma.orinocosqf;
+package arma.orinocosqf.sqf;
 
 import org.jetbrains.annotations.NotNull;
+
+import arma.orinocosqf.CaseInsentiveKey;
 
 /**
  * @author K

@@ -2,6 +2,8 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
+import arma.orinocosqf.util.CharSequenceReader;
+
 import java.io.*;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;

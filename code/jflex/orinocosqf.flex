@@ -4,10 +4,10 @@ import arma.orinocosqf.preprocessing.PreProcessorMacro;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import arma.orinocosqf.preprocessing.MacroSet;
-import arma.orinocosqf.HashableCharSequence;
+import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
-import arma.orinocosqf.CommandSet;
-import arma.orinocosqf.LightweightStringBuilder;
+import arma.orinocosqf.util.CommandSet;
+import arma.orinocosqf.util.LightweightStringBuilder;
 
 %%
 

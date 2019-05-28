@@ -1,11 +1,18 @@
 package arma.orinocosqf.lexer;
 
-import arma.orinocosqf.*;
+import arma.orinocosqf.OrinocoReader;
+import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.problems.Problem;
 import arma.orinocosqf.problems.ProblemListener;
+import arma.orinocosqf.sqf.SQFCommands;
+import arma.orinocosqf.sqf.SQFVariable;
+import arma.orinocosqf.util.CaseInsensitiveHashSet;
+import arma.orinocosqf.util.HashableCharSequence;
+import arma.orinocosqf.util.LightweightStringBuilder;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

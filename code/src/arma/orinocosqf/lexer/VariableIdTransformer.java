@@ -1,6 +1,10 @@
-package arma.orinocosqf;
+package arma.orinocosqf.lexer;
 
+import arma.orinocosqf.IdTransformer;
 import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.sqf.SQFVariable;
+import arma.orinocosqf.util.CaseInsensitiveHashSet;
+
 import org.jetbrains.annotations.NotNull;
 
 

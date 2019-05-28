@@ -1,9 +1,10 @@
 package arma.orinocosqf.lexer;
 
-import arma.orinocosqf.SQFCommands;
-import arma.orinocosqf.SimpleTextBuffer;
 import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.sqf.SQFCommands;
+import arma.orinocosqf.util.SimpleTextBuffer;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

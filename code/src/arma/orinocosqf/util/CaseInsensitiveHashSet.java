@@ -1,7 +1,9 @@
-package arma.orinocosqf;
+package arma.orinocosqf.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import arma.orinocosqf.CaseInsentiveKey;
 
 import java.util.Iterator;
 import java.util.LinkedList;

@@ -1,13 +1,15 @@
-package arma.orinocosqf;
+package arma.orinocosqf.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import arma.orinocosqf.Command;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static arma.orinocosqf.ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR;
+import static arma.orinocosqf.util.ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR;
 
 /**
  * @author K

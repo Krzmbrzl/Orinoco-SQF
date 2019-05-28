@@ -1,4 +1,4 @@
-package arma.orinocosqf;
+package arma.orinocosqf.util;
 
 import java.util.Comparator;
 

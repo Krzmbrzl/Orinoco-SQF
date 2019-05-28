@@ -1,6 +1,9 @@
-package arma.orinocosqf;
+package arma.orinocosqf.sqf;
 
+import arma.orinocosqf.IdTransformer;
 import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.util.CommandSet;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;

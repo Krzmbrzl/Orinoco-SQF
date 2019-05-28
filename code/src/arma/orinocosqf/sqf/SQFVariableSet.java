@@ -1,4 +1,6 @@
-package arma.orinocosqf;
+package arma.orinocosqf.sqf;
+
+import arma.orinocosqf.util.CaseInsensitiveHashSet;
 
 /**
  * @author K
