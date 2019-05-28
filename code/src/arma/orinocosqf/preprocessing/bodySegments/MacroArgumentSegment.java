@@ -48,7 +48,7 @@ public class MacroArgumentSegment extends BodySegment {
 	@Override
 	public CharSequence applyArguments(@NotNull List<CharSequence> args) throws MissingMacroArgumentException {
 		if (args.size() <= argIndex) {
-			throw new MissingMacroArgumentException(argumentName);
+			throw new MissingMacroArgumentException(argumentName, this);
 		}
 		return args.get(argIndex);
 	}
