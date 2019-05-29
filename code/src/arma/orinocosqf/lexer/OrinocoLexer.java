@@ -492,6 +492,9 @@ public class OrinocoLexer implements ProblemListener {
 
 		preprocessedOffset -= previousPreprocessedLength; //undo the previous preprocessed offset
 
+		int oldOffset = originalOffset;
+		int oldLength = originalLength;
+
 		if (amount > 0) {
 			String newline = "\n";
 			String OS = System.getProperty("os.name").toUpperCase();
@@ -512,7 +515,12 @@ public class OrinocoLexer implements ProblemListener {
 		} else {
 			preprocessedLength = 0;
 		}
+
 		updateOffsetsAfterMake();
+		// undo updating the original length and offset because updateOffsetsAfterMake will update them
+		// when they shouldn't be because the length and offset aren't to be updated from preprocessing
+		originalLength = oldLength;
+		originalOffset = oldOffset;
 	}
 
 	/**
