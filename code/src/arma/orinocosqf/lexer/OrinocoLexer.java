@@ -12,7 +12,6 @@ import arma.orinocosqf.sqf.SQFVariable;
 import arma.orinocosqf.util.CaseInsensitiveHashSet;
 import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.util.LightweightStringBuilder;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,10 +23,10 @@ import java.util.regex.Pattern;
 
 /**
  * A lexer that tokenizes text (into "words" or "tokens") and submits each token to a {@link OrinocoTokenDelegator}. This lexer also has a
- * cyclic dependency on a preprocessor (in shape of a {@link OrinocoTokenDelegator}). Due to the fact that each token may have a macro inside
- * it, the lexer stores a set of macro's as a reference to know when the preprocessor is needed. When a preprocessor is needed for a token,
- * it submits the token to {@link OrinocoTokenDelegator#preProcessToken(char[], int, int)}. Subsequently, the preprocessed result re-enters the
- * lexer for re-lexing via {@link #acceptPreProcessedText(CharSequence)}.
+ * cyclic dependency on a preprocessor (in shape of a {@link OrinocoTokenDelegator}). Due to the fact that each token may have a macro
+ * inside it, the lexer stores a set of macro's as a reference to know when the preprocessor is needed. When a preprocessor is needed for a
+ * token, it submits the token to {@link OrinocoTokenDelegator#preProcessToken(char[], int, int)}. Subsequently, the preprocessed result
+ * re-enters the lexer for re-lexing via {@link #acceptPreProcessedText(CharSequence)}.
  *
  * Example 1:
  *
@@ -59,6 +58,11 @@ public class OrinocoLexer implements ProblemListener {
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
 	private int preprocessedLength = 0;
+	private int previousOriginalOffset = 0;
+	private int previousOriginalLength = 0;
+	private int previousPreprocessedOffset = 0;
+	private int previousPreprocessedLength = 0;
+
 	private final OrinocoJFlexLexer jFlexLexer;
 	private static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
 	private static int nextGlobalVarId = 0;
@@ -323,12 +327,18 @@ public class OrinocoLexer implements ProblemListener {
 	 * </ol>
 	 */
 	private void updateOffsetsAfterMake() {
+		previousOriginalOffset = originalOffset;
+		previousOriginalLength = originalLength;
+		previousPreprocessedOffset = preprocessedOffset;
+		previousPreprocessedLength = preprocessedLength;
+
 		if (!jFlexLexer.yymoreStreams()) {
 			originalOffset += originalLength;
 			originalLength = 0;
 		}
 		preprocessedOffset += preprocessedLength;
 		preprocessedLength = 0;
+
 	}
 
 	/**
@@ -351,9 +361,9 @@ public class OrinocoLexer implements ProblemListener {
 	 * invoke {@link #updateOffsetsAfterMake()} after token is made or token is skipped.
 	 *
 	 * @param command command to use
+	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 * @see OrinocoTokenDelegator#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
 	 * @see OrinocoTokenDelegator#preProcessorCommandSkipped(int, int, OrinocoLexerContext)
-	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 */
 	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) throws IOException {
 		LightweightStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
@@ -467,15 +477,42 @@ public class OrinocoLexer implements ProblemListener {
 		jFlexLexer.yypushStream(reader);
 		preprocessedLength = 0; //reset the length because something took the place of the most recent token
 	}
-	
+
 	/**
 	 * Accepts newlines that are being preserved (by the preprocessor). Preserving in this contexts simply means, that the newlines are read
 	 * back into the input
-	 * 
+	 *
 	 * @param amount The amount of newlines to preserve
+	 * @throws IllegalArgumentException if amount < 0
 	 */
 	public void acceptPreservedNewlines(int amount) {
-		// TODO: implement and also take care of LF vs CRLF
+		if (amount < 0) {
+			throw new IllegalArgumentException(amount + "");
+		}
+
+		preprocessedOffset -= previousPreprocessedLength; //undo the previous preprocessed offset
+
+		if (amount > 0) {
+			String newline = "\n";
+			String OS = System.getProperty("os.name").toUpperCase();
+			if (OS.contains("WIN")) {
+				newline = "\r\n";
+			}
+
+			preprocessedLength = newline.length() * amount;
+			if (preprocessedResultWriter != null) {
+				try {
+					for (int i = 0; i < amount; i++) {
+						preprocessedResultWriter.write(newline);
+					}
+				} catch (IOException ignore) {
+				}
+			}
+			lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		} else {
+			preprocessedLength = 0;
+		}
+		updateOffsetsAfterMake();
 	}
 
 	/**
