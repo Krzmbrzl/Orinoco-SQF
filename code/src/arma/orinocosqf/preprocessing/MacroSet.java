@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
  */
 public class MacroSet implements Map<String, PreProcessorMacro> {
 
-	private static final long serialVersionUID = 6102312990139496236L;
-
 	private final HashMap<HashableCharSequence, PreProcessorMacro> map = new HashMap<>();
 
 	@Override
