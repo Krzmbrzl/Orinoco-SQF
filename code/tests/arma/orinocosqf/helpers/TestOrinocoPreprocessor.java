@@ -1,7 +1,7 @@
 package arma.orinocosqf.helpers;
 
-import arma.orinocosqf.OrinocoTokenProcessorAdapter;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.tokenprocessing.OrinocoTokenProcessorAdapter;
 
 public class TestOrinocoPreprocessor extends OrinocoPreProcessor {
 

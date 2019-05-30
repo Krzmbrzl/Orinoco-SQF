@@ -1,5 +1,6 @@
-package arma.orinocosqf;
+package arma.orinocosqf.tokenprocessing;
 
+import arma.orinocosqf.OrinocoTokenProcessor;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import org.jetbrains.annotations.NotNull;

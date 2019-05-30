@@ -1,4 +1,8 @@
-package arma.orinocosqf;
+package arma.orinocosqf.tokenprocessing;
+
+import arma.orinocosqf.OrinocoTokenProcessor;
+import arma.orinocosqf.OrinocoTokenQueue;
+import arma.orinocosqf.StatementProcessingScheduler;
 
 /**
  * A type of {@link OrinocoTokenProcessor} that collects whole statements and
