@@ -3,9 +3,9 @@ package arma.orinocosqf.helpers;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
 import arma.orinocosqf.tokenprocessing.OrinocoTokenProcessorAdapter;
 
-public class TestOrinocoPreprocessor extends OrinocoPreProcessor {
+public class OrinocoTestPreProcessor extends OrinocoPreProcessor {
 
-	public TestOrinocoPreprocessor() {
+	public OrinocoTestPreProcessor() {
 		super(new OrinocoTokenProcessorAdapter() {
 		}, new DummyFileSystem());
 	}

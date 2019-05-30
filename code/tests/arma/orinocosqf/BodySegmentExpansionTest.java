@@ -14,7 +14,7 @@ import arma.orinocosqf.exceptions.MissingMacroArgumentException;
 import arma.orinocosqf.exceptions.NoMacroArgumentsGivenException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.helpers.NoProblemListener;
-import arma.orinocosqf.helpers.TestOrinocoPreprocessor;
+import arma.orinocosqf.helpers.OrinocoTestPreProcessor;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
@@ -27,7 +27,7 @@ import arma.orinocosqf.preprocessing.bodySegments.WordSegment;
 public class BodySegmentExpansionTest {
 
 	static BodySegmentParser segmentParser;
-	static TestOrinocoPreprocessor p;
+	static OrinocoTestPreProcessor p;
 	static List<String> macroArguments;
 	static PreProcessorMacro pseudoMacro;
 	final static List<CharSequence> NO_ARGS = new ArrayList<>(0);
@@ -35,7 +35,7 @@ public class BodySegmentExpansionTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		segmentParser = new BodySegmentParser(new NoProblemListener());
-		p = new TestOrinocoPreprocessor();
+		p = new OrinocoTestPreProcessor();
 		macroArguments = new ArrayList<>();
 		pseudoMacro = new PreProcessorMacro(p.getMacroSet(), "NonExistantMacro", new ArrayList<>(),
 				new TextSegment("I don't really exist"));
