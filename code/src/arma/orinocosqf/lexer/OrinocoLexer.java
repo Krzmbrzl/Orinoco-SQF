@@ -53,7 +53,7 @@ public class OrinocoLexer implements ProblemListener {
 
 	private OrinocoLexerContext context = new DefaultLexerContext();
 
-	private final OrinocoTokenDelegator lexerStream;
+	private final OrinocoTokenDelegator tokenDelegator;
 	private int originalOffset = 0;
 	private int originalLength = 0;
 	private int preprocessedOffset = 0;
@@ -100,10 +100,10 @@ public class OrinocoLexer implements ProblemListener {
 	@NotNull
 	private final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
 
-	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoTokenDelegator lexerStream) {
-		this.lexerStream = lexerStream;
-		lexerStream.setLexer(this);
-		jFlexLexer = new OrinocoJFlexLexer(r, lexerStream.getMacroSet());
+	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoTokenDelegator tokenDelegator) {
+		this.tokenDelegator = tokenDelegator;
+		tokenDelegator.setLexer(this);
+		jFlexLexer = new OrinocoJFlexLexer(r, tokenDelegator.getMacroSet());
 		jFlexLexer.setCommandSet(SQFCommands.instance);
 	}
 
@@ -141,7 +141,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * Starts the lexing process.
 	 */
 	public void start() {
-		lexerStream.begin(getContext());
+		tokenDelegator.begin(getContext());
 
 		try {
 			doStart();
@@ -149,7 +149,7 @@ public class OrinocoLexer implements ProblemListener {
 			e.printStackTrace();
 		}
 
-		lexerStream.end(getContext());
+		tokenDelegator.end(getContext());
 	}
 
 	private void doStart() throws IOException {
@@ -212,14 +212,14 @@ public class OrinocoLexer implements ProblemListener {
 				}
 				case CMD_IFDEF: // fall
 				case CMD_IFNDEF: {
-					if (lexerStream.skipPreProcessing()) {
-						lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
+					if (tokenDelegator.skipPreProcessing()) {
+						tokenDelegator.preProcessorCommandSkipped(originalOffset, originalLength, context);
 						break;
 					}
 					Matcher m = pattern_ifdef.matcher(jFlexLexer.getPreProcessorCommand());
 					if (m.find()) {
 						String name = m.group(1);
-						MacroSet macroSet = lexerStream.getMacroSet();
+						MacroSet macroSet = tokenDelegator.getMacroSet();
 						if (macroSet.containsKey(name)) {
 							if (type == OrinocoJFlexLexer.TokenType.CMD_IFDEF) {
 								preProcessorIfDefState.push(PreProcessorIfDefState.LexToElse);
@@ -275,15 +275,15 @@ public class OrinocoLexer implements ProblemListener {
 				}
 				case GLUED_WORD: // fall
 				case MACRO: {
-					if (lexerStream.skipPreProcessing()) {
-						lexerStream.preProcessorTokenSkipped(originalOffset, originalLength, context);
+					if (tokenDelegator.skipPreProcessing()) {
+						tokenDelegator.preProcessorTokenSkipped(originalOffset, originalLength, context);
 					} else {
 						if (jFlexLexer.macroHasArgs()) {
 							LightweightStringBuilder macroWithArgs = jFlexLexer.getMacroWithArgs();
 							char[] chars = macroWithArgs.getCharsReadOnly();
-							lexerStream.preProcessToken(chars, 0, macroWithArgs.length());
+							tokenDelegator.preProcessToken(chars, 0, macroWithArgs.length());
 						} else {
-							lexerStream.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+							tokenDelegator.preProcessToken(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 						}
 					}
 					break;
@@ -355,7 +355,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		lexerStream.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		tokenDelegator.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -373,12 +373,12 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(cmd.getCharsReadOnly(), 0, cmd.length());
 		}
-		if (lexerStream.skipPreProcessing()) {
-			lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
+		if (tokenDelegator.skipPreProcessing()) {
+			tokenDelegator.preProcessorCommandSkipped(originalOffset, originalLength, context);
 			updateOffsetsAfterMake();
 			return;
 		}
-		lexerStream.acceptPreProcessorCommand(command, cmd.getCharsReadOnly(), 0, cmd.length());
+		tokenDelegator.acceptPreProcessorCommand(command, cmd.getCharsReadOnly(), 0, cmd.length());
 		updateOffsetsAfterMake();
 	}
 
@@ -392,7 +392,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+		tokenDelegator.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -414,7 +414,7 @@ public class OrinocoLexer implements ProblemListener {
 				count++;
 			}
 		}
-		lexerStream.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context, count);
+		tokenDelegator.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context, count);
 		updateOffsetsAfterMake();
 	}
 
@@ -429,7 +429,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		lexerStream.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		tokenDelegator.acceptLocalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -443,7 +443,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		lexerStream.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		tokenDelegator.acceptGlobalVariable(id, preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -457,7 +457,7 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength,
+		tokenDelegator.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength,
 				context);
 		updateOffsetsAfterMake();
 	}
@@ -515,7 +515,7 @@ public class OrinocoLexer implements ProblemListener {
 				} catch (IOException ignore) {
 				}
 			}
-			lexerStream.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
+			tokenDelegator.acceptWhitespace(originalOffset, originalLength, preprocessedOffset, preprocessedLength, context);
 		} else {
 			preprocessedLength = 0;
 		}
