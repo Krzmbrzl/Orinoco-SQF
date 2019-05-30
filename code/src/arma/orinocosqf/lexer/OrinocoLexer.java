@@ -141,12 +141,15 @@ public class OrinocoLexer implements ProblemListener {
 	 * Starts the lexing process.
 	 */
 	public void start() {
+		lexerStream.begin(getContext());
+
 		try {
 			doStart();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
+		lexerStream.end(getContext());
 	}
 
 	private void doStart() throws IOException {
@@ -154,7 +157,7 @@ public class OrinocoLexer implements ProblemListener {
 			jFlexLexer.resetTokenOffsets();
 			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
 			if (type == null) {
-				throw new IllegalStateException(); //?
+				throw new IllegalStateException(); // ?
 			}
 			if (type == OrinocoJFlexLexer.TokenType.EOF) {
 				return;
@@ -171,7 +174,7 @@ public class OrinocoLexer implements ProblemListener {
 					continue;
 				}
 				switch (preProcessorIfDefState.peek()) {
-					case LexToElse: { //read tokens until an #else comes along
+					case LexToElse: { // read tokens until an #else comes along
 						if (type == OrinocoJFlexLexer.TokenType.CMD_ELSE) {
 							preProcessorIfDefState.pop();
 							preProcessorIfDefState.push(PreProcessorIfDefState.SkipElseBlock);
@@ -207,7 +210,7 @@ public class OrinocoLexer implements ProblemListener {
 					makeWhitespace();
 					break;
 				}
-				case CMD_IFDEF: //fall
+				case CMD_IFDEF: // fall
 				case CMD_IFNDEF: {
 					if (lexerStream.skipPreProcessing()) {
 						lexerStream.preProcessorCommandSkipped(originalOffset, originalLength, context);
@@ -242,12 +245,12 @@ public class OrinocoLexer implements ProblemListener {
 					break;
 				}
 				case CMD_ELSE: {
-					//todo report uneeded #else
+					// todo report uneeded #else
 					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.Else);
 					break;
 				}
 				case CMD_ENDIF: {
-					//todo report uneeded #endif
+					// todo report uneeded #endif
 					makePreProcessorCommandIfPreProcessingEnabled(PreProcessorCommand.EndIf);
 					break;
 				}
@@ -260,8 +263,8 @@ public class OrinocoLexer implements ProblemListener {
 					makeComment();
 					break;
 				}
-				case HEX_LITERAL: //fall
-				case INTEGER_LITERAL: //fall
+				case HEX_LITERAL: // fall
+				case INTEGER_LITERAL: // fall
 				case DEC_LITERAL: {
 					makeLiteral(OrinocoLexerSQFLiteralType.Number);
 					break;
@@ -270,7 +273,7 @@ public class OrinocoLexer implements ProblemListener {
 					makeLiteral(OrinocoLexerSQFLiteralType.String);
 					break;
 				}
-				case GLUED_WORD: //fall
+				case GLUED_WORD: // fall
 				case MACRO: {
 					if (lexerStream.skipPreProcessing()) {
 						lexerStream.preProcessorTokenSkipped(originalOffset, originalLength, context);
@@ -454,7 +457,8 @@ public class OrinocoLexer implements ProblemListener {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength, context);
+		lexerStream.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength,
+				context);
 		updateOffsetsAfterMake();
 	}
 
@@ -475,7 +479,7 @@ public class OrinocoLexer implements ProblemListener {
 	 */
 	public void acceptIncludedReader(@NotNull OrinocoReader reader) {
 		jFlexLexer.yypushStream(reader);
-		preprocessedLength = 0; //reset the length because something took the place of the most recent token
+		preprocessedLength = 0; // reset the length because something took the place of the most recent token
 	}
 
 	/**
@@ -490,7 +494,7 @@ public class OrinocoLexer implements ProblemListener {
 			throw new IllegalArgumentException(amount + "");
 		}
 
-		preprocessedOffset -= previousPreprocessedLength; //undo the previous preprocessed offset
+		preprocessedOffset -= previousPreprocessedLength; // undo the previous preprocessed offset
 
 		int oldOffset = originalOffset;
 		int oldLength = originalLength;
