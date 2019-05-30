@@ -35,11 +35,11 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	/**
 	 * The lexer that is being used to feed tokens into this preprocessor
 	 */
-	private OrinocoLexer lexer;
+	protected OrinocoLexer lexer;
 	/**
 	 * The {@link OrinocoTokenProcessor} to delegate method calls to
 	 */
-	private final OrinocoTokenProcessor processor;
+	protected final OrinocoTokenProcessor processor;
 
 	/**
 	 * The {@link MacroSet} of the current preprocessing run
@@ -191,8 +191,8 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	}
 
 	@Override
-	public void begin() {
-		this.processor.begin();
+	public void begin(@NotNull OrinocoLexerContext ctx) {
+		this.processor.begin(ctx);
 	}
 
 	@Override
@@ -230,8 +230,8 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	}
 
 	@Override
-	public void end() {
-		this.processor.end();
+	public void end(@NotNull OrinocoLexerContext ctx) {
+		this.processor.end(ctx);
 	}
 
 	@Override

@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public abstract class OrinocoTokenProcessorAdapter implements OrinocoTokenProcessor {
 
 	@Override
-	public void begin() {
+	public void begin(@NotNull OrinocoLexerContext ctx) {
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public abstract class OrinocoTokenProcessorAdapter implements OrinocoTokenProces
 	}
 
 	@Override
-	public void end() {
+	public void end(@NotNull OrinocoLexerContext ctx) {
 	}
 
 }

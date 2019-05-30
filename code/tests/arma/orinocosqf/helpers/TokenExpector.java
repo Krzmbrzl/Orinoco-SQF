@@ -89,8 +89,8 @@ public class TokenExpector implements OrinocoTokenDelegator {
 	}
 
 	@Override
-	public void begin() {
-		acceptFactory.begin();
+	public void begin(@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.begin(ctx);
 	}
 
 	@Override
@@ -165,8 +165,8 @@ public class TokenExpector implements OrinocoTokenDelegator {
 	}
 
 	@Override
-	public void end() {
-		acceptFactory.end();
+	public void end(@NotNull OrinocoLexerContext ctx) {
+		acceptFactory.end(ctx);
 	}
 
 	public static class AcceptedToken {
@@ -323,7 +323,7 @@ public class TokenExpector implements OrinocoTokenDelegator {
 		private final MacroSet macroSet = new MacroSet();
 
 		@Override
-		public void begin() {
+		public void begin(@NotNull OrinocoLexerContext ctx) {
 
 		}
 
@@ -403,7 +403,7 @@ public class TokenExpector implements OrinocoTokenDelegator {
 		}
 
 		@Override
-		public void end() {
+		public void end(@NotNull OrinocoLexerContext ctx) {
 
 		}
 
