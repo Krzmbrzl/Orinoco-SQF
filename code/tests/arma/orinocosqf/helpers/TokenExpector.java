@@ -306,13 +306,14 @@ public class TokenExpector implements OrinocoTokenDelegator {
 
 		@NotNull
 		public static AcceptedToken acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
-												  @NotNull String originalToken) {
+												  @NotNull String originalToken, int newlineCount) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.acceptComment);
 			t.putParameter("originalOffset", originalOffset);
 			t.putParameter("originalLength", originalLength);
 			t.putParameter("preprocessedOffset", preprocessedOffset);
 			t.putParameter("preprocessedLength", preprocessedLength);
 			t.putParameter("originalToken", originalToken);
+			t.putParameter("newlineCount", newlineCount);
 			return t;
 		}
 	}
@@ -393,7 +394,7 @@ public class TokenExpector implements OrinocoTokenDelegator {
 		public void acceptComment(int originalOffset, int originalLength, int preprocessedOffset, int preprocessedLength,
 								  @NotNull OrinocoLexerContext ctx, int newlineCount) {
 			q.add(AcceptedToken.acceptComment(originalOffset, originalLength, preprocessedOffset, preprocessedLength,
-					ctx.getTextBuffer().getText(originalOffset, originalLength)));
+					ctx.getTextBuffer().getText(originalOffset, originalLength), newlineCount));
 		}
 
 		@Override
