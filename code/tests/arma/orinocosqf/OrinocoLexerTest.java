@@ -1127,7 +1127,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 1, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1137,7 +1136,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 2, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1149,7 +1147,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 2, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1159,7 +1156,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 4, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1191,7 +1187,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 2, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1201,7 +1196,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 2, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1222,7 +1216,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 1, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
@@ -1243,7 +1236,6 @@ public class OrinocoLexerTest {
 		lexerFromText(input);
 
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		tokenFactory.acceptWhitespace(0, input.length(), 0, 1, lexer.getContext());
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start();
 		expector.assertTokensMatch();
