@@ -49,35 +49,35 @@ public class OrinocoLexer implements ProblemListener {
 		return SQFCommands.instance.getId(command);
 	}
 
-	private static final Pattern pattern_ifdef = Pattern.compile("#if[n]?def ([a-zA-Z0-9_$]+)");
+	protected static final Pattern pattern_ifdef = Pattern.compile("#if[n]?def ([a-zA-Z0-9_$]+)");
 
-	private OrinocoLexerContext context = new DefaultLexerContext();
+	protected OrinocoLexerContext context = new DefaultLexerContext();
 
-	private final OrinocoTokenDelegator tokenDelegator;
-	private int originalOffset = 0;
-	private int originalLength = 0;
-	private int preprocessedOffset = 0;
-	private int preprocessedLength = 0;
-	private int previousOriginalOffset = 0;
-	private int previousOriginalLength = 0;
-	private int previousPreprocessedOffset = 0;
-	private int previousPreprocessedLength = 0;
+	protected final OrinocoTokenDelegator tokenDelegator;
+	protected int originalOffset = 0;
+	protected int originalLength = 0;
+	protected int preprocessedOffset = 0;
+	protected int preprocessedLength = 0;
+	protected int previousOriginalOffset = 0;
+	protected int previousOriginalLength = 0;
+	protected int previousPreprocessedOffset = 0;
+	protected int previousPreprocessedLength = 0;
 
-	private final OrinocoJFlexLexer jFlexLexer;
-	private static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
-	private static int nextGlobalVarId = 0;
-	private final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
-	private int nextLocalVarId = 0;
+	protected final OrinocoJFlexLexer jFlexLexer;
+	protected static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
+	protected static int nextGlobalVarId = 0;
+	protected final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
+	protected int nextLocalVarId = 0;
 	/**
 	 * @see #getIdTransformer()
 	 */
-	private final VariableIdTransformer varIdTransformer = new MyVariableIdTransformer();
+	protected final VariableIdTransformer varIdTransformer = new MyVariableIdTransformer();
 	/**
 	 * @see #setPreprocessedResultWriter(Writer)
 	 */
-	private Writer preprocessedResultWriter;
+	protected Writer preprocessedResultWriter;
 
-	private enum PreProcessorIfDefState {
+	protected enum PreProcessorIfDefState {
 		/** This state occurs when #ifdef of #ifndef results in a true condition and everything before #else is lexed */
 		LexToElse,
 		/**
@@ -98,7 +98,7 @@ public class OrinocoLexer implements ProblemListener {
 	}
 
 	@NotNull
-	private final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
+	protected final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
 
 	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoTokenDelegator tokenDelegator) {
 		this.tokenDelegator = tokenDelegator;
@@ -152,7 +152,7 @@ public class OrinocoLexer implements ProblemListener {
 		tokenDelegator.end(getContext());
 	}
 
-	private void doStart() throws IOException {
+	protected void doStart() throws IOException {
 		while (true) {
 			jFlexLexer.resetTokenOffsets();
 			OrinocoJFlexLexer.TokenType type = jFlexLexer.advance();
@@ -329,7 +329,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * <li>{@link #preprocessedLength} is set to 0</li>
 	 * </ol>
 	 */
-	private void updateOffsetsAfterMake() {
+	protected void updateOffsetsAfterMake() {
 		previousOriginalOffset = originalOffset;
 		previousOriginalLength = originalLength;
 		previousPreprocessedOffset = preprocessedOffset;
@@ -351,7 +351,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 * @see OrinocoTokenDelegator#acceptLiteral(OrinocoLexerLiteralType, int, int, int, int, OrinocoLexerContext)
 	 */
-	private void makeLiteral(@NotNull OrinocoLexerSQFLiteralType type) throws IOException {
+	protected void makeLiteral(@NotNull OrinocoLexerSQFLiteralType type) throws IOException {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
@@ -368,7 +368,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @see OrinocoTokenDelegator#acceptPreProcessorCommand(PreProcessorCommand, char[], int, int)
 	 * @see OrinocoTokenDelegator#preProcessorCommandSkipped(int, int, OrinocoLexerContext)
 	 */
-	private void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) throws IOException {
+	protected void makePreProcessorCommandIfPreProcessingEnabled(@NotNull PreProcessorCommand command) throws IOException {
 		LightweightStringBuilder cmd = jFlexLexer.getPreProcessorCommand();
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(cmd.getCharsReadOnly(), 0, cmd.length());
@@ -388,7 +388,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 * @see OrinocoTokenDelegator#acceptWhitespace(int, int, int, int, OrinocoLexerContext)
 	 */
-	private void makeWhitespace() throws IOException {
+	protected void makeWhitespace() throws IOException {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
@@ -402,7 +402,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 * @see OrinocoTokenDelegator#acceptComment(int, int, int, int, OrinocoLexerContext, int)
 	 */
-	private void makeComment() throws IOException {
+	protected void makeComment() throws IOException {
 		char[] buffer = jFlexLexer.getBuffer();
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(buffer, jFlexLexer.yystart(), jFlexLexer.yylength());
@@ -425,7 +425,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 * @see OrinocoTokenDelegator#acceptLocalVariable(int, int, int, int, int, OrinocoLexerContext)
 	 */
-	private void makeLocalVariable(int id) throws IOException {
+	protected void makeLocalVariable(int id) throws IOException {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
@@ -439,7 +439,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @param id global variable id
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 */
-	private void makeGlobalVariable(int id) throws IOException {
+	protected void makeGlobalVariable(int id) throws IOException {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
@@ -453,7 +453,7 @@ public class OrinocoLexer implements ProblemListener {
 	 * @throws IOException because of {@link #preprocessedResultWriter}
 	 * @see OrinocoTokenDelegator#acceptCommand(int, int, int, int, int, OrinocoLexerContext)
 	 */
-	private void makeCommand() throws IOException {
+	protected void makeCommand() throws IOException {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
@@ -547,7 +547,7 @@ public class OrinocoLexer implements ProblemListener {
 	/**
 	 * @see OrinocoLexer#getIdTransformer()
 	 */
-	private class MyVariableIdTransformer extends VariableIdTransformer {
+	protected class MyVariableIdTransformer extends VariableIdTransformer {
 
 		public MyVariableIdTransformer() {
 			super(localVarSet, globalVarSet);
@@ -567,7 +567,7 @@ public class OrinocoLexer implements ProblemListener {
 	/**
 	 * @see OrinocoLexer#setContext(OrinocoLexerContext)
 	 */
-	private class DefaultLexerContext implements OrinocoLexerContext {
+	protected class DefaultLexerContext implements OrinocoLexerContext {
 
 		@Override
 		public @NotNull String getCommand(int id) throws UnknownIdException {
