@@ -574,9 +574,9 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 			if (includeFle == null) {
 				lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Couldn't resolve path \"" + includePath + "\"", pathStartOffset,
 						includePath.length() + 2, -1);
+			} else {
+				lexer.acceptIncludedReader(OrinocoReader.fromStream(includeFle.getStream(), Charset.forName("utf-8")));
 			}
-
-			lexer.acceptIncludedReader(OrinocoReader.fromStream(includeFle.getStream(), Charset.forName("utf-8")));
 		} catch (InvalidPathException e) {
 			lexer.problemEncountered(Problems.ERROR_INVALID_PATH, "Invalid path \"" + includePath.toString() + "\": " + e.getMessage(),
 					pathStartOffset, includePath.length() + 2, -1);
