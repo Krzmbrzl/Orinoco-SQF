@@ -71,11 +71,12 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	public OrinocoPreProcessor(@NotNull OrinocoTokenProcessor processor, @NotNull ArmaFilesystem fileSystem,
 			@NotNull OrinocoPreprocessorConfiguration configuration) {
 		this.processor = processor;
-		this.fileSystem = fileSystem;
 		this.configuration = configuration;
 		this.macroSet = new MacroSet();
 		this.segmentParser = new BodySegmentParser(lexer);
 		this.dummyMacro = new PreProcessorMacro(macroSet, "__________________", Collections.emptyList(), new TextSegment(""));
+
+		setFileSystem(fileSystem);
 	}
 
 	@Override
@@ -266,6 +267,15 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	@NotNull
 	public MacroSet getMacroSet() {
 		return this.macroSet;
+	}
+
+	/**
+	 * Sets the {@link ArmaFilesystem} used by this preprocessor in order to resolve includes
+	 * 
+	 * @param system The new system to use form now on
+	 */
+	public void setFileSystem(@NotNull ArmaFilesystem system) {
+		this.fileSystem = system;
 	}
 
 	/**
