@@ -1,12 +1,12 @@
 package arma.orinocosqf.util;
 
+import arma.orinocosqf.CaseInsentiveKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import arma.orinocosqf.CaseInsentiveKey;
-
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 /**
  * @author K
@@ -54,6 +54,25 @@ public class CaseInsensitiveHashSet<Cik extends CaseInsentiveKey> implements Ite
 			}
 		}
 		return true;
+	}
+
+	@Nullable
+	public Cik computeIfKeyAbsent(@NotNull CharSequence cs, @NotNull Function<CharSequence, Cik> ifAbsent) {
+		Group g = getGroup(cs);
+		for (Object value : g.list) {
+			Cik next = (Cik) value;
+			if (keyIsEqual(next, cs)) {
+				return next;
+			}
+		}
+		Cik cik = ifAbsent.apply(cs);
+		if (cik == null) {
+			return null;
+		}
+		g.list.add(cik);
+		entryCount++;
+		maybeGrow();
+		return cik;
 	}
 
 	@Nullable

@@ -29,11 +29,7 @@ public abstract class HashableCharSequence implements CharSequence {
 	}
 
 	public static char[] asChars(@NotNull CharSequence cs) {
-		char[] chars = new char[cs.length()];
-		for (int i = 0; i < cs.length(); i++) {
-			chars[i] = cs.charAt(i);
-		}
-		return chars;
+		return TextHelper.asChars(cs);
 	}
 
 	protected final int hashcode;

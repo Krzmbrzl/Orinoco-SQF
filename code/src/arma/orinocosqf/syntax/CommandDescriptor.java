@@ -1,5 +1,6 @@
 package arma.orinocosqf.syntax;
 
+import arma.orinocosqf.CaseInsentiveKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * @author Kayler
  * @since 06/11/2016.
  */
-public class CommandDescriptor {
+public class CommandDescriptor implements CaseInsentiveKey {
 	/**
 	 * @see CommandXMLInputStream#CommandXMLInputStream(String)
 	 */
@@ -136,5 +137,11 @@ public class CommandDescriptor {
 				", deprecated=" + deprecated +
 				", uncertain=" + uncertain +
 				'}';
+	}
+
+	@Override
+	@NotNull
+	public CharSequence getKey() {
+		return commandName;
 	}
 }
