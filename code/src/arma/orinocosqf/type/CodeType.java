@@ -21,7 +21,7 @@ public class CodeType implements ValueType {
 
 	private final ValueType returnType;
 	private final ExpandedValueType expandedValueType;
-	private final List<ValueType> polymorphTypes = new ArrayList<>();
+	private final ArrayList<ValueType> polymorphTypes = new ArrayList<>();
 
 	public CodeType(@NotNull ValueType returnType) {
 		this.returnType = returnType;
@@ -100,5 +100,11 @@ public class CodeType implements ValueType {
 	@Override
 	public boolean equals(Object obj) {
 		return obj_equals(obj);
+	}
+
+	@Override
+	public void memCompact() {
+		expandedValueType.memCompact();
+		polymorphTypes.trimToSize();
 	}
 }

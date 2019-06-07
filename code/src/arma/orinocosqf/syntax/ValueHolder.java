@@ -1,6 +1,7 @@
 package arma.orinocosqf.syntax;
 
 import arma.orinocosqf.type.ValueType;
+import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * @author Kayler
  * @since 03/08/2017
  */
-public interface ValueHolder {
+public interface ValueHolder extends MemCompact {
 	/**
 	 * @return the {@link ValueType} of the value
 	 */

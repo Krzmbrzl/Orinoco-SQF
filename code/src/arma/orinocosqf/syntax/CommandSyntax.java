@@ -1,5 +1,6 @@
 package arma.orinocosqf.syntax;
 
+import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,14 +13,14 @@ import java.util.List;
  * @author Kayler
  * @since 06/11/2016
  */
-public class CommandSyntax {
-	private ReturnValueHolder returnValue;
-	private Param prefixParam;
-	private Param postfixParam;
+public class CommandSyntax implements MemCompact {
+	private final ReturnValueHolder returnValue;
+	private final Param leftParam;
+	private final Param rightParam;
 
-	public CommandSyntax(@Nullable Param prefixParam, @Nullable Param postfixParam, @NotNull ReturnValueHolder returnValue) {
-		this.prefixParam = prefixParam;
-		this.postfixParam = postfixParam;
+	public CommandSyntax(@Nullable Param leftParam, @Nullable Param rightParam, @NotNull ReturnValueHolder returnValue) {
+		this.leftParam = leftParam;
+		this.rightParam = rightParam;
 		this.returnValue = returnValue;
 	}
 
@@ -36,17 +37,17 @@ public class CommandSyntax {
 	}
 
 	@Nullable
-	public Param getPrefixParam() {
-		return prefixParam;
+	public Param getLeftParam() {
+		return leftParam;
 	}
 
 	@Nullable
-	public Param getPostfixParam() {
-		return postfixParam;
+	public Param getRightParam() {
+		return rightParam;
 	}
 
 	/**
-	 * Will traverse all parameters (both prefix and postfix). Note that this will also fully traverse the elements in arrays that are
+	 * Will traverse all parameters (both left and right). Note that this will also fully traverse the elements in arrays that are
 	 * parameters.
 	 *
 	 * @return an iterable that will iterate the parameters in order.
@@ -54,11 +55,11 @@ public class CommandSyntax {
 	@NotNull
 	public Iterable<Param> getAllParams() {
 		List<Param> list = new LinkedList<>();
-		if (prefixParam != null) {
-			addAllParamsFor(list, prefixParam);
+		if (leftParam != null) {
+			addAllParamsFor(list, leftParam);
 		}
-		if (postfixParam != null) {
-			addAllParamsFor(list, postfixParam);
+		if (rightParam != null) {
+			addAllParamsFor(list, rightParam);
 		}
 
 		return list;
@@ -83,11 +84,11 @@ public class CommandSyntax {
 	@NotNull
 	public Iterable<ArrayParam> getAllArrayParams() {
 		List<ArrayParam> list = new LinkedList<>();
-		if (prefixParam != null && prefixParam instanceof ArrayParam) {
-			addAllArrayParamsFor(list, (ArrayParam) prefixParam);
+		if (leftParam != null && leftParam instanceof ArrayParam) {
+			addAllArrayParamsFor(list, (ArrayParam) leftParam);
 		}
-		if (postfixParam != null && postfixParam instanceof ArrayParam) {
-			addAllArrayParamsFor(list, (ArrayParam) postfixParam);
+		if (rightParam != null && rightParam instanceof ArrayParam) {
+			addAllArrayParamsFor(list, (ArrayParam) rightParam);
 		}
 		return list;
 	}
@@ -100,5 +101,16 @@ public class CommandSyntax {
 				addAllArrayParamsFor(params, subArrayParam);
 			}
 		}
+	}
+
+	@Override
+	public void memCompact() {
+		if (leftParam != null) {
+			leftParam.memCompact();
+		}
+		if (rightParam != null) {
+			rightParam.memCompact();
+		}
+		returnValue.memCompact();
 	}
 }

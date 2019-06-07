@@ -1,5 +1,6 @@
 package arma.orinocosqf.type;
 
+import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,20 +10,21 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- @author K
- @since 02/12/2019 */
-public interface ValueType {
+ * @author K
+ * @since 02/12/2019
+ */
+public interface ValueType extends MemCompact {
 	/**
-	 * This method will compare {@link ExpandedValueType} instances returned from {@link ValueType#getExpanded()} and
-	 * {@link #getPolymorphicTypes()}.
+	 * This method will compare {@link ExpandedValueType} instances returned from {@link ValueType#getExpanded()} and {@link
+	 * #getPolymorphicTypes()}.
 	 * <p>
-	 * For comparing {@link ExpandedValueType} instances, type2's {@link ExpandedValueType} must have >= number
-	 * of elements to type1's number of elements. Also, each element type must match at each index. If an array
-	 * type is in the array type, this comparison will be used recursively.
+	 * For comparing {@link ExpandedValueType} instances, type2's {@link ExpandedValueType} must have >= number of elements to type1's
+	 * number of elements. Also, each element type must match at each index. If an array type is in the array type, this comparison will be
+	 * used recursively.
 	 * <p>
-	 * If an allowed type is equal to {@link BaseType#ANYTHING} or <code>type</code> is {@link BaseType#ANYTHING},
-	 * the comparison of {@link ValueType} instances will always be true. Also, this method will treat {@link BaseType#_VARIABLE}
-	 * like it is {@link BaseType#ANYTHING}.
+	 * If an allowed type is equal to {@link BaseType#ANYTHING} or <code>type</code> is {@link BaseType#ANYTHING}, the comparison of {@link
+	 * ValueType} instances will always be true. Also, this method will treat {@link BaseType#_VARIABLE} like it is {@link
+	 * BaseType#ANYTHING}.
 	 *
 	 * @param type1 type
 	 * @param type2 other type to check
@@ -230,6 +232,7 @@ public interface ValueType {
 	@NotNull
 	List<ValueType> getPolymorphicTypes();
 
+
 	/**
 	 * @return true if this is {@link BaseType#_VARIABLE} || {@link BaseType#ANYTHING}
 	 */
@@ -239,8 +242,8 @@ public interface ValueType {
 
 
 	/**
-	 * A String that is used for comparison in {@link #isHardEqual(ValueType)}. You can think of this as like a "class name"
-	 * where a class is equal to another class by checking it's full name (java.lang.String for example).
+	 * A String that is used for comparison in {@link #isHardEqual(ValueType)}. You can think of this as like a "class name" where a class
+	 * is equal to another class by checking it's full name (java.lang.String for example).
 	 *
 	 * @return String
 	 */
@@ -263,12 +266,12 @@ public interface ValueType {
 	}
 
 	/**
-	 * This is different from {@link #typeEquivalent(ValueType)} in that this is called inside {@link #typeEquivalent(ValueType)}
-	 * to check when {@link BaseType} are equal. Default implementation checks if this==other or this.getType.equals(other.getType)
-	 * or {@link #getPolymorphicTypes()} contains other.
+	 * This is different from {@link #typeEquivalent(ValueType)} in that this is called inside {@link #typeEquivalent(ValueType)} to check
+	 * when {@link BaseType} are equal. Default implementation checks if this==other or this.getType.equals(other.getType) or {@link
+	 * #getPolymorphicTypes()} contains other.
 	 * <p>
-	 * You can override this method for where you may be wrapping a {@link BaseType} instance or you don't want to
-	 * compare by {@link #getType()}
+	 * You can override this method for where you may be wrapping a {@link BaseType} instance or you don't want to compare by {@link
+	 * #getType()}
 	 *
 	 * @return true if this type is equal to other.
 	 */
@@ -279,6 +282,7 @@ public interface ValueType {
 
 	/**
 	 * Use this method for overriding Object.equals() (You can't override it with a default method in an interface)
+	 *
 	 * @return {@link #isHardEqual(ValueType)} result, or false if obj isn't a {@link ValueType} instance
 	 */
 
@@ -439,14 +443,12 @@ public interface ValueType {
 		public static final BaseType WITH = new BaseType("WITH", "WithType");
 
 		/**
-		 * Not an actual Arma 3 data type.
-		 * This is for Arma Intellij Plugin to signify a variable is being used
-		 * and that the type is indeterminate with static type checking.
+		 * Not an actual Arma 3 data type. This is for Arma Intellij Plugin to signify a variable is being used and that the type is
+		 * indeterminate with static type checking.
 		 */
 		public static final BaseType _VARIABLE = new BaseType("_VARIABLE", "VARIABLE");
 		/**
-		 * Not an actual Arma 3 data type.
-		 * This is for Arma Intellij Plugin to signify a type couldn't be determined because of an error.
+		 * Not an actual Arma 3 data type. This is for Arma Intellij Plugin to signify a type couldn't be determined because of an error.
 		 */
 		public static final BaseType _ERROR = new BaseType("_ERROR", "Generic Error");
 
@@ -511,6 +513,11 @@ public interface ValueType {
 		@Override
 		public List<ValueType> getPolymorphicTypes() {
 			return new ArrayList<>(0); //list should be mutable according to api, but we don't want the base types to be polymorphic
+		}
+
+		@Override
+		public void memCompact() {
+			getExpanded().memCompact();
 		}
 
 		@NotNull

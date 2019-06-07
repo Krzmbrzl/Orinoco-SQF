@@ -32,7 +32,7 @@ class SQFCommandSyntaxXMLLoader {
 
 		boolean deprecated, uncertain;
 
-		List<CommandSyntax> syntaxList;
+		ArrayList<CommandSyntax> syntaxList;
 
 		Element rootElement = document.getDocumentElement();
 		commandName = rootElement.getAttribute("name");
@@ -78,10 +78,12 @@ class SQFCommandSyntaxXMLLoader {
 			syntaxList.add(new CommandSyntax(params[PREFIX], params[POSTFIX], returnValue));
 		}
 
+		syntaxList.trimToSize();
 		CommandDescriptor c = new CommandDescriptor(commandName, syntaxList, gameVersion, GameNameMap.getInstance().getGame(GameNameMap.LookupType.LINK_PREFIX, gameName));
 		c.setDeprecated(deprecated);
 		c.setUncertain(uncertain);
 
+		c.memCompact();
 		return c;
 	}
 
@@ -192,7 +194,7 @@ class SQFCommandSyntaxXMLLoader {
 	}
 
 	private static ArrayParam getArrayParam(@NotNull Element arrayParamElement, boolean getCommandDescriptions) {
-		List<Param> paramList = new ArrayList<>();
+		ArrayList<Param> paramList = new ArrayList<>();
 		boolean unbounded, optional;
 
 		unbounded = valueOfTF(arrayParamElement.getAttribute("unbounded"));
@@ -210,7 +212,8 @@ class SQFCommandSyntaxXMLLoader {
 			paramList.set(order, getParam(paramElement, getCommandDescriptions));
 		}
 
-		return new ArrayParam(unbounded, paramList, optional);
+		ArrayParam ap = new ArrayParam(unbounded, paramList, optional);
+		return ap;
 
 	}
 

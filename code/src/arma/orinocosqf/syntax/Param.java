@@ -1,6 +1,7 @@
 package arma.orinocosqf.syntax;
 
 import arma.orinocosqf.type.ValueType;
+import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
  * @author Kayler
  * @since 06/11/2016
  */
-public class Param extends BasicValueHolder {
+public class Param extends BasicValueHolder implements MemCompact {
 
 	private final String name;
 
@@ -51,5 +52,10 @@ public class Param extends BasicValueHolder {
 				",type=" + getType() +
 				", polyTypes=" + getType().getPolymorphicTypes() +
 				"}";
+	}
+
+	@Override
+	public void memCompact() {
+		getType().memCompact();
 	}
 }

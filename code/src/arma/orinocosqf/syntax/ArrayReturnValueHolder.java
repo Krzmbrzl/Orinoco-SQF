@@ -3,6 +3,7 @@ package arma.orinocosqf.syntax;
 import arma.orinocosqf.type.ValueType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +27,14 @@ public class ArrayReturnValueHolder extends ReturnValueHolder implements ArrayVa
 	@NotNull
 	public List<ReturnValueHolder> getValueHolders() {
 		return values;
+	}
+
+	@Override
+	public void memCompact() {
+		super.memCompact();
+		if (values instanceof ArrayList) {
+			((ArrayList<ReturnValueHolder>) values).trimToSize();
+		}
 	}
 
 	@NotNull

@@ -51,4 +51,12 @@ public class BasicValueHolder implements ValueHolder {
 	public List<String> getLiterals() {
 		return literals;
 	}
+
+	@Override
+	public void memCompact() {
+		if (literals instanceof ArrayList) {
+			((ArrayList<String>) literals).trimToSize();
+		}
+		type.memCompact();
+	}
 }

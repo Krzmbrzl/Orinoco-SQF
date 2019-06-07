@@ -15,7 +15,7 @@ import java.util.List;
 public class PolymorphicWrapperValueType implements ValueType {
 	@NotNull
 	private final ValueType valueType;
-	private final List<ValueType> polymorphicTypes = new ArrayList<>();
+	private final ArrayList<ValueType> polymorphicTypes = new ArrayList<>();
 	private final ExpandedValueType expandedValueType;
 
 	public PolymorphicWrapperValueType(@NotNull ValueType valueType) {
@@ -73,4 +73,10 @@ public class PolymorphicWrapperValueType implements ValueType {
 	}
 
 
+	@Override
+	public void memCompact() {
+		valueType.memCompact();
+		expandedValueType.memCompact();
+		polymorphicTypes.trimToSize();
+	}
 }

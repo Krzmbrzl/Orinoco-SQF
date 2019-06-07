@@ -1,6 +1,7 @@
 package arma.orinocosqf.syntax;
 
 import arma.orinocosqf.CaseInsentiveKey;
+import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author Kayler
  * @since 06/11/2016.
  */
-public class CommandDescriptor implements CaseInsentiveKey {
+public class CommandDescriptor implements CaseInsentiveKey, MemCompact {
 	/**
 	 * @see CommandXMLInputStream#CommandXMLInputStream(String)
 	 */
@@ -143,5 +144,15 @@ public class CommandDescriptor implements CaseInsentiveKey {
 	@NotNull
 	public CharSequence getKey() {
 		return commandName;
+	}
+
+	@Override
+	public void memCompact() {
+		if (syntaxList instanceof ArrayList) {
+			((ArrayList<CommandSyntax>) syntaxList).trimToSize();
+		}
+		for (CommandSyntax cs : syntaxList) {
+			cs.memCompact();
+		}
 	}
 }
