@@ -1,9 +1,8 @@
 package arma.orinocosqf.util;
 
+import arma.orinocosqf.Command;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import arma.orinocosqf.Command;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,12 +54,21 @@ public class CommandSet<C extends Command> {
 		return Collections.binarySearch(commands, commandName, DYNAMIC_COMPARATOR);
 	}
 
+	@Nullable
+	public C getCommandInstance(@NotNull String commandName) {
+		int i = Collections.binarySearch(commands, commandName, DYNAMIC_COMPARATOR);
+		if (i < 0) {
+			return null;
+		}
+		return commands.get(i);
+	}
+
 	public int getId(@NotNull Command command) {
 		return Collections.binarySearch(commands, command, COMPARATOR);
 	}
 
 	@Nullable
-	public String getCommandById(int id) {
+	public String getCommandNameById(int id) {
 		C c = commands.get(id);
 		if (c == null) {
 			return null;

@@ -3,16 +3,13 @@ package arma.orinocosqf.sqf;
 import arma.orinocosqf.IdTransformer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.util.CommandSet;
-
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
+ * Holds all {@link SQFCommand} instances
  * @author K
  * @since 5/8/19
  */
@@ -20,29 +17,26 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 	public static final SQFCommands instance = new SQFCommands();
 
-	static {
-		ArrayList<SQFCommand> arrayList = (ArrayList<SQFCommand>) instance.commands;
-		InputStream stm = SQFCommands.class.getResourceAsStream("/arma/orinocosqf/sqfcommands.list");
-		Scanner scanner = new Scanner(new InputStreamReader(stm, StandardCharsets.UTF_8));
-		while (scanner.hasNextLine()) {
-			arrayList.add(new SQFCommand(scanner.nextLine()));
-		}
-
-		scanner.close();
-
-		stm = SQFCommands.class.getResourceAsStream("/arma/orinocosqf/sqfcommands_operators.list");
-		scanner = new Scanner(new InputStreamReader(stm, StandardCharsets.UTF_8));
-		while (scanner.hasNextLine()) {
-			arrayList.add(new SQFCommand(scanner.nextLine()));
-		}
-		scanner.close();
-
-		arrayList.trimToSize();
-		arrayList.sort(COMPARATOR);
-	}
-
 	private SQFCommands() {
-		super(new ArrayList<>(2048));
+		super(new ArrayList<>(3000));
+
+		Scanner commandsListScan = new Scanner(System.in);//todo
+		while (commandsListScan.hasNextLine()) {
+			String line = commandsListScan.nextLine().trim();
+			if (line.length() == 0) {
+				continue;
+			}
+			if (line.charAt(0) == '#') {
+				continue;
+			}
+			SQFCommand d = SQFCommand.getCommandFromFile(line);
+			if (d == null) {
+				throw new IllegalStateException(line);
+			}
+			this.commands.add(d);
+		}
+		((ArrayList) instance.commands).trimToSize();
+		this.commands.sort(COMPARATOR);
 	}
 
 	@NotNull
@@ -63,4 +57,5 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 		}
 		return id;
 	}
+
 }

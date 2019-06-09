@@ -1,5 +1,6 @@
 package arma.orinocosqf.syntax;
 
+import arma.orinocosqf.sqf.SQFCommandSyntax;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

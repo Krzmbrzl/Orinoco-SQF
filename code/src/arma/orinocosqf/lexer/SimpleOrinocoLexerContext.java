@@ -4,7 +4,6 @@ import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.sqf.SQFCommands;
 import arma.orinocosqf.util.SimpleTextBuffer;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +29,7 @@ public class SimpleOrinocoLexerContext implements OrinocoLexerContext {
 
 	@Override
 	public @NotNull String getCommand(int id) throws UnknownIdException {
-		String c = SQFCommands.instance.getCommandById(id);
+		String c = SQFCommands.instance.getCommandNameById(id);
 		if (c == null) {
 			throw new UnknownIdException(id + "");
 		}

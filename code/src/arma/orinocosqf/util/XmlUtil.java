@@ -1,4 +1,4 @@
-package arma.orinocosqf.syntax;
+package arma.orinocosqf.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.*;

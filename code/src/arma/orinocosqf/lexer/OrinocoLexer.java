@@ -571,7 +571,7 @@ public class OrinocoLexer implements ProblemListener {
 
 		@Override
 		public @NotNull String getCommand(int id) throws UnknownIdException {
-			String c = SQFCommands.instance.getCommandById(id);
+			String c = SQFCommands.instance.getCommandNameById(id);
 			if (c == null) {
 				throw new UnknownIdException(id + "");
 			}

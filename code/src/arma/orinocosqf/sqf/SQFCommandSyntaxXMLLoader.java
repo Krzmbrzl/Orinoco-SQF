@@ -1,8 +1,10 @@
-package arma.orinocosqf.syntax;
+package arma.orinocosqf.sqf;
 
+import arma.orinocosqf.syntax.*;
 import arma.orinocosqf.type.CodeType;
 import arma.orinocosqf.type.ValueType;
 import arma.orinocosqf.type.ValueType.BaseType;
+import arma.orinocosqf.util.XmlUtil;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,7 +21,7 @@ import java.util.List;
  */
 class SQFCommandSyntaxXMLLoader {
 	@NotNull
-	public static SQFCommandDescriptor importFromStream(@NotNull CommandXMLInputStream is, boolean getCommandDescriptions) throws Exception {
+	public static SQFCommand importFromStream(@NotNull CommandXMLInputStream is, boolean getCommandDescriptions) throws Exception {
 		Document document;
 
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -79,7 +81,7 @@ class SQFCommandSyntaxXMLLoader {
 		}
 
 		syntaxList.trimToSize();
-		SQFCommandDescriptor c = new SQFCommandDescriptor(commandName, syntaxList, gameVersion, GameNameMap.getInstance().getGame(GameNameMap.LookupType.LINK_PREFIX, gameName));
+		SQFCommand c = new SQFCommand(commandName, syntaxList, gameVersion, GameNameMap.getInstance().getGame(GameNameMap.LookupType.LINK_PREFIX, gameName));
 		c.setDeprecated(deprecated);
 		c.setUncertain(uncertain);
 

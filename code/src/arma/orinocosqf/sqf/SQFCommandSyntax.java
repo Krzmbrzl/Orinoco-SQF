@@ -1,5 +1,9 @@
-package arma.orinocosqf.syntax;
+package arma.orinocosqf.sqf;
 
+import arma.orinocosqf.syntax.ArrayParam;
+import arma.orinocosqf.syntax.CommandSyntax;
+import arma.orinocosqf.syntax.Param;
+import arma.orinocosqf.syntax.ReturnValueHolder;
 import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

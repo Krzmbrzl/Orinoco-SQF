@@ -1,5 +1,6 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.syntax.BIGame;
 import arma.orinocosqf.syntax.CommandSyntax;
 import org.jetbrains.annotations.NotNull;
 
@@ -96,4 +97,10 @@ public interface Command<Syntax extends CommandSyntax> {
 	 * @return true if the command is deprecated, false if it isn't
 	 */
 	boolean isDeprecated();
+
+	/**
+	 * @return {@link BIGame} that describes that this command was introduced in
+	 */
+	@NotNull
+	BIGame getGameIntroducedIn();
 }
