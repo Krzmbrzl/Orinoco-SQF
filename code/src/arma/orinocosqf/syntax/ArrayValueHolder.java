@@ -9,12 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A type of {@link ValueHolder} but for arrays
+ *
  * @author Kayler
  * @since 02/27/2017
  */
 public interface ArrayValueHolder extends ValueHolder {
-	@NotNull
-	static String getArrayDataValueDisplayText(@NotNull ArrayValueHolder arrayDataValue, @NotNull StringBuilder sb) {
+	/**
+	 * Show the {@link ArrayValueHolder} as a string presentable to the user
+	 *
+	 * @param arrayDataValue instance to use
+	 * @param sb string builder to append the result to
+	 */
+	static void getArrayDataValueDisplayText(@NotNull ArrayValueHolder arrayDataValue, @NotNull StringBuilder sb) {
 		sb.append("[");
 		int i = 0;
 		for (ValueHolder valueHolder : arrayDataValue.getValueHolders()) {
@@ -32,7 +39,6 @@ public interface ArrayValueHolder extends ValueHolder {
 			sb.append(" ...");
 		}
 		sb.append("]");
-		return sb.toString();
 	}
 
 	boolean hasUnboundedParams();

@@ -1,9 +1,8 @@
 package arma.orinocosqf.sqf;
 
-import org.jetbrains.annotations.NotNull;
-
 import arma.orinocosqf.Command;
-import arma.orinocosqf.CommandSyntax;
+import arma.orinocosqf.syntax.CommandSyntax;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 

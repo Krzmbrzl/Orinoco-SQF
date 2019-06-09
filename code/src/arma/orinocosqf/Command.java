@@ -1,5 +1,6 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.syntax.CommandSyntax;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  * @author K
  * @since 02/20/2019
  */
-public interface Command {
+public interface Command<Syntax extends CommandSyntax> {
 	/** @return the camelCase name of the command */
 	@NotNull
 	String getName();
@@ -83,10 +84,16 @@ public interface Command {
 	 * @return a list of all syntaxes for this command
 	 */
 	@NotNull
-	List<CommandSyntax> getSyntaxList();
+	List<Syntax> getSyntaxList();
 
 	/**
 	 * @return The precedence of this command. (Higher means higher precedence)
 	 */
 	int getPrecedence();
+
+
+	/**
+	 * @return true if the command is deprecated, false if it isn't
+	 */
+	boolean isDeprecated();
 }

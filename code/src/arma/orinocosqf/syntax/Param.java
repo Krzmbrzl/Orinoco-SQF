@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class Param extends BasicValueHolder implements MemCompact {
 
+	/** {@link #getName()} */
 	private final String name;
 
 	/**

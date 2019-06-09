@@ -1,6 +1,7 @@
 package arma.orinocosqf.syntax;
 
 import arma.orinocosqf.CaseInsentiveKey;
+import arma.orinocosqf.Command;
 import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,12 +14,12 @@ import java.util.List;
  * @author Kayler
  * @since 06/11/2016.
  */
-public class CommandDescriptor implements CaseInsentiveKey, MemCompact {
+public class SQFCommandDescriptor implements CaseInsentiveKey, Command<SQFCommandSyntax>, MemCompact {
 	/**
 	 * @see CommandXMLInputStream#CommandXMLInputStream(String)
 	 */
 	@Nullable
-	public static CommandDescriptor getDescriptorFromFile(@NotNull String commandName) {
+	public static SQFCommandDescriptor getDescriptorFromFile(@NotNull String commandName) {
 		try {
 			return SQFCommandSyntaxXMLLoader.importFromStream(new CommandXMLInputStream(commandName), false);
 		} catch (Exception e) {
@@ -32,37 +33,113 @@ public class CommandDescriptor implements CaseInsentiveKey, MemCompact {
 		}
 	}
 
-	private final List<CommandSyntax> syntaxList;
+	/** {@link #getSyntaxList()} */
+	private final List<SQFCommandSyntax> syntaxList;
+	/** {@link #getCommandName()} */
 	private final String commandName;
+	/** {@link #getGameVersion()} */
 	private String gameVersion;
+	/** {@link #getGameIntroducedIn()} */
 	private final BIGame game;
 
+	/** {@link #setDeprecated(boolean)} */
 	private boolean deprecated = false;
-
+	/** {@link #setUncertain(boolean)} */
 	private boolean uncertain = false;
 
-	public CommandDescriptor(@NotNull String commandName) {
+	public SQFCommandDescriptor(@NotNull String commandName) {
 		this.commandName = commandName;
 		syntaxList = Collections.emptyList();
 		game = BIGame.UNKNOWN;
 	}
 
-	public CommandDescriptor(@NotNull String commandName,
-							 @NotNull List<CommandSyntax> syntaxList,
-							 @NotNull String gameVersion,
-							 @NotNull BIGame game) {
+	public SQFCommandDescriptor(@NotNull String commandName,
+								@NotNull List<SQFCommandSyntax> syntaxList,
+								@NotNull String gameVersion,
+								@NotNull BIGame game) {
 		this.syntaxList = syntaxList;
 		this.commandName = commandName;
 		this.gameVersion = gameVersion;
 		this.game = game;
 	}
 
+	@Override
+	@NotNull
+	public String getName() {
+		return commandName;
+	}
+
+	@Override
+	public boolean isStrictlyNular() {
+		for (SQFCommandSyntax cs : syntaxList) {
+			if (cs.getLeftParam() != null || cs.getRightParam() != null) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean canBeNular() {
+		for (SQFCommandSyntax cs : syntaxList) {
+			if (cs.getLeftParam() == null && cs.getRightParam() == null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isStrictlyBinary() {
+		for (SQFCommandSyntax cs : syntaxList) {
+			if (cs.getLeftParam() == null || cs.getRightParam() == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean canBeBinary() {
+		for (SQFCommandSyntax cs : syntaxList) {
+			if (cs.getLeftParam() != null && cs.getRightParam() != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isStrictlyUnary() {
+		for (SQFCommandSyntax cs : syntaxList) {
+			if (cs.getLeftParam() != null || cs.getRightParam() == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean canBeUnary() {
+		for (SQFCommandSyntax cs : syntaxList) {
+			if (cs.getLeftParam() == null && cs.getRightParam() != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
-	 * @return a list of {@link CommandSyntax} instances for this command
+	 * @return a list of {@link SQFCommandSyntax} instances for this command
 	 */
 	@NotNull
-	public List<CommandSyntax> getSyntaxList() {
+	public List<SQFCommandSyntax> getSyntaxList() {
 		return syntaxList;
+	}
+
+	@Override
+	public int getPrecedence() {
+		throw new UnsupportedOperationException("todo");
 	}
 
 	/**
@@ -89,9 +166,7 @@ public class CommandDescriptor implements CaseInsentiveKey, MemCompact {
 		return gameVersion;
 	}
 
-	/**
-	 * @return true if the command is deprecated, false if it isn't
-	 */
+	@Override
 	public boolean isDeprecated() {
 		return deprecated;
 	}
@@ -118,7 +193,7 @@ public class CommandDescriptor implements CaseInsentiveKey, MemCompact {
 	@NotNull
 	public Iterable<String> getAllLiterals() {
 		List<String> all = new ArrayList<>();
-		for (CommandSyntax syntax : syntaxList) {
+		for (SQFCommandSyntax syntax : syntaxList) {
 			for (Param p : syntax.getAllParams()) {
 				all.addAll(p.getLiterals());
 			}
@@ -149,9 +224,9 @@ public class CommandDescriptor implements CaseInsentiveKey, MemCompact {
 	@Override
 	public void memCompact() {
 		if (syntaxList instanceof ArrayList) {
-			((ArrayList<CommandSyntax>) syntaxList).trimToSize();
+			((ArrayList<SQFCommandSyntax>) syntaxList).trimToSize();
 		}
-		for (CommandSyntax cs : syntaxList) {
+		for (SQFCommandSyntax cs : syntaxList) {
 			cs.memCompact();
 		}
 	}

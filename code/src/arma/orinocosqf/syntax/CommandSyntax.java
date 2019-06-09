@@ -1,50 +1,25 @@
 package arma.orinocosqf.syntax;
 
-import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
- * @author Kayler
- * @since 06/11/2016
+ * @author K
+ * @see SQFCommandSyntax
+ * @since 02/21/2019
  */
-public class CommandSyntax implements MemCompact {
-	private final ReturnValueHolder returnValue;
-	private final Param leftParam;
-	private final Param rightParam;
-
-	public CommandSyntax(@Nullable Param leftParam, @Nullable Param rightParam, @NotNull ReturnValueHolder returnValue) {
-		this.leftParam = leftParam;
-		this.rightParam = rightParam;
-		this.returnValue = returnValue;
-	}
-
+public interface CommandSyntax {
+	/** @return the return value of the syntax */
 	@NotNull
-	public static List<Param> params(@NotNull Param... allParams) {
-		List<Param> params = new ArrayList<>(allParams.length);
-		Collections.addAll(params, allParams);
-		return params;
-	}
+	ReturnValueHolder getReturnValue();
 
-	@NotNull
-	public ReturnValueHolder getReturnValue() {
-		return returnValue;
-	}
-
+	/** @return the LEFT_PARAM of the syntax (LEFT_PARAM commandName RIGHT_PARAM) or null if there isn't one */
 	@Nullable
-	public Param getLeftParam() {
-		return leftParam;
-	}
+	Param getLeftParam();
 
+	/** @return the RIGHT_PARAM of the syntax (LEFT_PARAM commandName RIGHT_PARAM) or null if there isn't one */
 	@Nullable
-	public Param getRightParam() {
-		return rightParam;
-	}
+	Param getRightParam();
 
 	/**
 	 * Will traverse all parameters (both left and right). Note that this will also fully traverse the elements in arrays that are
@@ -53,64 +28,6 @@ public class CommandSyntax implements MemCompact {
 	 * @return an iterable that will iterate the parameters in order.
 	 */
 	@NotNull
-	public Iterable<Param> getAllParams() {
-		List<Param> list = new LinkedList<>();
-		if (leftParam != null) {
-			addAllParamsFor(list, leftParam);
-		}
-		if (rightParam != null) {
-			addAllParamsFor(list, rightParam);
-		}
+	Iterable<Param> getAllParams();
 
-		return list;
-	}
-
-	private void addAllParamsFor(@NotNull List<Param> params, @NotNull Param param) {
-		if (param instanceof ArrayParam) {
-			ArrayParam arrayParam = (ArrayParam) param;
-			for (Param subParam : arrayParam.getParams()) {
-				if (subParam instanceof ArrayParam) {
-					addAllParamsFor(params, subParam);
-				} else {
-					params.add(subParam);
-				}
-			}
-		} else {
-			params.add(param);
-		}
-
-	}
-
-	@NotNull
-	public Iterable<ArrayParam> getAllArrayParams() {
-		List<ArrayParam> list = new LinkedList<>();
-		if (leftParam != null && leftParam instanceof ArrayParam) {
-			addAllArrayParamsFor(list, (ArrayParam) leftParam);
-		}
-		if (rightParam != null && rightParam instanceof ArrayParam) {
-			addAllArrayParamsFor(list, (ArrayParam) rightParam);
-		}
-		return list;
-	}
-
-	private void addAllArrayParamsFor(@NotNull List<ArrayParam> params, @NotNull ArrayParam param) {
-		for (Param subParam : param.getParams()) {
-			if (subParam instanceof ArrayParam) {
-				ArrayParam subArrayParam = (ArrayParam) subParam;
-				params.add(subArrayParam);
-				addAllArrayParamsFor(params, subArrayParam);
-			}
-		}
-	}
-
-	@Override
-	public void memCompact() {
-		if (leftParam != null) {
-			leftParam.memCompact();
-		}
-		if (rightParam != null) {
-			rightParam.memCompact();
-		}
-		returnValue.memCompact();
-	}
 }

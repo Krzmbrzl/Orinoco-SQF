@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Used for caching and loading SQF command syntax's ({@link CommandSyntax}) from their xml files.
+ * Used for caching and loading SQF command syntax's ({@link SQFCommandSyntax}) from their xml files.
  *
  * @author Kayler
  * @since 11/13/2017
@@ -15,7 +15,7 @@ public class CommandDescriptorPool {
 	/**
 	 * Cache of commands
 	 */
-	private final CaseInsensitiveHashSet<CommandDescriptor> cache = new CaseInsensitiveHashSet<>();
+	private final CaseInsensitiveHashSet<SQFCommandDescriptor> cache = new CaseInsensitiveHashSet<>();
 
 
 	public CommandDescriptorPool() {
@@ -77,7 +77,7 @@ public class CommandDescriptorPool {
 				"while",
 		};
 		for (String command : frequent) {
-			CommandDescriptor d = CommandDescriptor.getDescriptorFromFile(command);
+			SQFCommandDescriptor d = SQFCommandDescriptor.getDescriptorFromFile(command);
 			if (d == null) {
 				throw new IllegalStateException(command);
 			}
@@ -86,7 +86,7 @@ public class CommandDescriptorPool {
 	}
 
 	/**
-	 * This will get a {@link CommandDescriptor} instance for the given command name. Case sensitivity doesn't matter.
+	 * This will get a {@link SQFCommandDescriptor} instance for the given command name. Case sensitivity doesn't matter.
 	 * The backend has a lazy filled cache, meaning, only when a when a command is requested will it be loaded into the cache.
 	 * The cache will never be garbage collected.
 	 *
@@ -96,10 +96,10 @@ public class CommandDescriptorPool {
 	 * descriptions, you will need to invoke {@link SQFCommandSyntaxXMLLoader#importFromStream(CommandXMLInputStream, boolean)} directly.
 	 *
 	 * @param commandName the name of command (case sensitivity doesn't matter).
-	 * @return the {@link CommandDescriptor} instance, or null if one couldn't be created
+	 * @return the {@link SQFCommandDescriptor} instance, or null if one couldn't be created
 	 */
 	@Nullable
-	public CommandDescriptor get(@NotNull String commandName) {
-		return cache.computeIfKeyAbsent(commandName, cn -> CommandDescriptor.getDescriptorFromFile(TextHelper.asString(cn)));
+	public SQFCommandDescriptor get(@NotNull String commandName) {
+		return cache.computeIfKeyAbsent(commandName, cn -> SQFCommandDescriptor.getDescriptorFromFile(TextHelper.asString(cn)));
 	}
 }

@@ -19,7 +19,7 @@ import java.util.List;
  */
 class SQFCommandSyntaxXMLLoader {
 	@NotNull
-	public static CommandDescriptor importFromStream(@NotNull CommandXMLInputStream is, boolean getCommandDescriptions) throws Exception {
+	public static SQFCommandDescriptor importFromStream(@NotNull CommandXMLInputStream is, boolean getCommandDescriptions) throws Exception {
 		Document document;
 
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -32,7 +32,7 @@ class SQFCommandSyntaxXMLLoader {
 
 		boolean deprecated, uncertain;
 
-		ArrayList<CommandSyntax> syntaxList;
+		ArrayList<SQFCommandSyntax> syntaxList;
 
 		Element rootElement = document.getDocumentElement();
 		commandName = rootElement.getAttribute("name");
@@ -75,11 +75,11 @@ class SQFCommandSyntaxXMLLoader {
 			returnValue = getReturnValue(returnElements.get(0), getCommandDescriptions);
 
 
-			syntaxList.add(new CommandSyntax(params[PREFIX], params[POSTFIX], returnValue));
+			syntaxList.add(new SQFCommandSyntax(params[PREFIX], params[POSTFIX], returnValue));
 		}
 
 		syntaxList.trimToSize();
-		CommandDescriptor c = new CommandDescriptor(commandName, syntaxList, gameVersion, GameNameMap.getInstance().getGame(GameNameMap.LookupType.LINK_PREFIX, gameName));
+		SQFCommandDescriptor c = new SQFCommandDescriptor(commandName, syntaxList, gameVersion, GameNameMap.getInstance().getGame(GameNameMap.LookupType.LINK_PREFIX, gameName));
 		c.setDeprecated(deprecated);
 		c.setUncertain(uncertain);
 
