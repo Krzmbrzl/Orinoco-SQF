@@ -28,9 +28,10 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		} catch (Exception e) {
 			if (e instanceof UnsupportedOperationException) {
 				//command doesn't have a syntax xml file
-				System.out.println(e.getMessage());
+				System.out.println(commandName + '\n' + e.getMessage());
 				return null;
 			}
+			System.err.println(commandName);
 			e.printStackTrace();
 			return null;
 		}
