@@ -50,6 +50,8 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	/** {@link #setUncertain(boolean)} */
 	private boolean uncertain = false;
 
+	private boolean striclyNular, canBeNular, strictlyBinary, canBeBinary, strictlyUnary, canBeUnary;
+
 	public SQFCommand(@NotNull String commandName) {
 		this.commandName = commandName;
 		syntaxList = Collections.emptyList();
@@ -64,6 +66,13 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		this.commandName = commandName;
 		this.gameVersion = gameVersion;
 		this.game = game;
+
+		striclyNular = detectStrictlyNular();
+		canBeNular = detectCanBeNular();
+		strictlyBinary = detectStrictlyBinary();
+		canBeBinary = detectCanBeBinary();
+		strictlyUnary = detectStrictlyUnary();
+		canBeUnary = detectCanBeUnary();
 	}
 
 	@Override
@@ -74,6 +83,35 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 
 	@Override
 	public boolean isStrictlyNular() {
+		return striclyNular;
+	}
+
+	@Override
+	public boolean canBeNular() {
+		return canBeNular;
+	}
+
+	@Override
+	public boolean isStrictlyBinary() {
+		return strictlyBinary;
+	}
+
+	@Override
+	public boolean canBeBinary() {
+		return canBeBinary;
+	}
+
+	@Override
+	public boolean isStrictlyUnary() {
+		return strictlyUnary;
+	}
+
+	@Override
+	public boolean canBeUnary() {
+		return canBeUnary;
+	}
+
+	private boolean detectStrictlyNular() {
 		for (SQFCommandSyntax cs : syntaxList) {
 			if (cs.getLeftParam() != null || cs.getRightParam() != null) {
 				return false;
@@ -82,8 +120,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		return true;
 	}
 
-	@Override
-	public boolean canBeNular() {
+	private boolean detectCanBeNular() {
 		for (SQFCommandSyntax cs : syntaxList) {
 			if (cs.getLeftParam() == null && cs.getRightParam() == null) {
 				return true;
@@ -92,8 +129,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		return false;
 	}
 
-	@Override
-	public boolean isStrictlyBinary() {
+	private boolean detectStrictlyBinary() {
 		for (SQFCommandSyntax cs : syntaxList) {
 			if (cs.getLeftParam() == null || cs.getRightParam() == null) {
 				return false;
@@ -102,8 +138,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		return true;
 	}
 
-	@Override
-	public boolean canBeBinary() {
+	private boolean detectCanBeBinary() {
 		for (SQFCommandSyntax cs : syntaxList) {
 			if (cs.getLeftParam() != null && cs.getRightParam() != null) {
 				return true;
@@ -112,8 +147,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		return false;
 	}
 
-	@Override
-	public boolean isStrictlyUnary() {
+	private boolean detectStrictlyUnary() {
 		for (SQFCommandSyntax cs : syntaxList) {
 			if (cs.getLeftParam() != null || cs.getRightParam() == null) {
 				return false;
@@ -122,8 +156,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		return true;
 	}
 
-	@Override
-	public boolean canBeUnary() {
+	private boolean detectCanBeUnary() {
 		for (SQFCommandSyntax cs : syntaxList) {
 			if (cs.getLeftParam() == null && cs.getRightParam() != null) {
 				return true;
