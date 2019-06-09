@@ -41,7 +41,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	/** {@link #getCommandName()} */
 	private final String commandName;
 	/** {@link #getGameVersion()} */
-	private String gameVersion;
+	private final String gameVersion;
 	/** {@link #getGameIntroducedIn()} */
 	private final BIGame game;
 
@@ -56,6 +56,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		this.commandName = commandName;
 		syntaxList = Collections.emptyList();
 		game = BIGame.UNKNOWN;
+		this.gameVersion = "?";
 	}
 
 	public SQFCommand(@NotNull String commandName,
