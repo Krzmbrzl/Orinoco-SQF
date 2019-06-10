@@ -9,22 +9,45 @@ import arma.orinocosqf.sqf.SQFCommands;
 import arma.orinocosqf.util.SimpleTextBuffer;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class OrinocoLexerTest {
-	private TokenExpector expector;
-	private TokenExpector.AcceptedTokenFactory tokenFactory;
-	private OrinocoLexer lexer;
+	static TokenExpector expector;
+	static TokenExpector.AcceptedTokenFactory tokenFactory;
+	static OrinocoLexer lexer;
 
-
-	private void lexerFromText(@NotNull String text) {
+	@BeforeClass
+	public static void setup() {
 		expector = new TokenExpector(true);
-		lexer = new OrinocoLexer(OrinocoReader.fromCharSequence(text), expector);
-		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(text)));
+		lexer = new OrinocoLexer(expector);
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
+	
+	@Before
+	public void reset() {
+		expector.reset();
+		tokenFactory.reset();
+		lexer.reset();
+	}
+
+	void test(@NotNull String text) {
+		expector.addExpectedTokens(tokenFactory.getTokens());
+		lexer.start(OrinocoReader.fromCharSequence(text), false);
+		expector.assertTokensMatch();
+
+		reset();
+	}
+
+
+	/*
+	 * private void lexerFromText(@NotNull String text) { expector = new TokenExpector(true); lexer = new
+	 * OrinocoLexer(OrinocoReader.fromCharSequence(text), expector); lexer.setContext(new SimpleOrinocoLexerContext(lexer, new
+	 * SimpleTextBuffer(text))); tokenFactory = new TokenExpector.AcceptedTokenFactory(); }
+	 */
 
 	private IdTransformer<String> getVariableTransformer() {
 		return lexer.getIdTransformer();
@@ -36,534 +59,424 @@ public class OrinocoLexerTest {
 
 	@Test
 	public void emptyInput() {
-		String input = "";
-		lexerFromText(input);
-
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test("");
 	}
 
 	@Test
 	public void literal_string_doubleQuotes() {
 		String input = "\"\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "\"With input\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_string_doubleQuotes_escapedQuotes() {
 		String input = "\"\"\"\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "\"With \"\"input\"\"\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "\"With \"\"\"\"input\"\"\"\"\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_string_doubleQuotes_containingSingeQuotes() {
 		String input = "\"'\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "\"With 'input'\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "\"With ''input''\"";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_string_singleQuotes() {
 		String input = "''";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "'With input'";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_string_singleQuotes_escapedQuotes() {
 		String input = "''''";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "'With ''input'''";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "'With ''''input'''''";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_string_singleQuotes_containingDoubleQuotes() {
 		String input = "'\"'";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "'With \"input\"'";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "'With \"\"input\"\"'";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_int() {
 		String input = "5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "33576";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_float() {
 		String input = "0.5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "0.33576";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_float_noLeadingZero() {
 		String input = ".5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ".33576";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_scientific_intFactor() {
 		String input = "2e5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23e12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "2E5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23E12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_scientific_floatFactor() {
 		String input = "2.3e5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23.456e12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "2.3E5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23.456E12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_scientific_intFactor_negativeExponent() {
 		String input = "2e-5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23e-12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "2E-5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23E-12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_scientific_floatFactor_negativeExponent() {
 		String input = "2.3e-5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23.456e-12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "2.3E-5";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23.456E-12";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_scientific_intFactor_implicitExponent() {
 		String input = "2e";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23e";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "2E";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23E";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_scientific_floatFactor_implicitExponent() {
 		String input = "2.3e";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23.456e";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "2.3E";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "23.456E";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_hex_0x() {
 		String input = "0x1";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "0xFF";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "0xABCDEF1234567890";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void literal_number_hex_dollar() {
 		String input = "$1";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "$FF";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "$ABCDEF1234567890";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void globalVariables() throws UnknownIdException {
 		String input = "test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "otherTest";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
@@ -571,7 +484,7 @@ public class OrinocoLexerTest {
 		String input;
 		{
 			input = "test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("test");
 
 			// precondition: Used id-transformer is case-insensitive
@@ -579,242 +492,197 @@ public class OrinocoLexerTest {
 					getVariableTransformer().toId("TeSt"));
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 		{
 			input = "Test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "tesT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "TEST";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "tEsT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "second_Test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "second_test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "Second_TesT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "SECOND_TEST";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "sEcOnD_tEsT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 	}
 
 	@Test
 	public void globalVariables_withNumbers() throws UnknownIdException {
 		String input = "test123";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "other456Test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "o7the8rTe9st10";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void globalVariables_withUnderscores() throws UnknownIdException {
 		String input = "test_";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "other_Test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "o_the_rTe_st__";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "o_the______rTe_st__";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void globalVariables_withNumbersAndUnderscores() throws UnknownIdException {
 		String input = "test_123";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "test_123_";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "other_456_Test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "o_7___the_8rTe____9____st_10____";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void localVariables() throws UnknownIdException {
 		String input = "_test";
-		lexerFromText(input);
 
+		// TODO: The var-IDs are messed up
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_otherTest";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
@@ -822,8 +690,8 @@ public class OrinocoLexerTest {
 		String input;
 		{
 			input = "_test";
-			lexerFromText(input);
 
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			// precondition: Used id-transformer is case-insensitive
 			assertEquals("The used variable transformer appears to be case-sensitive", getVariableTransformer().toId("_test"),
 					getVariableTransformer().toId("_TeSt"));
@@ -831,479 +699,385 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 		{
 			input = "_Test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_tesT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_TEST";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_tEsT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_second_Test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_second_test";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_Second_TesT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_SECOND_TEST";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 
 
 		{
 			input = "_sEcOnD_tEsT";
-			lexerFromText(input);
+			lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			expector.addExpectedTokens(tokenFactory.getTokens());
-			lexer.start();
-			expector.assertTokensMatch();
+			test(input);
 		}
 	}
 
 	@Test
 	public void localVariables_withNumbers() throws UnknownIdException {
 		String input = "_test123";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_other456Test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_o7the8rTe9st10";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void localVariables_withUnderscores() throws UnknownIdException {
 		String input = "_test_";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_other_Test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_o_the_rTe_st__";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_o_the______rTe_st__";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void localVariables_withNumbersAndUnderscores() throws UnknownIdException {
 		String input = "_test_123";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_test_123_";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_other_456_Test";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "_o_7___the_8rTe____9____st_10____";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_singleLine() {
 		String input = "//";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "// I am a comment";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_singleLine_weirdCharacters() {
 		String input = "//#`}^°<>~,;.:-_äöü";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "// ĀǢŒÞ¢ǿ"; // unicode
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_singleLine_followedByNL() {
 		String input = "// I am a comment\n";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length() - 1, 0, input.length() - 1, lexer.getContext(), 0);
 		tokenFactory.acceptWhitespace(input.length() - 1, 1, input.length() - 1, 1, lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine() {
 		String input = "/**/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am a comment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine_withNL() {
 		String input = "/*\n*/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am \na \ncomment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine_withNL_withCarriageReturn() {
 		String input = "/*\r\n*/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am \r\na \r\ncomment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine_withStars() {
 		String input = "/***/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am *a *comment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine_withStars_withNL() {
 		String input = "/*\n*\n*/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am \n*a *com\nment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine_nestedStartSequence() {
 		String input = "/*/**/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am /*a \n/*comment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void comments_multiLine_almostEndSequence() {
 		String input = "/** /*/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/* I am *\n/a *\t/ * /comment */";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void commands_sqfkeywords() throws UnknownIdException {
 		String input = "hint";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "format";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "call";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "if";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "createUnit";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "addAction";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "atan2";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
@@ -1317,364 +1091,284 @@ public class OrinocoLexerTest {
 		int callId = getCommandTransformer().toId("call");
 
 		String input = "createUnit";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "createunit";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "CreAteUnit";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "CREATEUNIT";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "CreateuniT";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "addAction";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "addaction";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "AdDAction";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "ADDACTION";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "AddactioN";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "call";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "CALL";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "CaLl";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 
 	@Test
 	public void commands_operators() throws UnknownIdException {
 		String input = "+";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "-";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "*";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "/";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "^";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "%";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "#";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "(";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ")";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "[";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "]";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "{";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "}";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ",";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ";";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "!";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "&&";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "||";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ":";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "=";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "==";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "!=";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "<";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = "<=";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ">";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ">=";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 
 
 		input = ">>";
-		lexerFromText(input);
 
+		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		expector.addExpectedTokens(tokenFactory.getTokens());
-		lexer.start();
-		expector.assertTokensMatch();
+		test(input);
 	}
 }

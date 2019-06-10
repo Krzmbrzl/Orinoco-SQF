@@ -1,6 +1,5 @@
 package arma.orinocosqf.helpers;
 
-import arma.orinocosqf.OrinocoReader;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import org.jetbrains.annotations.NotNull;
@@ -8,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 /**
- * A {@link OrinocoLexer} instance made for testing. This class listens to {@link OrinocoLexer#acceptPreProcessedText(CharSequence)} via a {@link Consumer}
- * callback and submits the text through it for assertions.
+ * A {@link OrinocoLexer} instance made for testing. This class listens to {@link OrinocoLexer#acceptPreProcessedText(CharSequence)} via a
+ * {@link Consumer} callback and submits the text through it for assertions.
  *
  * @author K
  * @since 3/11/19
@@ -18,10 +17,8 @@ public class TestOrinocoLexer extends OrinocoLexer {
 	private final Consumer<CharSequence> preprocessedTextCallback;
 	private boolean didPreProcessing = false;
 
-	public TestOrinocoLexer(@NotNull OrinocoReader r,
-							@NotNull OrinocoTokenDelegator lexerStream,
-							@NotNull Consumer<CharSequence> preprocessedTextCallback) {
-		super(r, lexerStream);
+	public TestOrinocoLexer(@NotNull OrinocoTokenDelegator lexerStream, @NotNull Consumer<CharSequence> preprocessedTextCallback) {
+		super(lexerStream);
 		this.preprocessedTextCallback = preprocessedTextCallback;
 	}
 

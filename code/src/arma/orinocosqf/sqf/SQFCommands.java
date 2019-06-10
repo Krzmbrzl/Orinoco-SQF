@@ -19,7 +19,9 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 	private SQFCommands() {
 		super(new ArrayList<>(3000));
-
+		
+		return;
+/*
 		Scanner commandsListScan = new Scanner(System.in);//todo
 		while (commandsListScan.hasNextLine()) {
 			String line = commandsListScan.nextLine().trim();
@@ -36,7 +38,7 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			this.commands.add(d);
 		}
 		((ArrayList) instance.commands).trimToSize();
-		this.commands.sort(COMPARATOR);
+		this.commands.sort(COMPARATOR);*/
 	}
 
 	@NotNull

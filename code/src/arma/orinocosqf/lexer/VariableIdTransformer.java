@@ -1,6 +1,7 @@
 package arma.orinocosqf.lexer;
 
 import arma.orinocosqf.IdTransformer;
+import arma.orinocosqf.Resettable;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.sqf.SQFVariable;
 import arma.orinocosqf.util.CaseInsensitiveHashSet;
@@ -12,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 5/12/19
  */
-public abstract class VariableIdTransformer implements IdTransformer<String> {
-	private final CaseInsensitiveHashSet<SQFVariable> localVars;
-	private final CaseInsensitiveHashSet<SQFVariable> globalVars;
+public abstract class VariableIdTransformer implements IdTransformer<String>, Resettable {
+	private CaseInsensitiveHashSet<SQFVariable> localVars;
+	private CaseInsensitiveHashSet<SQFVariable> globalVars;
 
 	public VariableIdTransformer(@NotNull CaseInsensitiveHashSet<SQFVariable> localVars,
-								 @NotNull CaseInsensitiveHashSet<SQFVariable> globalVars) {
+			@NotNull CaseInsensitiveHashSet<SQFVariable> globalVars) {
 		this.localVars = localVars;
 		this.globalVars = globalVars;
 	}
@@ -53,6 +54,30 @@ public abstract class VariableIdTransformer implements IdTransformer<String> {
 			globalVars.put(var);
 		}
 		return var.getId();
+	}
+
+	@Override
+	public void reset() {
+		// Clear local variables but keep globals
+		localVars.clear();
+	}
+
+	/**
+	 * Sets the local variable set for this transformer
+	 * 
+	 * @param vars The new set of local variables to use
+	 */
+	protected void setLocalVars(@NotNull CaseInsensitiveHashSet<SQFVariable> vars) {
+		this.localVars = vars;
+	}
+
+	/**
+	 * Sets the global variable set for this transformer
+	 * 
+	 * @param vars The new set of global variables to use
+	 */
+	protected void setGlobalVars(@NotNull CaseInsensitiveHashSet<SQFVariable> vars) {
+		this.globalVars = vars;
 	}
 
 	protected abstract int getNextId(@NotNull String varName);

@@ -13,6 +13,7 @@ import arma.orinocosqf.sqf.SQFVariable;
 import arma.orinocosqf.util.CaseInsensitiveHashSet;
 import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.util.LightweightStringBuilder;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +55,7 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 	protected OrinocoLexerContext context = new DefaultLexerContext();
 
-	protected final OrinocoTokenDelegator tokenDelegator;
+	protected OrinocoTokenDelegator tokenDelegator;
 	protected int originalOffset = 0;
 	protected int originalLength = 0;
 	protected int preprocessedOffset = 0;
@@ -64,15 +65,15 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	protected int previousPreprocessedOffset = 0;
 	protected int previousPreprocessedLength = 0;
 
-	protected final OrinocoJFlexLexer jFlexLexer;
-	protected static final CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
+	protected OrinocoJFlexLexer jFlexLexer;
+	protected static CaseInsensitiveHashSet<SQFVariable> globalVarSet = new CaseInsensitiveHashSet<>();
 	protected static int nextGlobalVarId = 0;
-	protected final CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
+	protected CaseInsensitiveHashSet<SQFVariable> localVarSet = new CaseInsensitiveHashSet<>();
 	protected int nextLocalVarId = 0;
 	/**
 	 * @see #getIdTransformer()
 	 */
-	protected final VariableIdTransformer varIdTransformer = new MyVariableIdTransformer();
+	protected VariableIdTransformer varIdTransformer;
 	/**
 	 * @see #setPreprocessedResultWriter(Writer)
 	 */
@@ -101,11 +102,11 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	@NotNull
 	protected final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
 
-	public OrinocoLexer(@NotNull OrinocoReader r, @NotNull OrinocoTokenDelegator tokenDelegator) {
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator) {
 		this.tokenDelegator = tokenDelegator;
 		tokenDelegator.setLexer(this);
-		jFlexLexer = new OrinocoJFlexLexer(r, tokenDelegator.getMacroSet());
-		jFlexLexer.setCommandSet(SQFCommands.instance);
+		
+		this.varIdTransformer = new MyVariableIdTransformer();
 	}
 
 	/**
@@ -140,8 +141,28 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 	/**
 	 * Starts the lexing process.
+	 * 
+	 * @param inputReader The {@link OrinocoReader} for accessing the input
+	 * @param reset A flag indicating whether to reset the lexer before starting
 	 */
-	public void start() {
+	public void start(@NotNull OrinocoReader inputReader) {
+		this.start(inputReader, true);
+	}
+
+	/**
+	 * Starts the lexing process.
+	 * 
+	 * @param inputReader The {@link OrinocoReader} for accessing the input
+	 * @param reset A flag indicating whether to reset the lexer before starting
+	 */
+	public void start(@NotNull OrinocoReader inputReader, boolean reset) {
+		if (reset) {
+			this.reset();
+		}
+		// TODO: Make JFlex lexer resettable as well
+		jFlexLexer = new OrinocoJFlexLexer(inputReader, tokenDelegator.getMacroSet());
+		jFlexLexer.setCommandSet(SQFCommands.instance);
+
 		tokenDelegator.begin(getContext());
 
 		try {
@@ -458,8 +479,8 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		if (preprocessedResultWriter != null) {
 			preprocessedResultWriter.write(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}
-		tokenDelegator.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset, originalLength,
-				context);
+		tokenDelegator.acceptCommand(jFlexLexer.getLatestCommandId(), preprocessedOffset, preprocessedLength, originalOffset,
+				originalLength, context);
 		updateOffsetsAfterMake();
 	}
 
@@ -606,6 +627,26 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 	@Override
 	public void reset() {
-		// TODO Implement
+		// TODO jflexLeer.reset();
+
+		// New input comes with separate local variables
+		localVarSet = new CaseInsensitiveHashSet<>();
+		
+		varIdTransformer.setLocalVars(localVarSet);
+
+		// Maybe also tokenDelegator.reset() ?
+
+		originalOffset = 0;
+		originalLength = 0;
+		preprocessedOffset = 0;
+		preprocessedLength = 0;
+		previousOriginalOffset = 0;
+		previousOriginalLength = 0;
+		previousPreprocessedOffset = 0;
+		previousPreprocessedLength = 0;
+
+		// leave nextGlobalVarId and globalVarSet untouched in order to maintain compatibility between lex-runs
+		// leave nextLocalVarId untouched in order to avoid same indices for local variables in different files (after all they are not the
+		// same - in general anyways)
 	}
 }
