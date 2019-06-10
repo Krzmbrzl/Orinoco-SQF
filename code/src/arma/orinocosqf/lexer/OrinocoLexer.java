@@ -1,6 +1,7 @@
 package arma.orinocosqf.lexer;
 
 import arma.orinocosqf.OrinocoReader;
+import arma.orinocosqf.Resettable;
 import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.preprocessing.MacroSet;
@@ -44,7 +45,7 @@ import java.util.regex.Pattern;
  * @author K
  * @since 02/20/2019
  */
-public class OrinocoLexer implements ProblemListener {
+public class OrinocoLexer implements ProblemListener, Resettable {
 	public static int getCommandId(@NotNull String command) {
 		return SQFCommands.instance.getId(command);
 	}
@@ -601,5 +602,10 @@ public class OrinocoLexer implements ProblemListener {
 		public @Nullable TextBuffer getTextBufferPreprocessed() {
 			return null;
 		}
+	}
+
+	@Override
+	public void reset() {
+		// TODO Implement
 	}
 }

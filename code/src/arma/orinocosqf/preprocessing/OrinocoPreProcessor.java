@@ -586,4 +586,12 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 					includePath.length() + 2, -1);
 		}
 	}
+
+	@Override
+	public void reset() {
+		// Create a new one instead of clearing the existing one as the set will be referenced in the respective macros that might still be
+		// used beyond this point
+		macroSet = new MacroSet();
+		lexer = null;
+	}
 }

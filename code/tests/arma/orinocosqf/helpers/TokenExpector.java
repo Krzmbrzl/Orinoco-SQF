@@ -411,10 +411,23 @@ public class TokenExpector implements OrinocoTokenDelegator {
 		public List<AcceptedToken> getTokens() {
 			return q;
 		}
+
+		@Override
+		public void reset() {
+			q.clear();
+			macroSet.clear();
+		}
 	}
 
 	public enum AcceptMethod {
 		AcceptCommand, AcceptLocalVariable, AcceptGlobalVariable, AcceptLiteral, PreProcessorTokenSkipped, PreProcessorCommandSkipped,
 		acceptPreprocessorCommand, acceptWhitespace, acceptComment
+	}
+
+	@Override
+	public void reset() {
+		acceptFactory.reset();
+		expectedTokens.clear();
+		macroSet.clear();
 	}
 }

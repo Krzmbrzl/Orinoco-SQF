@@ -50,4 +50,7 @@ public abstract class OrinocoTokenProcessorAdapter implements OrinocoTokenProces
 	public void end(@NotNull OrinocoLexerContext ctx) {
 	}
 
+	@Override
+	public void reset() {
+	}
 }

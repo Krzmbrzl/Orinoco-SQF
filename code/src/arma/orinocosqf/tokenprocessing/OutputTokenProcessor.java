@@ -73,4 +73,16 @@ public class OutputTokenProcessor extends OrinocoTokenProcessorAdapter {
 		}
 	}
 
+	@Override
+	public void reset() {
+		try {
+			outWriter.flush();
+			outWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		outWriter = null;
+	}
+
 }

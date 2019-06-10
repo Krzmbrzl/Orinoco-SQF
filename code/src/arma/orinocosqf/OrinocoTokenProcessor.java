@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 02/20/2019
  */
-public interface OrinocoTokenProcessor {
+public interface OrinocoTokenProcessor extends Resettable {
 	/**
 	 * Invoked once when the {@link OrinocoLexer} has begun lexing
 	 * 
