@@ -41,36 +41,41 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			}
 		}
 
-		Scanner commandsListScan;
 		try {
-			commandsListScan = new Scanner(new File(prefix + "operators/operators.list"));
+			Scanner commandsListScan = new Scanner(new File(prefix + "operators/operators.list"));
+
+
+			Pattern p = Pattern.compile("`(.+?)`([^\n]+)");
+
+			while (commandsListScan.hasNextLine()) {
+				String line = commandsListScan.nextLine().trim();
+				if (line.length() == 0) {
+					continue;
+				}
+				if (line.charAt(0) == '#') {
+					continue;
+				}
+
+				Matcher m = p.matcher(line);
+				while (m.find()) {
+					String commandFileName = m.group(1) + ".xml";
+					try {
+						SQFCommand d = SQFCommandSyntaxXMLLoader
+								.importFromStream(new FileInputStream(prefix + "operators/" + commandFileName), false);
+						commands.add(d);
+					} catch (Exception e) {
+						commandsListScan.close();
+						throw new IllegalStateException(e);
+					}
+				}
+			}
+
+			commandsListScan.close();
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException(e);
 		}
 
-		Pattern p = Pattern.compile("`(.+?)`([^\n]+)");
-
-		while (commandsListScan.hasNextLine()) {
-			String line = commandsListScan.nextLine().trim();
-			if (line.length() == 0) {
-				continue;
-			}
-			if (line.charAt(0) == '#') {
-				continue;
-			}
-
-			Matcher m = p.matcher(line);
-			while (m.find()) {
-				String commandFileName = m.group(1) + ".xml";
-				try {
-					SQFCommand d = SQFCommandSyntaxXMLLoader.importFromStream(new FileInputStream(prefix + "operators/" + commandFileName), false);
-					commands.add(d);
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
-			}
-		}
-		((ArrayList) this.commands).trimToSize();
+		((ArrayList<SQFCommand>) this.commands).trimToSize();
 		this.commands.sort(COMPARATOR);
 	}
 
