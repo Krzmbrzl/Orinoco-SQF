@@ -323,7 +323,9 @@ public class ExpandedValueType implements ValueType {
 		}
 
 		for (ValueType vt : valueTypes) {
-			vt.memCompact();
+			if (vt.getExpanded() != this) {
+				vt.memCompact();
+			}
 		}
 		for (ValueType vt : polymorphicTypes) {
 			vt.memCompact();

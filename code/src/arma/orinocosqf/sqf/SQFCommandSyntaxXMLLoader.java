@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +20,9 @@ import java.util.List;
  * @author Kayler
  * @since 11/12/2017
  */
-class SQFCommandSyntaxXMLLoader {
+public class SQFCommandSyntaxXMLLoader {
 	@NotNull
-	public static SQFCommand importFromStream(@NotNull CommandXMLInputStream is, boolean getCommandDescriptions) throws Exception {
+	public static SQFCommand importFromStream(@NotNull InputStream is, boolean getCommandDescriptions) throws Exception {
 		Document document;
 
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -55,7 +56,7 @@ class SQFCommandSyntaxXMLLoader {
 			for (Element arrayElement : arrayElements) {
 				int order = Integer.parseInt(arrayElement.getAttribute("order"));
 				if (params[order] != null) {
-					throw new RuntimeException("duplicate order for command " + is.getCommandName() + ". order=" + order);
+					throw new RuntimeException("duplicate order for command " + commandName + ". order=" + order);
 				}
 				params[order] = getArrayParam(arrayElement, getCommandDescriptions);
 			}
@@ -63,7 +64,7 @@ class SQFCommandSyntaxXMLLoader {
 			for (Element paramElement : paramElements) {
 				int order = Integer.parseInt(paramElement.getAttribute("order"));
 				if (params[order] != null) {
-					throw new RuntimeException("duplicate order for command " + is.getCommandName() + ". order=" + order);
+					throw new RuntimeException("duplicate order for command " + commandName + ". order=" + order);
 				}
 				params[order] = getParam(paramElement, getCommandDescriptions);
 			}
