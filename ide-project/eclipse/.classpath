@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="code/src"/>
 	<classpathentry kind="src" path="code/gen"/>
 	<classpathentry kind="src" path="code/tests"/>
-	<classpathentry kind="src" path="code/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
