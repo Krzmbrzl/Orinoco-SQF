@@ -39,7 +39,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	/**
 	 * The {@link OrinocoTokenProcessor} to delegate method calls to
 	 */
-	protected final OrinocoTokenProcessor processor;
+	protected OrinocoTokenProcessor processor;
 
 	/**
 	 * The {@link MacroSet} of the current preprocessing run
@@ -593,5 +593,17 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 		// used beyond this point
 		macroSet = new MacroSet();
 		lexer = null;
+
+		// "Update" the dummy owner-macro
+		dummyMacro = new PreProcessorMacro(macroSet, "__________________", Collections.emptyList(), new TextSegment(""));
+	}
+
+	/**
+	 * Sets the {@link OrinocoTokenProcessor} for this preprocessor
+	 * 
+	 * @param processor The new processor to use
+	 */
+	public void setProcessor(@NotNull OrinocoTokenProcessor processor) {
+		this.processor = processor;
 	}
 }

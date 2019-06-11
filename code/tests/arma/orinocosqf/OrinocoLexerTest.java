@@ -34,7 +34,7 @@ public class OrinocoLexerTest {
 		lexer.reset();
 	}
 
-	void test(@NotNull String text) {
+	void performTest(@NotNull String text) {
 		expector.addExpectedTokens(tokenFactory.getTokens());
 		lexer.start(OrinocoReader.fromCharSequence(text), false);
 		expector.assertTokensMatch();
@@ -59,7 +59,7 @@ public class OrinocoLexerTest {
 
 	@Test
 	public void emptyInput() {
-		test("");
+		performTest("");
 	}
 
 	@Test
@@ -68,14 +68,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "\"With input\"";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class OrinocoLexerTest {
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "\"With \"\"input\"\"\"";
@@ -93,7 +93,7 @@ public class OrinocoLexerTest {
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "\"With \"\"\"\"input\"\"\"\"\"";
@@ -101,7 +101,7 @@ public class OrinocoLexerTest {
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -110,21 +110,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "\"With 'input'\"";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "\"With ''input''\"";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -133,14 +133,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "'With input'";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -149,21 +149,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "'With ''input'''";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "'With ''''input'''''";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -172,21 +172,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "'With \"input\"'";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "'With \"\"input\"\"'";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -195,14 +195,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "33576";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -211,14 +211,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "0.33576";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -227,14 +227,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ".33576";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -243,28 +243,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23e12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "2E5";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23E12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -273,28 +273,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23.456e12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "2.3E5";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23.456E12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -303,28 +303,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23e-12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "2E-5";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23E-12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -333,28 +333,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23.456e-12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "2.3E-5";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23.456E-12";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -363,28 +363,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23e";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "2E";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23E";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -393,28 +393,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23.456e";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "2.3E";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "23.456E";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -423,21 +423,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "0xFF";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "0xABCDEF1234567890";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -446,21 +446,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "$FF";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "$ABCDEF1234567890";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -469,14 +469,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "otherTest";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -492,7 +492,7 @@ public class OrinocoLexerTest {
 					getVariableTransformer().toId("TeSt"));
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 		{
@@ -501,7 +501,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -511,7 +511,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -521,7 +521,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -531,7 +531,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("test");
 
 			tokenFactory.acceptGlobalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -541,7 +541,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -551,7 +551,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -561,7 +561,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -571,7 +571,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -581,7 +581,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("second_Test");
 
 			tokenFactory.acceptGlobalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 	}
 
@@ -591,21 +591,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "other456Test";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "o7the8rTe9st10";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -614,28 +614,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "other_Test";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "o_the_rTe_st__";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "o_the______rTe_st__";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -644,45 +644,44 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "test_123_";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "other_456_Test";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "o_7___the_8rTe____9____st_10____";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptGlobalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
 	public void localVariables() throws UnknownIdException {
 		String input = "_test";
 
-		// TODO: The var-IDs are messed up
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_otherTest";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -699,7 +698,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 		{
@@ -708,7 +707,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -718,7 +717,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -728,7 +727,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -738,7 +737,7 @@ public class OrinocoLexerTest {
 			int testId = getVariableTransformer().toId("_test");
 
 			tokenFactory.acceptLocalVariable(testId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -748,7 +747,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -758,7 +757,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -768,7 +767,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -778,7 +777,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 
 
@@ -788,7 +787,7 @@ public class OrinocoLexerTest {
 			int secondTestId = getVariableTransformer().toId("_second_Test");
 
 			tokenFactory.acceptLocalVariable(secondTestId, 0, input.length(), 0, input.length(), lexer.getContext());
-			test(input);
+			performTest(input);
 		}
 	}
 
@@ -798,21 +797,21 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_other456Test";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_o7the8rTe9st10";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -821,28 +820,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_other_Test";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_o_the_rTe_st__";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_o_the______rTe_st__";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -851,28 +850,28 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_test_123_";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_other_456_Test";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "_o_7___the_8rTe____9____st_10____";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptLocalVariable(getVariableTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -881,14 +880,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 
 
 		input = "// I am a comment";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -897,14 +896,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 
 
 		input = "// ĀǢŒÞ¢ǿ"; // unicode
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -914,7 +913,7 @@ public class OrinocoLexerTest {
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length() - 1, 0, input.length() - 1, lexer.getContext(), 0);
 		tokenFactory.acceptWhitespace(input.length() - 1, 1, input.length() - 1, 1, lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -923,14 +922,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am a comment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -939,14 +938,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am \na \ncomment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -955,14 +954,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am \r\na \r\ncomment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -971,14 +970,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am *a *comment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -987,14 +986,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am \n*a *com\nment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 2);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -1003,14 +1002,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am /*a \n/*comment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -1019,14 +1018,14 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 0);
-		test(input);
+		performTest(input);
 
 
 		input = "/* I am *\n/a *\t/ * /comment */";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptComment(0, input.length(), 0, input.length(), lexer.getContext(), 1);
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -1035,49 +1034,49 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "format";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "call";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "if";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "createUnit";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "addAction";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "atan2";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -1094,91 +1093,91 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "createunit";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "CreAteUnit";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "CREATEUNIT";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "CreateuniT";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(createUnitId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "addAction";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "addaction";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "AdDAction";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "ADDACTION";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "AddactioN";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(addActionId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "call";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "CALL";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "CaLl";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(callId, 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 
 	@Test
@@ -1187,188 +1186,188 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "-";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "*";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "/";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "^";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "%";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "#";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "(";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ")";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "[";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "]";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "{";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "}";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ",";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ";";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "!";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "&&";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "||";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ":";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "=";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "==";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "!=";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "<";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = "<=";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ">";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ">=";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 
 
 		input = ">>";
 
 		lexer.setContext(new SimpleOrinocoLexerContext(lexer, new SimpleTextBuffer(input)));
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), lexer.getContext());
-		test(input);
+		performTest(input);
 	}
 }

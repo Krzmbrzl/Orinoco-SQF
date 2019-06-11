@@ -14,11 +14,14 @@ import java.util.function.Consumer;
  * @since 3/11/19
  */
 public class TestOrinocoLexer extends OrinocoLexer {
-	private final Consumer<CharSequence> preprocessedTextCallback;
+	private Consumer<CharSequence> preprocessedTextCallback;
 	private boolean didPreProcessing = false;
 
-	public TestOrinocoLexer(@NotNull OrinocoTokenDelegator lexerStream, @NotNull Consumer<CharSequence> preprocessedTextCallback) {
+	public TestOrinocoLexer(@NotNull OrinocoTokenDelegator lexerStream) {
 		super(lexerStream);
+	}
+	
+	public void setConsumer(@NotNull Consumer<CharSequence> preprocessedTextCallback) {
 		this.preprocessedTextCallback = preprocessedTextCallback;
 	}
 

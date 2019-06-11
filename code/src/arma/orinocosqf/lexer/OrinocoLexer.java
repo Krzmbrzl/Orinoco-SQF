@@ -159,6 +159,9 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		if (reset) {
 			this.reset();
 		}
+		
+		tokenDelegator.setLexer(this);
+		
 		// TODO: Make JFlex lexer resettable as well
 		jFlexLexer = new OrinocoJFlexLexer(inputReader, tokenDelegator.getMacroSet());
 		jFlexLexer.setCommandSet(SQFCommands.instance);
