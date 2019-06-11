@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Orinoco SQF.iml" filepath="$PROJECT_DIR$/Orinoco SQF.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../arma-commands-syntax/arma-commands-syntax.iml" filepath="$PROJECT_DIR$/../../arma-commands-syntax/arma-commands-syntax.iml" />
     </modules>
   </component>
 </project>

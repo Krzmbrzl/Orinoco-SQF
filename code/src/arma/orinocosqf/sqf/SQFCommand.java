@@ -3,11 +3,9 @@ package arma.orinocosqf.sqf;
 import arma.orinocosqf.CaseInsentiveKey;
 import arma.orinocosqf.Command;
 import arma.orinocosqf.syntax.BIGame;
-import arma.orinocosqf.syntax.CommandXMLInputStream;
 import arma.orinocosqf.syntax.Param;
 import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,24 +16,6 @@ import java.util.List;
  * @since 06/11/2016.
  */
 public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, MemCompact {
-	/**
-	 * @see CommandXMLInputStream#CommandXMLInputStream(String)
-	 */
-	@Nullable
-	public static SQFCommand getCommandFromFile(@NotNull String commandName) {
-		try {
-			return SQFCommandSyntaxXMLLoader.importFromStream(new CommandXMLInputStream(commandName), false);
-		} catch (Exception e) {
-			if (e instanceof UnsupportedOperationException) {
-				//command doesn't have a syntax xml file
-				System.out.println(commandName + '\n' + e.getMessage());
-				return null;
-			}
-			System.err.println(commandName);
-			e.printStackTrace();
-			return null;
-		}
-	}
 
 	/** {@link #getSyntaxList()} */
 	private final List<SQFCommandSyntax> syntaxList;
