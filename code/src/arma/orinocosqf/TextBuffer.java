@@ -2,7 +2,9 @@ package arma.orinocosqf;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface TextBuffer extends CharSequence {
+import java.io.IOException;
+
+public interface TextBuffer extends CharSequence, Appendable {
 	/**
 	 * Gets text from this buffer
 	 *
@@ -12,7 +14,7 @@ public interface TextBuffer extends CharSequence {
 	 * @throws IndexOutOfBoundsException When the requested text-area is not contained in this buffer
 	 */
 	@NotNull
-	public String getText(int offset, int length) throws IndexOutOfBoundsException;
+	String getText(int offset, int length) throws IndexOutOfBoundsException;
 
 	/**
 	 * Gets text from this buffer and writes it into the given char-buffer
@@ -24,5 +26,7 @@ public interface TextBuffer extends CharSequence {
 	 * @throws IndexOutOfBoundsException When the requested text-area is not contained in this buffer or if the provided char[]-buffer is
 	 * not big enough to hold all of the requested text
 	 */
-	public void getText(char[] buffer, int boffset, int offset, int length) throws IndexOutOfBoundsException;
+	void getText(char[] buffer, int boffset, int offset, int length) throws IndexOutOfBoundsException;
+
+	void append(char[] buffer, int offset, int length) throws IndexOutOfBoundsException, IOException;
 }
