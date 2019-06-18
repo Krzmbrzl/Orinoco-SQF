@@ -5,6 +5,9 @@
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="directory" />
     <option name="PARAMETERS" value="" />
+    <envs>
+      <env name="SQF_COMMANDS" value="command_xml" />
+    </envs>
     <dir value="$PROJECT_DIR$/../../code/tests/arma/orinocosqf" />
     <fork_mode value="class" />
     <method v="2">

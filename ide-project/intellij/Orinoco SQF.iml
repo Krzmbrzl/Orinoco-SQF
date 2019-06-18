@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
-    <exclude-output />
-    <content url="file://$MODULE_DIR$/../../code">
+    <content url="file://$MODULE_DIR$/../..">
       <sourceFolder url="file://$MODULE_DIR$/../../code/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../code/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../code/design" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../code/gen" isTestSource="false" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../code/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../code/tests" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../code/gen" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/../../out" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.jetbrains:annotations:16.0.2" level="project" />
     <orderEntry type="library" name="junit:junit:4.12" level="project" />
     <orderEntry type="library" name="jflex-full-1.7.0" level="project" />
-    <orderEntry type="module" module-name="arma-commands-syntax" />
   </component>
 </module>
