@@ -2,6 +2,7 @@ package arma.orinocosqf;
 
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import org.junit.BeforeClass;
@@ -25,6 +26,8 @@ public class PreProcessingTest {
 		processor = new OutputTokenProcessor();
 		preprocessor = new OrinocoPreProcessor(processor, virtualFs);
 		lexer = new OrinocoLexer(preprocessor);
+		
+		lexer.enableTextBuffering(true);
 	}
 
 	void performTest(String[] input, String[] expected) {
@@ -42,6 +45,13 @@ public class PreProcessingTest {
 		processor.setOutputWriter(outWriter);
 
 		lexer.start(OrinocoReader.fromCharSequence(input));
+		
+		try {
+			outWriter.flush();
+			outWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		String result = new String(os.toByteArray());
 
