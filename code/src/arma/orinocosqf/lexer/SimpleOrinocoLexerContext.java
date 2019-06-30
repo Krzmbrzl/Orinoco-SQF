@@ -13,12 +13,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SimpleOrinocoLexerContext implements OrinocoLexerContext {
 	private final OrinocoLexer lexer;
-	private TextBuffer originalText;
-	private final SimpleTextBuffer preprocessedBuffer = new SimpleTextBuffer();
+	private final TextBuffer originalText;
+	private final SimpleTextBuffer preprocessedBuffer;
 
-	public SimpleOrinocoLexerContext(@NotNull OrinocoLexer lexer, @NotNull TextBuffer originalText) {
+	public SimpleOrinocoLexerContext(@NotNull OrinocoLexer lexer) {
 		this.lexer = lexer;
-		this.originalText = originalText;
+		this.originalText = new SimpleTextBuffer();
+		this.preprocessedBuffer = new SimpleTextBuffer();
 	}
 
 
