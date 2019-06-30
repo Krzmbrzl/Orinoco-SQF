@@ -13,6 +13,7 @@ import arma.orinocosqf.sqf.SQFVariable;
 import arma.orinocosqf.util.CaseInsensitiveHashSet;
 import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.util.LightweightStringBuilder;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -111,6 +112,28 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		return varIdTransformer;
 	}
 
+	/**
+	 * Enables or disables text-buffering by switching out this lexer's context object.
+	 * 
+	 * @param enabled Whether text-buffering should be enabled
+	 */
+	public void enableTextBuffering(boolean enabled) {
+		if (enabled && !getContext().isTextBufferingEnabled()) {
+			// switch the context to an implementation that does support text-buffering
+			this.setContext(new SimpleOrinocoLexerContext(this));
+		}
+		if (!enabled && getContext().isTextBufferingEnabled()) {
+			// switch the context to an implementation that doesn't support text-buffering
+			this.setContext(new DefaultLexerContext());
+		}
+	}
+
+	/**
+	 * @return Whether the current context of this lexer supports text-buffering
+	 */
+	public boolean isTextBufferingEnabled() {
+		return getContext().isTextBufferingEnabled();
+	}
 
 	/**
 	 * Sets the context for the lexer. If null, a default instance will be used that has no text buffering.
