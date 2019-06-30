@@ -25,7 +25,7 @@ public class ArmaFilesystemTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		base = new File(".." + File.separator + ".." + File.separator + "code" + File.separator + "tests" + File.separator + "resources"
+		base = new File(".." + File.separator + ".." + File.separator + "code" + File.separator + "tests" + File.separator + "testresources"
 				+ File.separator + "include");
 		cwd = new File(base, "MyAwesomeMod" + File.separator + "addons");
 		searchPath1 = new File(base, "SearchDir1");
