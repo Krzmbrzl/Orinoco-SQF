@@ -67,7 +67,7 @@ public class OutputTokenProcessor extends OrinocoTokenProcessorAdapter {
 
 		// Write the preprocessed buffer to the outWriter
 		try {
-			outWriter.write(ctx.getTextBufferPreprocessed().toString());
+			outWriter.write(ctx.getTextBufferPreprocessed().getText());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
