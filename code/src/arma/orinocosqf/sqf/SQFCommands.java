@@ -23,12 +23,12 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 	public static final SQFCommands instance = new SQFCommands();
 
+	public static final String sqfCommandsDirectory = "arma-commands-syntax";
+
 	private SQFCommands() {
 		super(new ArrayList<>(3000));
 
-		String prefix = "../../arma-commands-syntax/";
-		File[] files = new File(prefix + "command_xml").listFiles((file, s) -> s.endsWith(".xml"));
-		if (files == null) {
+		File[] files = new File(sqfCommandsDirectory + File.separator + "command_xml").listFiles((file, s) -> s.endsWith(".xml"));
 			throw new NullPointerException();
 		}
 
@@ -41,8 +41,9 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			}
 		}
 
+
 		try {
-			Scanner commandsListScan = new Scanner(new File(prefix + "operators/operators.list"));
+			Scanner commandsListScan = new Scanner(new File(sqfCommandsDirectory + File.separator + "operators" + File.separator + "operators.list"));
 
 
 			Pattern p = Pattern.compile("`(.+?)`([^\n]+)");
@@ -60,8 +61,10 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 				while (m.find()) {
 					String commandFileName = m.group(1) + ".xml";
 					try {
-						SQFCommand d = SQFCommandSyntaxXMLLoader
-								.importFromStream(new FileInputStream(prefix + "operators/" + commandFileName), false);
+						SQFCommand d = SQFCommandSyntaxXMLLoader.importFromStream(
+								new FileInputStream(sqfCommandsDirectory + File.separator
+										+ "operators" + File.separator + commandFileName), false
+						);
 						commands.add(d);
 					} catch (Exception e) {
 						commandsListScan.close();
