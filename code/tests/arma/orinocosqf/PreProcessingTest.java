@@ -1,8 +1,9 @@
 package arma.orinocosqf;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,20 +24,33 @@ public class PreProcessingTest {
 		virtualFs = new VirtualArmaFileSystem();
 		processor = new OutputTokenProcessor();
 		preprocessor = new OrinocoPreProcessor(processor, virtualFs);
-		lexer = new OrinocoLexer(preprocessor); // TODO: Hope that this will soon be valid
+		lexer = new OrinocoLexer(preprocessor);
 	}
 
-	@Before
-	public void setUp() throws Exception {
+	void performTest(String[] input, String[] expected) {
+		// Test with LF
+		performTest(String.join("\n", input), String.join("\n", expected), true);
+
+		// Test with CRLF
+		performTest(String.join("\r\n", input), String.join("\r\n", expected), false);
+	}
+
+	void performTest(String input, String expected, boolean unixLF) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream(expected.length());
+		OutputStreamWriter outWriter = new OutputStreamWriter(os);
+
+		processor.setOutputWriter(outWriter);
+
+		lexer.start(OrinocoReader.fromCharSequence(input));
+
+		String result = new String(os.toByteArray());
+
+		assertEquals("Preprocessed result difers from expected one (LF=" + (unixLF ? "UNIX" : "WINDOWS"), expected, result);
 	}
 
 	@Test
-	public void test() {
-		String[] inputLinesines = { "#define TEST some Test", "I am TEST and I am proud of it", "hint str 3;" };
-		String[] expectedOutputLines = { "", "I am some Test and I am proud of it", "hint str 3;" };
-
-		// TODO: Actually implement the test
-		fail("Not yet implemented");
+	public void basicMacroExpansion() {
+		performTest(new String[] { "#define MACRO test", "MACRO" }, new String[] { "", "test" });
 	}
 
 }
