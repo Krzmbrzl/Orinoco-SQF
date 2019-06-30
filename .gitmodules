@@ -1,3 +1,3 @@
-[submodule "arma-commands-syntax"]
-	path = arma-commands-syntax
+[submodule "resources/arma/commands/syntax"]
+	path = resources/arma/commands/syntax
 	url = https://github.com/kayler-renslow/arma-commands-syntax.git
