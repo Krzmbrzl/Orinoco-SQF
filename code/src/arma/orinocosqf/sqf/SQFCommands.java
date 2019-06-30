@@ -26,7 +26,7 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 	private SQFCommands() {
 		super(new ArrayList<>(3000));
 
-		String prefix = "../arma-commands-syntax/";
+		String prefix = "../../arma-commands-syntax/";
 		File[] files = new File(prefix + "command_xml").listFiles((file, s) -> s.endsWith(".xml"));
 		if (files == null) {
 			throw new NullPointerException();
