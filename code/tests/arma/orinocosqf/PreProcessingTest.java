@@ -26,7 +26,7 @@ public class PreProcessingTest {
 		processor = new OutputTokenProcessor();
 		preprocessor = new OrinocoPreProcessor(processor, virtualFs);
 		lexer = new OrinocoLexer(preprocessor);
-		
+
 		lexer.enableTextBuffering(true);
 	}
 
@@ -45,7 +45,7 @@ public class PreProcessingTest {
 		processor.setOutputWriter(outWriter);
 
 		lexer.start(OrinocoReader.fromCharSequence(input));
-		
+
 		try {
 			outWriter.flush();
 			outWriter.close();
@@ -55,7 +55,21 @@ public class PreProcessingTest {
 
 		String result = new String(os.toByteArray());
 
-		assertEquals("Preprocessed result difers from expected one (LF=" + (unixLF ? "UNIX" : "WINDOWS"), expected, result);
+		String expectedSingleLine = expected.replaceAll("\\r?\\n", "");
+		String resultSingleLine = result.replaceAll("\\r?\\n", "");
+
+		if (!expectedSingleLine.equals(resultSingleLine)) {
+			// the difference is not WS-only -> Explicitly perform assertion in order to make the diff available
+			assertEquals("Preprocessed result differs from expected one", expected, result);
+		} else {
+			// The content without any newlines is the same -> Let's check the newlines then
+			assertEquals("Preprocessed result has different amount of NLs than the expected one", expected.replace("\r", ""),
+					result.replace("\r", ""));
+
+			// They also got the same amount of NLs -> check the kind of NLs as well
+			assertEquals("The NLs in the preprocessed result differs from the ones in the expected one (LF=" + (unixLF ? "UNIX" : "WINDOWS")
+					+ ")", expected, result);
+		}
 	}
 
 	@Test
