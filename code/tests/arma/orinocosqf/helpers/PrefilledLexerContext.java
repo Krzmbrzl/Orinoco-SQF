@@ -5,10 +5,10 @@ import org.jetbrains.annotations.Nullable;
 
 import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.lexer.OrinocoLexer;
-import arma.orinocosqf.lexer.SimpleOrinocoLexerContext;
+import arma.orinocosqf.lexer.BufferingOrinocoLexerContext;
 import arma.orinocosqf.util.SimpleTextBuffer;
 
-public class PrefilledLexerContext extends SimpleOrinocoLexerContext {
+public class PrefilledLexerContext extends BufferingOrinocoLexerContext {
 
 	protected TextBuffer originalInputBuffer;
 	protected TextBuffer preprocessedInputBuffer;
