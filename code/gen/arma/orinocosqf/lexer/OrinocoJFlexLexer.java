@@ -2,13 +2,12 @@
 
 package arma.orinocosqf.lexer;
 
+import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 import arma.orinocosqf.util.CommandSet;
 import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.util.LightweightStringBuilder;
-
 import org.jetbrains.annotations.NotNull;
-import arma.orinocosqf.preprocessing.MacroSet;
 
 
 /**
@@ -471,6 +470,17 @@ public class OrinocoJFlexLexer {
 
 	public int getLatestCommandId() {
 		return latestCommandId;
+	}
+
+	public void reset() {
+		whhile(yymoreStreams()) {
+			yypopStream();
+		}
+		this.zzReader.reset();
+		yyreset(this.reader);
+		resetTokenOffsets();
+		macroArgLeftParenCount = macroArgRightParenCount = 0;
+		macroHasArgs = false;
 	}
 
   	public void setCommandSet(@NotNull CommandSet commands) {

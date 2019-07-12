@@ -113,6 +113,17 @@
 		return latestCommandId;
 	}
 
+	public void reset() {
+		whhile (yymoreStreams()) {
+			yypopStream();
+		}
+		this.zzReader.reset();
+		yyreset(this.reader);
+		resetTokenOffsets();
+		macroArgLeftParenCount = macroArgRightParenCount = 0;
+		macroHasArgs = false;
+	}
+
   	public void setCommandSet(@NotNull CommandSet commands) {
 		this.commands = commands;
 

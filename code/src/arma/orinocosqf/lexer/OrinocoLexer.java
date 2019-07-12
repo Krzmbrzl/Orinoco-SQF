@@ -147,7 +147,6 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 		tokenDelegator.setLexer(this);
 
-		// TODO: Make JFlex lexer resettable as well
 		jFlexLexer = new OrinocoJFlexLexer(inputReader, tokenDelegator.getMacroSet());
 		jFlexLexer.setCommandSet(SQFCommands.instance);
 
@@ -637,8 +636,6 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 	@Override
 	public void reset() {
-		// TODO jflexLeer.reset();
-
 		// New input comes with separate local variables
 		localVarSet = new CaseInsensitiveHashSet<>();
 
@@ -654,6 +651,8 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		previousOriginalLength = 0;
 		previousPreprocessedOffset = 0;
 		previousPreprocessedLength = 0;
+		preProcessorIfDefState.clear();
+		jFlexLexer.reset();
 
 		// leave nextGlobalVarId and globalVarSet untouched in order to maintain compatibility between lex-runs
 		// leave nextLocalVarId untouched in order to avoid same indices for local variables in different files (after all they are not the
