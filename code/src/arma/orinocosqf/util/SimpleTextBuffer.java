@@ -71,4 +71,9 @@ public class SimpleTextBuffer implements TextBuffer {
 		sb.append(c);
 		return sb;
 	}
+
+	@Override
+	public @NotNull String getText() {
+		return sb.toString();
+	}
 }

@@ -18,13 +18,22 @@
 		<link>
 			<name>code</name>
 			<type>2</type>
-			<locationURI>SOURCE_DIR</locationURI>
+			<locationURI>PROJECT_ROOT/code</locationURI>
+		</link>
+		<link>
+			<name>resources</name>
+			<type>2</type>
+			<locationURI>PROJECT_ROOT/resources</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
+			<name>PROJECT_ROOT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D</value>
+		</variable>
+		<variable>
 			<name>SOURCE_DIR</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D/code</value>
+			<value>$%7BPROJECT_ROOT%7D/code</value>
 		</variable>
 	</variableList>
 </projectDescription>

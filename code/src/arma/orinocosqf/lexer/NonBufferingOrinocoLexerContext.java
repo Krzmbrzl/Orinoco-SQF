@@ -1,27 +1,34 @@
 package arma.orinocosqf.lexer;
 
-import arma.orinocosqf.TextBuffer;
-import arma.orinocosqf.exceptions.UnknownIdException;
-import arma.orinocosqf.sqf.SQFCommands;
-import arma.orinocosqf.util.SimpleTextBuffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * @author K
- * @since 5/13/19
- */
-public class SimpleOrinocoLexerContext implements OrinocoLexerContext {
-	private final OrinocoLexer lexer;
-	private TextBuffer originalText;
-	private final SimpleTextBuffer preprocessedBuffer = new SimpleTextBuffer();
+import arma.orinocosqf.TextBuffer;
+import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.sqf.SQFCommands;
 
-	public SimpleOrinocoLexerContext(@NotNull OrinocoLexer lexer, @NotNull TextBuffer originalText) {
+/**
+ * An implementation of a {@link OrinocoLexerContext} which will have text-buffering disabled
+ * 
+ * @author Raven
+ *
+ */
+public class NonBufferingOrinocoLexerContext implements OrinocoLexerContext {
+	/**
+	 * The lexer associated to this buffer
+	 */
+	protected OrinocoLexer lexer;
+
+
+	/**
+	 * 
+	 * @param lexer The lexer this context is being instantiated for
+	 */
+	public NonBufferingOrinocoLexerContext(@NotNull OrinocoLexer lexer) {
 		this.lexer = lexer;
-		this.originalText = originalText;
 	}
 
-
+	
 	@Override
 	public @NotNull String getCommand(int id) throws UnknownIdException {
 		String c = SQFCommands.instance.getCommandNameById(id);
@@ -42,19 +49,19 @@ public class SimpleOrinocoLexerContext implements OrinocoLexerContext {
 
 	@Override
 	public boolean isTextBufferingEnabled() {
-		return true;
+		return false;
 	}
 
 	@Override
 	@Nullable
 	public TextBuffer getTextBuffer() {
-		return originalText;
+		return null;
 	}
 
 	@Override
 	@Nullable
 	public TextBuffer getTextBufferPreprocessed() {
-		return preprocessedBuffer;
+		return null;
 	}
 
 }

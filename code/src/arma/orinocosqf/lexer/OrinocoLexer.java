@@ -3,7 +3,6 @@ package arma.orinocosqf.lexer;
 import arma.orinocosqf.OrinocoReader;
 import arma.orinocosqf.Resettable;
 import arma.orinocosqf.TextBuffer;
-import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.problems.Problem;
@@ -13,6 +12,7 @@ import arma.orinocosqf.sqf.SQFVariable;
 import arma.orinocosqf.util.CaseInsensitiveHashSet;
 import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.util.LightweightStringBuilder;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +51,8 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 	protected static final Pattern pattern_ifdef = Pattern.compile("#if[n]?def ([a-zA-Z0-9_$]+)");
 
-	protected OrinocoLexerContext context = new DefaultLexerContext();
+	protected OrinocoLexerContext context;
+	protected OrinocoLexerContextFactory contextFactory;
 
 	protected OrinocoTokenDelegator tokenDelegator;
 	protected int originalOffset = 0;
@@ -96,12 +97,68 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	@NotNull
 	protected final Stack<PreProcessorIfDefState> preProcessorIfDefState = new Stack<>();
 
-	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator) {
+
+	/**
+	 * Creates an instance of this lexer
+	 * 
+	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param contextFactory The {@link OrinocoLexerContextFactory} used to produce {@link OrinocoLexerContext}s with the desired properties
+	 * @param enableTextBuffering Whether to enable text-buffering for the context used by this lexer
+	 */
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull OrinocoLexerContextFactory contextFactory,
+			boolean enableTextBuffering) {
 		this.tokenDelegator = tokenDelegator;
 		tokenDelegator.setLexer(this);
 
+		this.contextFactory = contextFactory;
+		this.context = contextFactory.produce(this, enableTextBuffering);
+
 		this.varIdTransformer = new MyVariableIdTransformer();
 	}
+
+	/**
+	 * Creates an instance of this lexer. The instanciated lexer will have text-buffering disabled by default.
+	 * 
+	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param contextFactory The {@link OrinocoLexerContextFactory} used to produce {@link OrinocoLexerContext}s with the desired properties
+	 */
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull OrinocoLexerContextFactory contextFactory) {
+		this(tokenDelegator, contextFactory, false);
+	}
+
+	/**
+	 * Creates an instance of this lexer. The instantiated lexer will use default LexerContext objects by default.
+	 * 
+	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param enableTextBuffering Whether to enable text-buffering for the context used by this lexer
+	 * 
+	 * @see BufferingOrinocoLexerContext
+	 * @see NonBufferingOrinocoLexerContext
+	 */
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, boolean enableTextBuffering) {
+		this(tokenDelegator, new OrinocoLexerContextFactory() {
+
+			@Override
+			public OrinocoLexerContext produce(@NotNull OrinocoLexer lexer, boolean textBufferingEnabled) {
+				return textBufferingEnabled ? new BufferingOrinocoLexerContext(lexer) : new NonBufferingOrinocoLexerContext(lexer);
+			}
+		}, enableTextBuffering);
+	}
+
+	/**
+	 * Creates an instance of this lexer. The instantiated lexer will have text-buffering disabled and it will use default LexerContext
+	 * objects by default.
+	 * 
+	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param enableTextBuffering Whether to enable text-buffering for the context used by this lexer
+	 * 
+	 * @see BufferingOrinocoLexerContext
+	 * @see NonBufferingOrinocoLexerContext
+	 */
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator) {
+		this(tokenDelegator, false);
+	}
+
 
 	/**
 	 * @return an id transformer for both local and global variables
@@ -111,6 +168,24 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		return varIdTransformer;
 	}
 
+	/**
+	 * Enables or disables text-buffering by switching out this lexer's context object.
+	 * 
+	 * @param enabled Whether text-buffering should be enabled
+	 */
+	public void enableTextBuffering(boolean enabled) {
+		if ((enabled && !isTextBufferingEnabled() || (!enabled && isTextBufferingEnabled()))) {
+			// The current context doesn't fulfill the requirements of the user -> switch it out by one that does
+			this.setContext(contextFactory.produce(this, enabled));
+		}
+	}
+
+	/**
+	 * @return Whether the current context of this lexer supports text-buffering
+	 */
+	public boolean isTextBufferingEnabled() {
+		return getContext().isTextBufferingEnabled();
+	}
 
 	/**
 	 * Sets the context for the lexer. If null, a default instance will be used that has no text buffering.
@@ -119,7 +194,7 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 */
 	public void setContext(@Nullable OrinocoLexerContext context) {
 		if (context == null) {
-			context = new DefaultLexerContext();
+			context = contextFactory.produce(this, false);
 		}
 		this.context = context;
 	}
@@ -285,6 +360,9 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 				case GLUED_WORD: // fall
 				case MACRO: {
 					if (tokenDelegator.skipPreProcessing()) {
+						if (context.getTextBufferPreprocessed() != null) {
+							context.getTextBufferPreprocessed().append(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
+						}
 						tokenDelegator.preProcessorTokenSkipped(originalOffset, originalLength, context);
 					} else {
 						if (jFlexLexer.macroHasArgs()) {
@@ -384,10 +462,12 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		if (context.getTextBuffer() != null) {
 			context.getTextBuffer().append(cmd.getCharsReadOnly(), 0, cmd.length());
 		}
-		if (context.getTextBufferPreprocessed() != null) {
-			context.getTextBufferPreprocessed().append(cmd.getCharsReadOnly(), 0, cmd.length());
-		}
+
 		if (tokenDelegator.skipPreProcessing()) {
+			if (context.getTextBufferPreprocessed() != null) {
+				context.getTextBufferPreprocessed().append(cmd.getCharsReadOnly(), 0, cmd.length());
+			}
+
 			tokenDelegator.preProcessorCommandSkipped(originalOffset, originalLength, context);
 			updateOffsetsAfterMake();
 			return;
@@ -595,45 +675,6 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		}
 	}
 
-	/**
-	 * @see OrinocoLexer#setContext(OrinocoLexerContext)
-	 */
-	protected class DefaultLexerContext implements OrinocoLexerContext {
-
-		@Override
-		public @NotNull String getCommand(int id) throws UnknownIdException {
-			String c = SQFCommands.instance.getCommandNameById(id);
-			if (c == null) {
-				throw new UnknownIdException(id + "");
-			}
-			return c;
-		}
-
-		@Override
-		public @Nullable String getVariable(int id) {
-			try {
-				return OrinocoLexer.this.getIdTransformer().fromId(id);
-			} catch (UnknownIdException ignore) {
-				return null;
-			}
-		}
-
-		@Override
-		public boolean isTextBufferingEnabled() {
-			return false;
-		}
-
-		@Override
-		public @Nullable TextBuffer getTextBuffer() {
-			return null;
-		}
-
-		@Override
-		public @Nullable TextBuffer getTextBufferPreprocessed() {
-			return null;
-		}
-	}
-
 	@Override
 	public void reset() {
 		// New input comes with separate local variables
@@ -641,7 +682,11 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 		varIdTransformer.setLocalVars(localVarSet);
 
-		// Maybe also tokenDelegator.reset() ?
+		// Reset TokenDelegator
+		tokenDelegator.reset();
+
+		// "Reset" context -> we can't actually reset it as it might be stored somewhere for later usage by the user
+		this.context = contextFactory.produce(this, isTextBufferingEnabled());
 
 		originalOffset = 0;
 		originalLength = 0;
