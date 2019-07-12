@@ -114,11 +114,16 @@
 	}
 
 	public void reset() {
-		whhile (yymoreStreams()) {
-			yypopStream();
+		while (yymoreStreams()) {
+			try{
+				yypopStream();
+			}catch(IOException ignore){}
 		}
-		this.zzReader.reset();
-		yyreset(this.reader);
+
+		try{
+			this.zzReader.reset();
+			yyreset(this.zzReader);
+		}catch(IOException ignore){}
 		resetTokenOffsets();
 		macroArgLeftParenCount = macroArgRightParenCount = 0;
 		macroHasArgs = false;

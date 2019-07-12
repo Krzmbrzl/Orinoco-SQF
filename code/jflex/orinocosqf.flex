@@ -8,6 +8,7 @@ import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.util.CommandSet;
 import arma.orinocosqf.util.LightweightStringBuilder;
+import java.io.IOException;
 
 %%
 
