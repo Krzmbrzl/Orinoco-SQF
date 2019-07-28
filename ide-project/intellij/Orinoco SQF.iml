@@ -11,5 +11,6 @@
     <orderEntry type="library" name="org.jetbrains:annotations:16.0.2" level="project" />
     <orderEntry type="library" name="junit:junit:4.12" level="project" />
     <orderEntry type="library" name="jflex-full-1.7.0" level="project" />
+    <orderEntry type="library" name="openjfx-javafx-11.0.2" level="application" />
   </component>
 </module>

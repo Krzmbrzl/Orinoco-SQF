@@ -75,4 +75,13 @@ public class CommandSet<C extends Command> {
 		}
 		return c.getName();
 	}
+
+	public int count() {
+		return commands.size();
+	}
+
+	@NotNull
+	public Iterable<C> iterate() {
+		return commands;
+	}
 }

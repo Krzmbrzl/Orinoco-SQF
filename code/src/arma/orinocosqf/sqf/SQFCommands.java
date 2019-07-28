@@ -3,13 +3,11 @@ package arma.orinocosqf.sqf;
 import arma.orinocosqf.IdTransformer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.util.CommandSet;
-import arma.orinocosqf.util.ResourceHelper;
-
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -25,29 +23,16 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 	public static final SQFCommands instance = new SQFCommands();
 
-	public static final String sqfCommandsDirectory = "arma/commands/syntax/";
+	public static final String sqfCommandsDirectory = "arma-commands-syntax";
 
 	private SQFCommands() {
 		super(new ArrayList<>(3000));
 
-		String commandDirPath = sqfCommandsDirectory + "command_xml/";
+		File[] files = new File(sqfCommandsDirectory + File.separator + "command_xml").listFiles((file, s) -> s.endsWith(".xml"));
 
-		String[] resourceNames;
-		try {
-			resourceNames = ResourceHelper.getResourceListing(getClass(), commandDirPath);
-		} catch (URISyntaxException | IOException e1) {
-			throw new RuntimeException("Failed to load SQF command resources");
-		}
-
-
-		for (String currentResourceName : resourceNames) {
-			if (!currentResourceName.endsWith(".xml")) {
-				continue;
-			}
-
+		for (File commandXmlFile : files) {
 			try {
-				SQFCommand d = SQFCommandSyntaxXMLLoader
-						.importFromStream(getClass().getClassLoader().getResourceAsStream(commandDirPath + currentResourceName), false);
+				SQFCommand d = SQFCommandSyntaxXMLLoader.importFromStream(new FileInputStream(commandXmlFile), false);
 				commands.add(d);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
@@ -55,14 +40,12 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 		}
 
 
-		InputStream is = getClass().getClassLoader().getResourceAsStream(sqfCommandsDirectory + "operators/operators.list");
-
-		if (is == null) {
-			throw new IllegalStateException();
+		Scanner commandsListScan = null;
+		try {
+			commandsListScan = new Scanner(new File(sqfCommandsDirectory + File.separator + "operators" + File.separator + "operators.list"));
+		} catch (FileNotFoundException e) {
+			throw new IllegalStateException(e);
 		}
-
-		Scanner commandsListScan = new Scanner(is);
-		// new File(sqfCommandsDirectory + File.separator + "operators" + File.separator + "operators.list"));
 
 
 		Pattern p = Pattern.compile("`(.+?)`([^\n]+)");
@@ -81,7 +64,9 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 				String commandFileName = m.group(1) + ".xml";
 				try {
 					SQFCommand d = SQFCommandSyntaxXMLLoader.importFromStream(
-							getClass().getClassLoader().getResourceAsStream(sqfCommandsDirectory + "/operators/" + commandFileName), false);
+							new FileInputStream(sqfCommandsDirectory + File.separator + "operators" + File.separator + commandFileName),
+							false
+					);
 					commands.add(d);
 				} catch (Exception e) {
 					commandsListScan.close();
@@ -114,5 +99,6 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 		}
 		return id;
 	}
+
 
 }

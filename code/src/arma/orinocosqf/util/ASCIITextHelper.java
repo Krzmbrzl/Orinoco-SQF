@@ -1,5 +1,7 @@
 package arma.orinocosqf.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Comparator;
 
 /**
@@ -21,6 +23,26 @@ public class ASCIITextHelper {
 		}
 		return len1 - len2;
 	};
+
+	public static boolean containsLowerCase(@NotNull CharSequence base, @NotNull CharSequence search) {
+		if (search.length() > base.length()) {
+			return false;
+		}
+		int sind = 0;
+		for (int b = 0; b < base.length(); ++b) {
+			final char blc = toLowerCase(base.charAt(b));
+			final char slc = toLowerCase(search.charAt(sind));
+			if (blc != slc) {
+				sind = 0;
+				continue;
+			}
+			sind++;
+			if (sind == search.length()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * An optimized toLowerCase method. This method assumes no non-ASCII characters are to be submitted to this method
