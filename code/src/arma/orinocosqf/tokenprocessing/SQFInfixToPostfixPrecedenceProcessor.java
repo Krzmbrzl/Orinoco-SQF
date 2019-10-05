@@ -198,6 +198,21 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 			// todo https://community.bistudio.com/wiki/a_:_b
 		}
 
+		if (command == ops.COMMA || command == ops.COLON) {
+			// todo report error
+			// 1 + 1
+			// acceptBinaryExpression(leftArgument, rightArgument, operator)
+			// acceptUnaryExpression(rightArgument, operator)
+			// acceptNularExpression(operator)
+
+			// !a && b
+			// a ! b &&
+		}
+
+		if (command == ops.SEMICOLON) {
+
+		}
+
 		if (command == ops.LPAREN) {
 			operators.add(command);
 		} else if (command == ops.RPAREN) {
@@ -266,7 +281,10 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 
 	@Override
 	public void end(@NotNull OrinocoLexerContext ctx) {
-
+		// todo check delay eval stack
+		while (!operators.isEmpty()) {
+			postfixOutput.add(new CommandOrinocoNode(operators.pop()));
+		}
 	}
 
 	@Override

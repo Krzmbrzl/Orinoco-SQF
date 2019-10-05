@@ -85,13 +85,17 @@ public class SQFCommandPreviewPane extends StackPane {
 			//syntax string
 			HBox hboxSyntaxString = new HBox(5);
 			if (syntax.getLeftParam() != null) {
-				hboxSyntaxString.getChildren().add(getLabel(getParameterString(syntax.getLeftParam()), false));
+				StringBuilder sb = new StringBuilder();
+				getParameterString(sb, syntax.getLeftParam());
+				hboxSyntaxString.getChildren().add(getLabel(sb.toString(), false));
 			}
 
 			hboxSyntaxString.getChildren().add(getLabel(commandName, true));
 
 			if (syntax.getRightParam() != null) {
-				hboxSyntaxString.getChildren().add(getLabel(getParameterString(syntax.getRightParam()), false));
+				StringBuilder sb = new StringBuilder();
+				getParameterString(sb, syntax.getRightParam());
+				hboxSyntaxString.getChildren().add(getLabel(sb.toString(), false));
 			}
 
 			addRow(row++, getLabel("Syntax:", true), hboxSyntaxString);
@@ -120,16 +124,26 @@ public class SQFCommandPreviewPane extends StackPane {
 
 		}
 
-		private String getParameterString(@NotNull Param p) {
-			StringBuilder sb = new StringBuilder(100);
+		private void getParameterString(@NotNull StringBuilder sb, @NotNull Param p) {
 			if (p instanceof ArrayParam) {
 				ArrayParam arrayParam = (ArrayParam) p;
-				getArrayDataValueDisplayText(arrayParam, sb);
+
+				sb.append("[");
+				int i = 0;
+				for (Param innerParam : arrayParam.getParams()) {
+					getParameterString(sb, innerParam);
+					if (i != arrayParam.getValueHolders().size() - 1) {
+						sb.append(", ");
+					}
+					i++;
+				}
+				if (arrayParam.hasUnboundedParams()) {
+					sb.append(" ...");
+				}
+				sb.append("]");
 			} else {
 				sb.append(p.getName());
 			}
-
-			return sb.toString();
 		}
 
 		private Node getParameterDescriptionNode(@NotNull Param p) {
