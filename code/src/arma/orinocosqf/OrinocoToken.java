@@ -1,17 +1,15 @@
 package arma.orinocosqf;
 
-import arma.orinocosqf.parsing.postfix.OrinocoNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A token class that can either hold text or an id for things like
- * {@link OrinocoSQFTokenType#Command}
+ * A token class that can either hold text or an id for things like {@link OrinocoSQFTokenType#Command}
  *
  * @author K
  * @since 02/21/2019
  */
-public class OrinocoToken implements OrinocoNode {
+public class OrinocoToken {
 	private String text;
 	private int id;
 	private OrinocoTokenType tokenType;
@@ -50,8 +48,7 @@ public class OrinocoToken implements OrinocoNode {
 	}
 
 	/**
-	 * @return null if this token is id based, or the text if the token is text
-	 *         based
+	 * @return null if this token is id based, or the text if the token is text based
 	 */
 	@Nullable
 	public String getText() {
@@ -82,21 +79,5 @@ public class OrinocoToken implements OrinocoNode {
 
 	public int getOriginalLength() {
 		return originalLength;
-	}
-
-
-	@Override
-	public boolean isScopeNode() {
-		return false;
-	}
-
-	@Override
-	public boolean isArrayNode() {
-		return false;
-	}
-
-	@Override
-	public boolean isCollectionNode() {
-		return false;
 	}
 }

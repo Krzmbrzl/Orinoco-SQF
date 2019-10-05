@@ -1,15 +1,24 @@
 package arma.orinocosqf.parsing.postfix;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author K
  * @since 7/28/19
  */
-public interface OrinocoNode {
+public class OrinocoNode {
+	public enum Flag {
+		Literal, Variable, Array, Command, CodeBlock, InvalidToken
+	}
 
-	boolean isScopeNode();
+	private final Flag flag;
 
-	boolean isArrayNode();
+	public OrinocoNode(@NotNull Flag flag) {
+		this.flag = flag;
+	}
 
-	boolean isCollectionNode();
-
+	@NotNull
+	public Flag getFlag() {
+		return flag;
+	}
 }
