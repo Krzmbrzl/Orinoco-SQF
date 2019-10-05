@@ -10,4 +10,5 @@ module Orinoco.SQF {
 	requires javafx.swt;
 
 	exports arma.orinocosqf.gui;
+	exports arma.orinocosqf.sqf;
 }

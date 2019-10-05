@@ -24,7 +24,7 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 	public static final SQFCommands instance = new SQFCommands();
 
 	public static final String sqfCommandsDirectory = "arma-commands-syntax";
-	private final Operators operators;
+	private Operators operators;
 
 	private SQFCommands() {
 		super(new ArrayList<>(3000));
@@ -86,8 +86,6 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			}
 		}
 
-
-		operators = new Operators();
 	}
 
 	@NotNull
@@ -111,6 +109,9 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 	@NotNull
 	public static Operators ops() {
+		if (instance.operators == null) {
+			instance.operators = new Operators();
+		}
 		return instance.operators;
 	}
 

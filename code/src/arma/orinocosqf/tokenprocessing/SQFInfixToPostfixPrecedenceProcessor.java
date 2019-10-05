@@ -135,7 +135,6 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 		if (command == ops.SEMICOLON) {
 		}
 
-		//check for array literal
 		if (command == ops.L_SQ_BRACKET) {
 		} else if (command == ops.R_SQ_BRACKET) {
 		}
