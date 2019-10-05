@@ -1,5 +1,6 @@
 package arma.orinocosqf.tokenprocessing;
 
+import arma.orinocosqf.Command;
 import arma.orinocosqf.OrinocoToken;
 import arma.orinocosqf.OrinocoTokenInstanceProcessor;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
@@ -20,10 +21,10 @@ import static arma.orinocosqf.util.ASCIITextHelper.equalsIgnoreCase;
  */
 public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanceProcessor {
 	private final List<OrinocoNode> postfixOutput = new ArrayList<>();
-	private final Stack<OrinocoNode> operators = new Stack<>();
+	private final Stack<Command> operators = new Stack<>();
 	private final Stack<DelayEvalOrinocoNode> delayEvalStack = new Stack<>();
 
-	private int precedence(@NotNull SQFCommand cmd) {
+	private int precedence(@NotNull Command cmd) {
 		// ORDER OF PRECEDENCE: (Lower number is highest precedence)
 		// https://community.bistudio.com/wiki/SQF_syntax
 		// 1. Nular
@@ -43,7 +44,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 		if (cmd.isStrictlyUnary()) {
 			return 2;
 		}
-		final String cn = cmd.getCommandName();
+		final String cn = cmd.getName();
 		if (postfixOutput.isEmpty() && cmd.canBeUnary() || (
 				!postfixOutput.isEmpty() && (equalsIgnoreCase(cn, "+") || equalsIgnoreCase(cn, "-"))
 		)
@@ -198,35 +199,35 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 		}
 
 		if (command == ops.LPAREN) {
-			operators.add(new CommandOrinocoNode(command));
+			operators.add(command);
 		} else if (command == ops.RPAREN) {
 			while (!operators.isEmpty()) {
-				OrinocoNode peek = operators.peek();
-				if (peek instanceof CommandOrinocoNode) {
-					CommandOrinocoNode peekCmd = (CommandOrinocoNode) peek;
-					if (peekCmd.getCommand() == ops.LPAREN) {
-						break;
-					}
+				Command peek = operators.peek();
+				if (peek == ops.LPAREN) {
+					break;
 				}
-				postfixOutput.add(operators.pop());
+				postfixOutput.add(new CommandOrinocoNode(operators.pop()));
 			}
 			if (!operators.isEmpty()) {
-				OrinocoNode peek = operators.peek();
-				if (peek instanceof CommandOrinocoNode) {
-					CommandOrinocoNode peekCmd = (CommandOrinocoNode) peek;
-					if (peekCmd.getCommand() != ops.LPAREN) {
-						// todo report error
-					} else {
-						operators.pop();
-					}
+				Command peek = operators.peek();
+				if (peek != ops.LPAREN) {
+					postfixOutput.add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(operators.pop())));
 				} else {
-					//todo report error because it's not (
+					operators.pop();
+				}
+			}
+		} else { // operator is encountered
+			int prec = precedence(command);
+			while (!operators.isEmpty() && prec <= precedence(operators.peek())) {
+				if (operators.peek() == ops.LPAREN) {
+					postfixOutput.add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(operators.pop())));
+				} else {
+					postfixOutput.add(new CommandOrinocoNode(operators.pop()));
 				}
 			}
 		}
 
-		int prec = precedence(command);
-		// todo
+		operators.add(command);
 	}
 
 	private void addNode(@NotNull OrinocoNode node) {
