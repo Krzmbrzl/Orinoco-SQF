@@ -31,7 +31,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	/** {@link #setUncertain(boolean)} */
 	private boolean uncertain = false;
 
-	private boolean striclyNular, canBeNular, strictlyBinary, canBeBinary, strictlyUnary, canBeUnary;
+	private boolean strictlyNular, strictlyBinary, canBeBinary, strictlyUnary, canBeUnary;
 
 	public SQFCommand(@NotNull String commandName) {
 		this.commandName = commandName;
@@ -49,8 +49,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		this.gameVersion = gameVersion;
 		this.game = game;
 
-		striclyNular = detectStrictlyNular();
-		canBeNular = detectCanBeNular();
+		strictlyNular = detectStrictlyNular();
 		strictlyBinary = detectStrictlyBinary();
 		canBeBinary = detectCanBeBinary();
 		strictlyUnary = detectStrictlyUnary();
@@ -65,13 +64,9 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 
 	@Override
 	public boolean isStrictlyNular() {
-		return striclyNular;
+		return strictlyNular;
 	}
 
-	@Override
-	public boolean canBeNular() {
-		return canBeNular;
-	}
 
 	@Override
 	public boolean isStrictlyBinary() {

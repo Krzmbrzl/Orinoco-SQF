@@ -24,6 +24,7 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 	public static final SQFCommands instance = new SQFCommands();
 
 	public static final String sqfCommandsDirectory = "arma-commands-syntax";
+	private final Operators operators;
 
 	private SQFCommands() {
 		super(new ArrayList<>(3000));
@@ -79,6 +80,14 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 		((ArrayList<SQFCommand>) this.commands).trimToSize();
 		this.commands.sort(COMPARATOR);
+		for (SQFCommand c : iterate()) {
+			if (c.isNotStrict()) {
+				System.out.println("SQFCommands.SQFCommands c=" + c);
+			}
+		}
+
+
+		operators = new Operators();
 	}
 
 	@NotNull
@@ -98,6 +107,46 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			throw new UnknownIdException(value);
 		}
 		return id;
+	}
+
+	@NotNull
+	public static Operators ops() {
+		return instance.operators;
+	}
+
+	public static class Operators {
+		private SQFCommand getCmd(String s) {
+			return instance.commands.get(instance.toId(s));
+		}
+
+		public final SQFCommand EQEQ = getCmd("==");
+		public final SQFCommand NE = getCmd("!=");
+		public final SQFCommand GTGT = getCmd(">>");
+		public final SQFCommand LE = getCmd("<=");
+		public final SQFCommand GE = getCmd(">=");
+		public final SQFCommand AMPAMP = getCmd("&&");
+		public final SQFCommand BARBAR = getCmd("||");
+		public final SQFCommand ASTERISK = getCmd("*");
+		public final SQFCommand EQ = getCmd("=");
+		public final SQFCommand PERC = getCmd("%");
+		public final SQFCommand PLUS = getCmd("+");
+		public final SQFCommand MINUS = getCmd("-");
+		public final SQFCommand FSLASH = getCmd("/");
+		public final SQFCommand CARET = getCmd("^");
+		public final SQFCommand HASH = getCmd("#");
+		public final SQFCommand LT = getCmd("<");
+		public final SQFCommand GT = getCmd(">");
+		public final SQFCommand EXCL = getCmd("!");
+		public final SQFCommand LPAREN = getCmd("(");
+		public final SQFCommand RPAREN = getCmd(")");
+		public final SQFCommand L_CURLY_BRACE = getCmd("{");
+		public final SQFCommand R_CURLY_BRACE = getCmd("}");
+		public final SQFCommand L_SQ_BRACKET = getCmd("[");
+		public final SQFCommand R_SQ_BRACKET = getCmd("]");
+		public final SQFCommand COMMA = getCmd(",");
+		public final SQFCommand SEMICOLON = getCmd(";");
+		public final SQFCommand QUEST = getCmd("?");
+		public final SQFCommand COLON = getCmd(":");
 	}
 
 

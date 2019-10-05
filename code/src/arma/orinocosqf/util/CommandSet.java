@@ -63,6 +63,11 @@ public class CommandSet<C extends Command> {
 		return commands.get(i);
 	}
 
+	@NotNull
+	public C getCommandInstanceById(int id) {
+		return commands.get(id);
+	}
+
 	public int getId(@NotNull Command command) {
 		return Collections.binarySearch(commands, command, COMPARATOR);
 	}

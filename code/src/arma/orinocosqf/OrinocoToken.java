@@ -1,5 +1,6 @@
 package arma.orinocosqf;
 
+import arma.orinocosqf.parsing.postfix.OrinocoNode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,17 +11,18 @@ import org.jetbrains.annotations.Nullable;
  * @author K
  * @since 02/21/2019
  */
-public class OrinocoToken {
+public class OrinocoToken implements OrinocoNode {
 	private String text;
 	private int id;
 	private OrinocoTokenType tokenType;
 	private int preprocessedOffset;
+	private int preprocessedLength;
 	private int originalOffset;
 	private int originalLength;
 
-	public OrinocoToken(@NotNull String text, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset,
+	public OrinocoToken(@NotNull String text, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int preprocessedLength, int originalOffset,
 						int originalLength) {
-		this(tokenType, preprocessedOffset, originalOffset, originalLength);
+		this(tokenType, preprocessedOffset, preprocessedLength, originalOffset, originalLength);
 
 		if (tokenType.isIdBased()) {
 			throw new IllegalArgumentException("Tried to instantiate Id-based token with text!");
@@ -29,8 +31,8 @@ public class OrinocoToken {
 		this.id = -1;
 	}
 
-	public OrinocoToken(int id, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset, int originalLength) {
-		this(tokenType, preprocessedOffset, originalOffset, originalLength);
+	public OrinocoToken(int id, @NotNull OrinocoTokenType tokenType, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength) {
+		this(tokenType, preprocessedOffset, preprocessedLength, originalOffset, originalLength);
 
 		if (!tokenType.isIdBased()) {
 			throw new IllegalArgumentException("Tried to instantiate text-based token with Id!");
@@ -39,7 +41,8 @@ public class OrinocoToken {
 		this.id = id;
 	}
 
-	private OrinocoToken(OrinocoTokenType tokenType, int preprocessedOffset, int originalOffset, int originalLength) {
+	private OrinocoToken(OrinocoTokenType tokenType, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength) {
+		this.preprocessedLength = preprocessedLength;
 		this.tokenType = tokenType;
 		this.preprocessedOffset = preprocessedOffset;
 		this.originalOffset = originalOffset;
@@ -69,6 +72,10 @@ public class OrinocoToken {
 		return preprocessedOffset;
 	}
 
+	public int getPreprocessedLength() {
+		return preprocessedLength;
+	}
+
 	public int getOriginalOffset() {
 		return originalOffset;
 	}
@@ -78,4 +85,18 @@ public class OrinocoToken {
 	}
 
 
+	@Override
+	public boolean isScopeNode() {
+		return false;
+	}
+
+	@Override
+	public boolean isArrayNode() {
+		return false;
+	}
+
+	@Override
+	public boolean isCollectionNode() {
+		return false;
+	}
 }

@@ -58,7 +58,7 @@ public class SQFSyntaxVisualizer extends Application {
 				commandsLv.getItems().addAll(helpers);
 			} else {
 				for (CommandListViewHelper helper : helpers) {
-					if (ASCIITextHelper.containsLowerCase(helper.command.getCommandName(), newValue)) {
+					if (ASCIITextHelper.containsIgnoreCase(helper.command.getCommandName(), newValue)) {
 						commandsLv.getItems().addAll(helper);
 					}
 				}

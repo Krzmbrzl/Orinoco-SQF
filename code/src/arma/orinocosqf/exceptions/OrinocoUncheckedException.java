@@ -1,18 +1,17 @@
 package arma.orinocosqf.exceptions;
 
 /**
- * An exception that is thrown if a provided Id is unknown
+ * Base class of all custom Orinoco Runtime exceptions.
  *
- * @author Raven
+ * @author Kayler
  */
-public class UnknownIdException extends OrinocoUncheckedException {
-	private static final long serialVersionUID = -2150394272107512233L;
+public class OrinocoUncheckedException extends RuntimeException {
 
 	/**
 	 * Constructs a new exception with {@code null} as its detail message. The cause is not initialized, and may subsequently be initialized
 	 * by a call to {@link #initCause}.
 	 */
-	public UnknownIdException() {
+	public OrinocoUncheckedException() {
 		super();
 	}
 
@@ -22,7 +21,7 @@ public class UnknownIdException extends OrinocoUncheckedException {
 	 *
 	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
 	 */
-	public UnknownIdException(String message) {
+	public OrinocoUncheckedException(String message) {
 		super(message);
 	}
 
@@ -36,7 +35,7 @@ public class UnknownIdException extends OrinocoUncheckedException {
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
 	 * and indicates that the cause is nonexistent or unknown.)
 	 */
-	public UnknownIdException(String message, Throwable cause) {
+	public OrinocoUncheckedException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -48,7 +47,7 @@ public class UnknownIdException extends OrinocoUncheckedException {
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted,
 	 * and indicates that the cause is nonexistent or unknown.)
 	 */
-	public UnknownIdException(Throwable cause) {
+	public OrinocoUncheckedException(Throwable cause) {
 		super(cause);
 	}
 
@@ -61,7 +60,7 @@ public class UnknownIdException extends OrinocoUncheckedException {
 	 * @param enableSuppression whether or not suppression is enabled or disabled
 	 * @param writableStackTrace whether or not the stack trace should be writable
 	 */
-	protected UnknownIdException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+	protected OrinocoUncheckedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 }

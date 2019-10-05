@@ -10,7 +10,9 @@ import java.util.Comparator;
  */
 public class ASCIITextHelper {
 
-	public static final Comparator<CharSequence> CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR = (left, right) -> {
+	public static final Comparator<CharSequence> CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR = ASCIITextHelper::compareIgnoreCase;
+
+	public static int compareIgnoreCase(@NotNull CharSequence left, @NotNull CharSequence right) {
 		int len1 = left.length();
 		int len2 = right.length();
 		int lim = Math.min(left.length(), right.length());
@@ -22,9 +24,9 @@ public class ASCIITextHelper {
 			}
 		}
 		return len1 - len2;
-	};
+	}
 
-	public static boolean containsLowerCase(@NotNull CharSequence base, @NotNull CharSequence search) {
+	public static boolean containsIgnoreCase(@NotNull CharSequence base, @NotNull CharSequence search) {
 		if (search.length() > base.length()) {
 			return false;
 		}
@@ -61,5 +63,9 @@ public class ASCIITextHelper {
 			return true;
 		}
 		return c >= 'a' && c <= 'z';
+	}
+
+	public static boolean equalsIgnoreCase(@NotNull CharSequence left, @NotNull CharSequence right) {
+		return compareIgnoreCase(left, right) == 0;
 	}
 }

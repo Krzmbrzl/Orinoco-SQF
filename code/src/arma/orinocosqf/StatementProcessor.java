@@ -8,5 +8,5 @@ package arma.orinocosqf;
  * @author K
  * @since 02/20/2019
  */
-public interface StatementProcessor extends OrinocoTokenProcessor {
+public interface StatementProcessor extends OrinocoTokenInstanceProcessor {
 }
