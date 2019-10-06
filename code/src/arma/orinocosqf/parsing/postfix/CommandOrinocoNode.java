@@ -19,4 +19,5 @@ public class CommandOrinocoNode extends OrinocoNode {
 	public Command getCommand() {
 		return command;
 	}
+
 }

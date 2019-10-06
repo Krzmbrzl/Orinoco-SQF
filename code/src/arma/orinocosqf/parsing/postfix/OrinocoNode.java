@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
  * @author K
  * @since 7/28/19
  */
-public class OrinocoNode {
+public abstract class OrinocoNode {
 	public enum Flag {
 		Literal, Variable, Array, Command, CodeBlock, InvalidToken
 	}
@@ -21,4 +21,5 @@ public class OrinocoNode {
 	public Flag getFlag() {
 		return flag;
 	}
+
 }

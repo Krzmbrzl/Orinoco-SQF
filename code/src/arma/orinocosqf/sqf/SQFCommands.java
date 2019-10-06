@@ -4,6 +4,7 @@ import arma.orinocosqf.IdTransformer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.util.CommandSet;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,6 +87,11 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			}
 		}
 
+	}
+
+	@Nullable
+	public static SQFCommand command(@NotNull String command) {
+		return instance.getCommandInstance(command);
 	}
 
 	@NotNull
