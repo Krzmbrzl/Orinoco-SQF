@@ -8,6 +8,7 @@ module Orinoco.SQF {
 	requires transitive javafx.swing;
 	requires transitive javafx.web;
 	requires javafx.swt;
+	requires junit;
 
 	exports arma.orinocosqf.gui;
 	exports arma.orinocosqf.sqf;
