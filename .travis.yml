@@ -1,3 +1,5 @@
+dist: bionic
+
 language: java
 
 git:
@@ -6,6 +8,9 @@ git:
 jdk:
  - openjdk11
  - oraclejdk11
+
+before_install:
+  - wget
 
 script:
   - java --version
