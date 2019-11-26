@@ -1,0 +1,8 @@
+language: java
+jdk:
+ - openjdk11
+ - oraclejdk11
+
+script:
+  - ant compile
+  - ant test
