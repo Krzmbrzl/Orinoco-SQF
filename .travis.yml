@@ -9,6 +9,10 @@ jdk:
  - openjdk11
  - oraclejdk11
 
+before_install:
+    - sudo apt install ant
+    - sudo apt install ant-optional
+
 script:
   - java --version
   - ant -version
