@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<project name="orinoco-sqf" default="compile" basedir=".">
+	
+	<property name="src.dir" location="${basedir}/code/src"/>
+	<property name="gen.dir" location="${basedir}/code/gen"/>
+	<property name="tests.dir" location="${basedir}/code/tests"/>
+	<property name="lib.dir" location="${basedir}/code/lib"/>
+	<property name="build.dir" location="${basedir}/build"/>
+
+	<path id="libs">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<path id="tests-classpath">
+		<path refid="libs" />
+		<pathelement location="${build.dir}"/>
+	</path>
+	
+	
+	<target name="clean" description="Deletes the build directory">
+		<delete dir="${build.dir}" failonerror="false" />
+	</target>
+	
+	<target name="createBuildDir" description="Creates the build-directory">
+		<mkdir dir="${build.dir}"/>
+	</target>
+	
+	<target name="compile" depends="clean, createBuildDir" description="Builds Orionoco">
+		<javac destdir="${build.dir}" includeantruntime="false">
+			<modulepath refid="libs" />
+			<src path="${src.dir}" />
+			<src path="${gen.dir}" />
+		</javac>
+	</target>
+	
+	<target name="compile-tests" depends="compile" description="Builds Orinoco's tests">
+		<javac destdir="${build.dir}" includeantruntime="false">
+			<modulepath refid="libs" />
+			<classpath path="${build.dir}" />
+			<src path="${tests.dir}" />
+		</javac>
+	</target>
+	
+	<target name="test" depends="compile-tests" description="Runs the test-cases">
+		<junit failureproperty="tests.failed">
+			<classpath refid="tests-classpath" />
+			<batchtest>
+				<fileset dir="${tests.dir}">
+					<include name="**/OrinocoTestSuite.java"/>
+				</fileset>
+			</batchtest>
+			<formatter type="brief" usefile="false"/>
+		</junit>
+		
+		<fail message="At least one test didn't pass" if="tests.failed" />
+	</target>
+	
+</project>
