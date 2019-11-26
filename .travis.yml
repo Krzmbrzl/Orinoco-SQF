@@ -8,4 +8,6 @@ jdk:
  - oraclejdk11
 
 script:
+  - java --version
+  - ant -version
   - ant test
