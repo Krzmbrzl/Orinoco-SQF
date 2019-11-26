@@ -4,5 +4,4 @@ jdk:
  - oraclejdk11
 
 script:
-  - ant compile
   - ant test
