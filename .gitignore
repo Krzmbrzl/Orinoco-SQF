@@ -9,3 +9,9 @@ hs_err_pid*
 
 ide-project/intellij/\.idea/workspace\.xml
 out/
+
+# build dir
+build/
+
+# Vim swp-files
+*.swp
