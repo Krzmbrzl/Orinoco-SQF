@@ -94,11 +94,6 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 		((ArrayList<SQFCommand>) this.commands).trimToSize();
 		this.commands.sort(COMPARATOR);
-		for (SQFCommand c : iterate()) {
-			if (c.isNotStrict()) {
-				System.out.println("SQFCommands.SQFCommands c=" + c);
-			}
-		}
 
 	}
 
