@@ -697,7 +697,10 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		previousPreprocessedOffset = 0;
 		previousPreprocessedLength = 0;
 		preProcessorIfDefState.clear();
-		jFlexLexer.reset();
+		
+		if (jFlexLexer != null) {
+			jFlexLexer.reset();
+		}
 
 		// leave nextGlobalVarId and globalVarSet untouched in order to maintain compatibility between lex-runs
 		// leave nextLocalVarId untouched in order to avoid same indices for local variables in different files (after all they are not the
