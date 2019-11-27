@@ -6,6 +6,7 @@
 	<property name="tests.dir" location="${basedir}/code/tests"/>
 	<property name="lib.dir" location="${basedir}/code/lib"/>
 	<property name="build.dir" location="${basedir}/build"/>
+	<property name="syntax.dir" location="${basedir}/arma-commands-syntax"/>
 
 	<path id="libs">
 		<fileset dir="${lib.dir}">
@@ -13,9 +14,13 @@
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>
+
+	<path id="classpath">
+		<path refid="libs" />
+	</path>
 	
 	<path id="tests-classpath">
-		<path refid="libs" />
+		<path refid="classpath" />
 		<pathelement location="${build.dir}"/>
 	</path>
 	
@@ -29,8 +34,14 @@
 	</target>
 	
 	<target name="compile" depends="clean, createBuildDir" description="Builds Orionoco">
+		<copy todir="${build.dir}">
+			<fileset dir="${syntax.dir}/../">
+				<include name="arma-commands-syntax/**" />
+			</fileset>
+		</copy>
 		<javac destdir="${build.dir}" includeantruntime="false">
 			<modulepath refid="libs" />
+			<classpath refid="classpath" />
 			<src path="${src.dir}" />
 			<src path="${gen.dir}" />
 		</javac>
