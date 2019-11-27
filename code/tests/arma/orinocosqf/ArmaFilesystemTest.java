@@ -3,6 +3,8 @@ package arma.orinocosqf;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,17 @@ public class ArmaFilesystemTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		base = new File(".." + File.separator + ".." + File.separator + "code" + File.separator + "tests" + File.separator + "testresources"
+		// Assume that we start either at the root dir or some sub-directory
+		Path basePath = Paths.get(".").toAbsolutePath().normalize();
+		while (basePath != null && !(new File(basePath.toFile(), "code")).exists()) {
+			basePath = basePath.getParent();
+		}
+		
+		if (basePath == null) {
+			throw new RuntimeException("Can't find the code-directory. You have to run the tests from the OrinocoSWF root dir or one of it subdirs");
+		}
+		
+		base = new File(basePath.toString() + File.separator + "code" + File.separator + "tests" + File.separator + "testresources"
 				+ File.separator + "include");
 		cwd = new File(base, "MyAwesomeMod" + File.separator + "addons");
 		searchPath1 = new File(base, "SearchDir1");
