@@ -68,5 +68,18 @@
 		
 		<fail message="At least one test didn't pass" if="tests.failed" />
 	</target>
-	
+
+
+	<target name="build" depends="clean-gen">
+		<taskdef classname="jflex.anttask.JFlexTask" classpathref="classpath" name="jflex"/>
+		<jflex file="${basedir}/code/jflex/orinocosqf.flex" destdir="${basedir}/code/gen"
+			   skeleton="${basedir}/code/jflex/skeleton.nested"/>
+	</target>
+
+	<target name="clean-gen">
+		<delete>
+			<fileset dir="${gen.dir}"/>
+		</delete>
+	</target>
+
 </project>
