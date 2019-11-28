@@ -70,7 +70,7 @@
 	</target>
 
 
-	<target name="build" depends="clean-gen">
+	<target name="gen-jflex" depends="clean-gen">
 		<taskdef classname="jflex.anttask.JFlexTask" classpathref="classpath" name="jflex"/>
 		<jflex file="${basedir}/code/jflex/orinocosqf.flex" destdir="${basedir}/code/gen"
 			   skeleton="${basedir}/code/jflex/skeleton.nested"/>
