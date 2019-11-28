@@ -21,6 +21,18 @@ import java.util.List;
  * @since 11/12/2017
  */
 public class SQFCommandSyntaxXMLLoader {
+	/**
+	 * Loads a {@link SQFCommand} instance from an xml file {@link InputStream}. This method will not perform {@link
+	 * SQFCommand#memCompact()}; this is so that this method can be run concurrently and the typing system ({@link BaseType}) is not made to
+	 * have {@link BaseType#memCompact()} run concurrently. Therefore, run {@link SQFCommand#memCompact()} after you have loaded all
+	 * commands.
+	 *
+	 * @param is the input stream
+	 * @param getCommandDescriptions true if you wish to load the command descriptions ({@link ValueHolder#getDescription()} will bet set to
+	 * non-empty string).
+	 * @return the command
+	 * @throws Exception when the command failed to load
+	 */
 	@NotNull
 	public static SQFCommand importFromStream(@NotNull InputStream is, boolean getCommandDescriptions) throws Exception {
 		Document document;
@@ -85,8 +97,6 @@ public class SQFCommandSyntaxXMLLoader {
 		SQFCommand c = new SQFCommand(commandName, syntaxList, gameVersion, GameNameMap.getInstance().getGame(GameNameMap.LookupType.LINK_PREFIX, gameName));
 		c.setDeprecated(deprecated);
 		c.setUncertain(uncertain);
-
-		c.memCompact();
 		return c;
 	}
 
@@ -130,7 +140,7 @@ public class SQFCommandSyntaxXMLLoader {
 		}
 
 		while (order >= parentReturnValues.size()) { //guarantee that the order index exists
-			parentReturnValues.add(PLACEHOLDER_RETURN_VALUE);
+			parentReturnValues.add(new ReturnValueHolder(BaseType.ANYTHING, "PLACEHOLDER"));
 		}
 
 		parentReturnValues.set(order, returnValue);
@@ -157,7 +167,7 @@ public class SQFCommandSyntaxXMLLoader {
 			getArrayReturnValueFromElement(arrayChildElement, myValues, getCommandDescriptions);
 		}
 		while (order >= parentReturnValues.size()) { //guarantee that the order index exists
-			parentReturnValues.add(PLACEHOLDER_RETURN_VALUE);
+			parentReturnValues.add(new ReturnValueHolder(BaseType.ANYTHING, "PLACEHOLDER"));
 		}
 
 		parentReturnValues.set(order, value);
@@ -223,7 +233,7 @@ public class SQFCommandSyntaxXMLLoader {
 	private static int getOrderForParam(@NotNull List<Param> paramList, @NotNull Element paramElement) {
 		int order = Integer.parseInt(paramElement.getAttribute("order"));
 		while (order >= paramList.size()) {
-			paramList.add(PLACEHOLDER_PARAM);
+			paramList.add(new Param("PLACEHOLDER", BaseType.ANYTHING, "", true));
 		}
 		return order;
 	}
@@ -259,6 +269,4 @@ public class SQFCommandSyntaxXMLLoader {
 		return new CodeType(getTypeFromElementAttribute(codeHandlers.get(0), "t"));
 	}
 
-	private static final ReturnValueHolder PLACEHOLDER_RETURN_VALUE = new ReturnValueHolder(BaseType.ANYTHING, "PLACEHOLDER");
-	private static final Param PLACEHOLDER_PARAM = new Param("PLACEHOLDER", BaseType.ANYTHING, "", true);
 }

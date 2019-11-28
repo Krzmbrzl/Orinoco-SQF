@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../code/tests" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../code/gen" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../arma-commands-syntax" type="java-resource" relativeOutputPath="arma-commands-syntax" />
+      <excludeFolder url="file://$MODULE_DIR$/../../build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

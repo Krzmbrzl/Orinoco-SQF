@@ -4,7 +4,6 @@ import arma.orinocosqf.IdTransformer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.util.CommandSet;
 import arma.orinocosqf.util.ResourceHelper;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,18 +47,24 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			throw new RuntimeException("Failed to load SQF command syntax resources");
 		}
 
+		final List<SQFCommand> commands = Collections.synchronizedList(new ArrayList<>());
+		ExecutorService pool = Executors.newFixedThreadPool(20);
+//		Pool pool = new Pool();
+
 		for (String currentResourceName : resourceNames) {
 			if (!currentResourceName.endsWith(".xml")) {
 				continue;
 			}
+			pool.execute(() -> {
+				try {
+					SQFCommand command = SQFCommandSyntaxXMLLoader.importFromStream(
+							getClass().getClassLoader().getResourceAsStream(sqfCommandsXMLDirectory + currentResourceName), false);
+					commands.add(command);
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
+				}
+			});
 
-			try {
-				SQFCommand command = SQFCommandSyntaxXMLLoader.importFromStream(
-						getClass().getClassLoader().getResourceAsStream(sqfCommandsXMLDirectory + currentResourceName), false);
-				commands.add(command);
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
 		}
 
 		InputStream in = getClass().getClassLoader().getResourceAsStream(sqfOperatorsListPath);
@@ -80,21 +90,34 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 			Matcher m = p.matcher(line);
 			while (m.find()) {
 				String commandFileName = m.group(1) + ".xml";
-				try {
-					SQFCommand operator = SQFCommandSyntaxXMLLoader.importFromStream(
-							getClass().getClassLoader().getResourceAsStream(sqfOperatorsDirectory + commandFileName), false);
-					commands.add(operator);
-				} catch (Exception e) {
-					commandsListScan.close();
-					throw new IllegalStateException(e);
-				}
+				pool.execute(() -> {
+					try {
+						SQFCommand operator = SQFCommandSyntaxXMLLoader.importFromStream(
+								getClass().getClassLoader().getResourceAsStream(sqfOperatorsDirectory + commandFileName), false);
+						commands.add(operator);
+					} catch (Exception e) {
+						throw new IllegalStateException(e);
+					}
+				});
 			}
 		}
 
 		commandsListScan.close();
+		pool.shutdown();
+		try {
+			pool.awaitTermination(10, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new IllegalStateException("Failed to load all commands in under 10 seconds. ", e);
+		}
 
+		this.commands.addAll(commands);
 		((ArrayList<SQFCommand>) this.commands).trimToSize();
 		this.commands.sort(COMPARATOR);
+
+		for (SQFCommand command : this.commands) {
+			command.memCompact();
+		}
 
 	}
 
@@ -165,5 +188,18 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 		public final SQFCommand COLON = getCmd(":");
 	}
 
+	private static class Pool {
+		public void execute(Runnable r) {
+			r.run();
+		}
+
+		public void shutdown() {
+
+		}
+
+		public void awaitTermination(int i, TimeUnit seconds) throws InterruptedException {
+
+		}
+	}
 
 }
