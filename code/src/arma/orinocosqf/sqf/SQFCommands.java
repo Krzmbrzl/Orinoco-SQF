@@ -49,7 +49,6 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 
 		final List<SQFCommand> commands = Collections.synchronizedList(new ArrayList<>());
 		ExecutorService pool = Executors.newFixedThreadPool(20);
-//		Pool pool = new Pool();
 
 		for (String currentResourceName : resourceNames) {
 			if (!currentResourceName.endsWith(".xml")) {
@@ -186,20 +185,6 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 		public final SQFCommand SEMICOLON = getCmd(";");
 		public final SQFCommand QUEST = getCmd("?");
 		public final SQFCommand COLON = getCmd(":");
-	}
-
-	private static class Pool {
-		public void execute(Runnable r) {
-			r.run();
-		}
-
-		public void shutdown() {
-
-		}
-
-		public void awaitTermination(int i, TimeUnit seconds) throws InterruptedException {
-
-		}
 	}
 
 }
