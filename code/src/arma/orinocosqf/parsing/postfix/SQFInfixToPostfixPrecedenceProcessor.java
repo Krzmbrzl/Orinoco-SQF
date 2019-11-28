@@ -132,6 +132,10 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 
 		if (!delayEvalStack.isEmpty()) {
 			if (command == ops.L_SQ_BRACKET) {
+//				postfixProcessor.beginArray(); TODO remove DelayEvalOrinocoNode and instead use these methods
+//				postfixProcessor.endArray(); //todo
+//				postfixProcessor.beginCodeBlock(); //todo
+//				postfixProcessor.endCodeBlock(); //todo
 				delayEvalStack.add(new DelayEvalOrinocoNode(new CommandOrinocoNode(command)));
 				return;
 			} else if (command == ops.R_SQ_BRACKET) {

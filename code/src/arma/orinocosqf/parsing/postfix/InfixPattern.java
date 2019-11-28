@@ -38,8 +38,14 @@ public class InfixPattern {
 
 	}
 
-	public List<OrinocoToken> getCaptured(@NotNull String captureName) {
+	public List<OrinocoToken> getCapturedPattern(@NotNull String captureName) {
 		Map<String, List<OrinocoToken>> captured = new HashMap<>();
+		// todo implementation
+		return captured.get(captureName);
+	}
+
+	public OrinocoToken getCaptured(@NotNull String captureName) {
+		Map<String, OrinocoToken> captured = new HashMap<>();
 		// todo implementation
 		return captured.get(captureName);
 	}

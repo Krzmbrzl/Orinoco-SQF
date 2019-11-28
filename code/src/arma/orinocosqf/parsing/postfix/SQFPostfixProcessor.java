@@ -9,13 +9,19 @@ import java.util.List;
  * @since 10/5/19
  */
 public class SQFPostfixProcessor {
+	private final List<InfixPattern> patterns;
+
+	public SQFPostfixProcessor(@NotNull List<InfixPattern> patterns) {
+		this.patterns = patterns;
+	}
+
 	public void acceptStatement(@NotNull SQFInfixToPostfixPrecedenceProcessor processor, @NotNull List<OrinocoNode> nodes) {
 		for (OrinocoNode node : nodes) {
 			if (node instanceof DelayEvalOrinocoNode) {//[]
 				processor.acceptDelayEvalNode((DelayEvalOrinocoNode) node);
 			}
 		}
-		
+
 	}
 
 	public void beginCodeBlock() {
