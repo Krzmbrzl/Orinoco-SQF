@@ -17,6 +17,7 @@ public class Problems {
 	public static final Error_UnclosedParenthesis ERROR_UNCLOSED_PARENTHESIS = new Error_UnclosedParenthesis();
 	public static final Error_UnclosedString ERROR_UNCLOSED_STRING = new Error_UnclosedString();
 	public static final Error_WrongMacroArgumentCount ERROR_WRONG_ARGUMENT_COUNT = new Error_WrongMacroArgumentCount();
+	public static final Error_LeadingWS ERROR_LEADING_WS = new Error_LeadingWS();
 
 	public static final Warning_OverwriteExisting WARNING_OVERWRITE = new Warning_OverwriteExisting();
 	public static final Warning_UndefineNonExistent WARNING_UNDEFINE_NONEXISTENT = new Warning_UndefineNonExistent();

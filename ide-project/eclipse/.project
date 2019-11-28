@@ -16,14 +16,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>code</name>
+			<name>Orinoco-SQF</name>
 			<type>2</type>
-			<locationURI>PROJECT_ROOT/code</locationURI>
-		</link>
-		<link>
-			<name>resources</name>
-			<type>2</type>
-			<locationURI>PROJECT_ROOT/resources</locationURI>
+			<location>/home/robert/Documents/Git/Orinoco-SQF</location>
 		</link>
 	</linkedResources>
 	<variableList>

@@ -331,6 +331,23 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 					break;
 				}
 			} else {
+				boolean removedLeadingWS = false;
+				if (currentArg.length() == 0) {
+					// Make sure there is no leading whitespace
+					int begin = i;
+					while (i + 1 < maxOffset && Character.isWhitespace(c)) {
+						i++;
+						c = readOnlyBuf[i];
+						removedLeadingWS = true;
+					}
+
+					if (removedLeadingWS && isMacroNamePart(c, true)) {
+						// report error about leading WS for macro argument
+						lexer.problemEncountered(Problems.ERROR_LEADING_WS, "Leading whitespace before macro argument", startOffset + begin,
+								i - begin, -1);
+					}
+					// If we removed all WS but c is no macro name part, the error about pure WS argument will trigger below
+				}
 				// extract arguments
 				if (isMacroNamePart(c, currentArg.length() == 0)) {
 					currentArg.append(c);
