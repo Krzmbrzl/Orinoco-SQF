@@ -1,4 +1,4 @@
-package arma.orinocosqf;
+package arma.orinocosqf.helpers;
 
 import arma.orinocosqf.type.ValueType;
 import org.jetbrains.annotations.NotNull;
