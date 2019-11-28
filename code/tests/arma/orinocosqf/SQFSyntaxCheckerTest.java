@@ -2,6 +2,7 @@ package arma.orinocosqf;
 
 
 import arma.orinocosqf.exceptions.UnknownIdException;
+import arma.orinocosqf.helpers.SQFSyntaxCheckerTestHelper;
 import arma.orinocosqf.sqf.SQFCommand;
 import arma.orinocosqf.sqf.SQFCommandSyntax;
 import arma.orinocosqf.sqf.SQFCommands;
