@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ant - gen_jflex" type="AntRunConfiguration">
+    <antsettings antfile="file://$PROJECT_DIR$/../../build.xml" target="gen-jflex" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
