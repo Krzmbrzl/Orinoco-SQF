@@ -1,7 +1,6 @@
 package arma.orinocosqf.parsing.postfix;
 
 import arma.orinocosqf.Command;
-import arma.orinocosqf.OrinocoToken;
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
 import arma.orinocosqf.sqf.SQFCommands;
@@ -9,16 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author K
  * @since 10/5/19
  */
 public class InfixPattern {
-	private final Node root;
+	protected final Node root;
 
 	private InfixPattern(@NotNull Node root) {
 		this.root = root;
@@ -38,18 +35,6 @@ public class InfixPattern {
 
 	}
 
-	public List<OrinocoToken> getCapturedPattern(@NotNull String captureName) {
-		Map<String, List<OrinocoToken>> captured = new HashMap<>();
-		// todo implementation
-		return captured.get(captureName);
-	}
-
-	public OrinocoToken getCaptured(@NotNull String captureName) {
-		Map<String, OrinocoToken> captured = new HashMap<>();
-		// todo implementation
-		return captured.get(captureName);
-	}
-
 	@NotNull
 	public static Node start(@NotNull OrinocoLexerLiteralType literal) {
 		return new LiteralNode("", literal);
@@ -60,13 +45,19 @@ public class InfixPattern {
 		return new CommandNode("", command);
 	}
 
+	protected enum NodeType {
+		Command, Operand, Literal, Pattern
+	}
+
 	public static abstract class Node {
-		private List<Node> children;
 		protected boolean canHaveChildren = false;
+		protected final NodeType nodeType;
+		private List<Node> children;
 		private final String captureName;
 
-		public Node(@Nullable String captureName) {
+		public Node(@Nullable String captureName, @NotNull NodeType nodeType) {
 			this.captureName = captureName;
+			this.nodeType = nodeType;
 		}
 
 		@NotNull
@@ -102,7 +93,7 @@ public class InfixPattern {
 
 		@NotNull
 		public Node pattern(@NotNull InfixPattern pattern) {
-			return pattern(null);
+			return pattern(null, pattern);
 		}
 
 		@NotNull
@@ -136,20 +127,20 @@ public class InfixPattern {
 	}
 
 	public static class CommandNode extends Node {
-		private final Command command;
+		protected final Command command;
 
 		public CommandNode(@Nullable String captureName, @NotNull Command command) {
-			super(captureName);
+			super(captureName, NodeType.Command);
 			this.command = command;
 			this.canHaveChildren = true;
 		}
 	}
 
 	public static class LiteralNode extends Node {
-		private final OrinocoLexerLiteralType literal;
+		protected final OrinocoLexerLiteralType literal;
 
 		public LiteralNode(@Nullable String captureName, @NotNull OrinocoLexerLiteralType literal) {
-			super(captureName);
+			super(captureName, NodeType.Literal);
 			this.literal = literal;
 			this.canHaveChildren = false;
 		}
@@ -163,17 +154,17 @@ public class InfixPattern {
 	public static class OperandNode extends Node {
 
 		public OperandNode(@Nullable String captureName) {
-			super(captureName);
+			super(captureName, NodeType.Operand);
 			this.canHaveChildren = false;
 		}
 	}
 
 
 	public static class PatternNode extends Node {
-		private final InfixPattern pattern;
+		protected final InfixPattern pattern;
 
 		public PatternNode(@Nullable String captureName, @NotNull InfixPattern pattern) {
-			super(captureName);
+			super(captureName, NodeType.Pattern);
 			this.pattern = pattern;
 			this.canHaveChildren = false;
 		}

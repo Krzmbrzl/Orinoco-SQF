@@ -1,17 +1,16 @@
 package arma.orinocosqf.lexer;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
+import arma.orinocosqf.Command;
 import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.sqf.SQFCommands;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An implementation of a {@link OrinocoLexerContext} which will have text-buffering disabled
- * 
- * @author Raven
  *
+ * @author Raven
  */
 public class NonBufferingOrinocoLexerContext implements OrinocoLexerContext {
 	/**
@@ -21,17 +20,26 @@ public class NonBufferingOrinocoLexerContext implements OrinocoLexerContext {
 
 
 	/**
-	 * 
 	 * @param lexer The lexer this context is being instantiated for
 	 */
 	public NonBufferingOrinocoLexerContext(@NotNull OrinocoLexer lexer) {
 		this.lexer = lexer;
 	}
 
-	
+
 	@Override
 	public @NotNull String getCommand(int id) throws UnknownIdException {
 		String c = SQFCommands.instance.getCommandNameById(id);
+		if (c == null) {
+			throw new UnknownIdException(id + "");
+		}
+		return c;
+	}
+
+	@Override
+	@NotNull
+	public Command getCommandInstance(int id) throws UnknownIdException {
+		Command c = SQFCommands.instance.getCommandInstanceById(id);
 		if (c == null) {
 			throw new UnknownIdException(id + "");
 		}

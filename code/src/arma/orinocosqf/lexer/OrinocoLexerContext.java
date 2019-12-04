@@ -1,5 +1,6 @@
 package arma.orinocosqf.lexer;
 
+import arma.orinocosqf.Command;
 import arma.orinocosqf.TextBuffer;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,17 @@ public interface OrinocoLexerContext {
 	 * @throws UnknownIdException If the given id can't be associated with a command
 	 */
 	@NotNull
-	public String getCommand(int id) throws UnknownIdException;
+	String getCommand(int id) throws UnknownIdException;
+
+	/**
+	 * Converts the given command-id back into the {@link Command} representation of the corresponding command
+	 *
+	 * @param id The Id to convert
+	 * @return The corresponding {@link Command} representation
+	 * @throws UnknownIdException If the given id can't be associated with a command
+	 */
+	@NotNull
+	public Command getCommandInstance(int id) throws UnknownIdException;
 
 	/**
 	 * Converts the given variable-id back into the String representation of the corresponding variable

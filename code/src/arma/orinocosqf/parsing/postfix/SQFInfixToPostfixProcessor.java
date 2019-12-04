@@ -18,15 +18,15 @@ import static arma.orinocosqf.util.ASCIITextHelper.equalsIgnoreCase;
  * @author K
  * @since 7/28/19
  */
-public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanceProcessor {
-	private final List<OrinocoNode> postfixOutput = new ArrayList<>();
+public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor {
+	private boolean expressionStarted = false;
 	private final Stack<Command> operators = new Stack<>();
 	private final Stack<DelayEvalOrinocoNode> delayEvalStack = new Stack<>();
 	private final List<OrinocoNode> statementLists = new ArrayList<>();
-	private final SQFPostfixProcessor postfixProcessor;
+	private final List<InfixPattern> patterns = new ArrayList<>();
+	private final List<InfixPattern.Node> activePatterns = new ArrayList<>();
 
-	public SQFInfixToPostfixPrecedenceProcessor(@NotNull SQFPostfixProcessor processor) {
-		this.postfixProcessor = processor;
+	public SQFInfixToPostfixProcessor() {
 	}
 
 	private int precedence(@NotNull Command cmd) {
@@ -50,8 +50,8 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 			return 2;
 		}
 		final String cn = cmd.getName();
-		if (postfixOutput.isEmpty() && cmd.canBeUnary() || (
-				!postfixOutput.isEmpty() && (equalsIgnoreCase(cn, "+") || equalsIgnoreCase(cn, "-"))
+		if (!expressionStarted && cmd.canBeUnary() || (
+				expressionStarted && (equalsIgnoreCase(cn, "+") || equalsIgnoreCase(cn, "-"))
 		)
 		) {
 			return 2;
@@ -96,7 +96,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 				|| cmd == ops.COLON) {
 			return 8;
 		}
-		if (cmd.canBeBinary() && !special_binary && !postfixOutput.isEmpty()) {
+		if (cmd.canBeBinary() && !special_binary && expressionStarted) {
 			return 8;
 		} else {
 			//todo report error
@@ -125,17 +125,17 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 
 	@Override
 	public void acceptCommand(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		SQFCommand command = SQFCommands.instance.getCommandInstanceById(token.getId());
+		processToken(token);
 
-		//check for parentheses
+		SQFCommand command = SQFCommands.instance.getCommandInstanceById(token.getId());
+		if (command == null) {
+			throw new IllegalStateException();
+		}
+
 		final SQFCommands.Operators ops = SQFCommands.ops();
 
 		if (!delayEvalStack.isEmpty()) {
 			if (command == ops.L_SQ_BRACKET) {
-//				postfixProcessor.beginArray(); TODO remove DelayEvalOrinocoNode and instead use these methods
-//				postfixProcessor.endArray(); //todo
-//				postfixProcessor.beginCodeBlock(); //todo
-//				postfixProcessor.endCodeBlock(); //todo
 				delayEvalStack.add(new DelayEvalOrinocoNode(new CommandOrinocoNode(command)));
 				return;
 			} else if (command == ops.R_SQ_BRACKET) {
@@ -154,7 +154,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 					delayEvalStack.pop();
 				}
 				if (delayEvalStack.isEmpty()) {
-					postfixOutput.add(delayPeek);
+					processNode(delayPeek);
 				} else {
 					delayEvalStack.peek().getLastItemList().add(delayPeek);
 				}
@@ -171,6 +171,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 				if (error) {
 					delayEvalStack.peek().getLastItemList().add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(command)));
 				} else {
+					delayEvalStack.peek().getLastItemList().add(new CommandOrinocoNode(command));
 					delayEvalStack.peek().getItems().add(new ArrayList<>());
 				}
 				return;
@@ -193,7 +194,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 					delayEvalStack.pop();
 				}
 				if (delayEvalStack.isEmpty()) {
-					postfixOutput.add(delayPeek);
+					processNode(delayPeek);
 				} else {
 					delayEvalStack.peek().getLastItemList().add(delayPeek);
 				}
@@ -211,6 +212,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 				if (error) {
 					delayEvalStack.peek().getLastItemList().add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(command)));
 				} else {
+					delayEvalStack.peek().getLastItemList().add(new CommandOrinocoNode(command));
 					delayEvalStack.peek().getItems().add(new ArrayList<>());
 				}
 				return;
@@ -228,7 +230,7 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 		}
 
 		if (command == ops.R_SQ_BRACKET || command == ops.R_CURLY_BRACE) {
-			postfixOutput.add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(command)));
+			processNode(new InvalidTokenOrinocoNode(new CommandOrinocoNode(command)));
 			return;
 		}
 
@@ -248,7 +250,8 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 		}
 
 		if (command == ops.SEMICOLON) {
-			endStatement();
+			processNode(new CommandOrinocoNode(command));
+			endExpression();
 			return;
 		}
 
@@ -260,12 +263,12 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 				if (peek == ops.LPAREN) {
 					break;
 				}
-				postfixOutput.add(new CommandOrinocoNode(operators.pop()));
+				processNode(new CommandOrinocoNode(operators.pop()));
 			}
 			if (!operators.isEmpty()) {
 				Command peek = operators.peek();
 				if (peek != ops.LPAREN) {
-					postfixOutput.add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(operators.pop())));
+					processNode(new InvalidTokenOrinocoNode(new CommandOrinocoNode(operators.pop())));
 				} else {
 					operators.pop();
 				}
@@ -274,9 +277,9 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 			int prec = precedence(command);
 			while (!operators.isEmpty() && prec <= precedence(operators.peek())) {
 				if (operators.peek() == ops.LPAREN) {
-					postfixOutput.add(new InvalidTokenOrinocoNode(new CommandOrinocoNode(operators.pop())));
+					processNode(new InvalidTokenOrinocoNode(new CommandOrinocoNode(operators.pop())));
 				} else {
-					postfixOutput.add(new CommandOrinocoNode(operators.pop()));
+					processNode(new CommandOrinocoNode(operators.pop()));
 				}
 			}
 		}
@@ -284,9 +287,20 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 		operators.add(command);
 	}
 
+	private void processToken(@NotNull OrinocoToken token) {
+		for (InfixPattern.Node patternNode : activePatterns) {
+
+		}
+	}
+
+	private void processNode(@NotNull OrinocoNode node) {
+		this.expressionStarted = true;
+
+	}
+
 	private void addNode(@NotNull OrinocoNode node) {
 		if (delayEvalStack.isEmpty()) {
-			postfixOutput.add(node);
+			processNode(node);
 		} else {
 			delayEvalStack.peek().getLastItemList().add(node);
 		}
@@ -294,16 +308,19 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 
 	@Override
 	public void acceptLocalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+		processToken(token);
 		addNode(new TokenOrinocoNode(OrinocoNode.Flag.Variable, token));
 	}
 
 	@Override
 	public void acceptGlobalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+		processToken(token);
 		addNode(new TokenOrinocoNode(OrinocoNode.Flag.Variable, token));
 	}
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+		processToken(token);
 		addNode(new TokenOrinocoNode(OrinocoNode.Flag.Literal, token));
 	}
 
@@ -320,13 +337,12 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 
 	@Override
 	public void end(@NotNull OrinocoLexerContext ctx) {
-		endStatement();
+		endExpression();
 	}
 
-	private void endStatement() {
+	private void endExpression() {
 		finalizePostfixOutput();
-		this.postfixProcessor.acceptStatement(this, this.postfixOutput);
-		this.postfixOutput.clear();
+		this.expressionStarted = false;
 	}
 
 	private void finalizePostfixOutput() {
@@ -335,17 +351,17 @@ public class SQFInfixToPostfixPrecedenceProcessor implements OrinocoTokenInstanc
 			if (!delayEvalStack.isEmpty()) {
 				delayEvalStack.peek().getLastItemList().add(pop);
 			} else {
-				postfixOutput.add(new InvalidTokenOrinocoNode(pop));
+				processNode(new InvalidTokenOrinocoNode(pop));
 			}
 		}
 		while (!operators.isEmpty()) {
-			postfixOutput.add(new CommandOrinocoNode(operators.pop()));
+			processNode(new CommandOrinocoNode(operators.pop()));
 		}
 	}
 
 	@Override
 	public void reset() {
-		postfixOutput.clear();
+		this.expressionStarted = false;
 		delayEvalStack.clear();
 	}
 

@@ -2,6 +2,7 @@ package arma.orinocosqf;
 
 import arma.orinocosqf.syntax.BIGame;
 import arma.orinocosqf.syntax.CommandSyntax;
+import arma.orinocosqf.util.ASCIITextHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,6 +18,10 @@ public interface Command<Syntax extends CommandSyntax> {
 	/** @return the camelCase name of the command */
 	@NotNull
 	String getName();
+
+	default boolean commandNameEquals(@NotNull Command other) {
+		return ASCIITextHelper.equalsIgnoreCase(getName(), other.getName());
+	}
 
 	/**
 	 * @return true if this command is always nular (always no arguments). Returns false if the command is never nular (always has at least
@@ -73,11 +78,6 @@ public interface Command<Syntax extends CommandSyntax> {
 	 */
 	@NotNull
 	List<Syntax> getSyntaxList();
-
-	/**
-	 * @return The precedence of this command. (Higher means higher precedence)
-	 */
-	int getPrecedence();
 
 
 	/**

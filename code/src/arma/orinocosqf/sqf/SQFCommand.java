@@ -8,7 +8,6 @@ import arma.orinocosqf.util.MemCompact;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,13 +31,6 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	private boolean uncertain = false;
 
 	private boolean strictlyNular, strictlyBinary, canBeBinary, strictlyUnary, canBeUnary;
-
-	public SQFCommand(@NotNull String commandName) {
-		this.commandName = commandName;
-		syntaxList = Collections.emptyList();
-		game = BIGame.UNKNOWN;
-		this.gameVersion = "?";
-	}
 
 	public SQFCommand(@NotNull String commandName,
 					  @NotNull List<SQFCommandSyntax> syntaxList,
@@ -149,11 +141,6 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	@NotNull
 	public List<SQFCommandSyntax> getSyntaxList() {
 		return syntaxList;
-	}
-
-	@Override
-	public int getPrecedence() {
-		throw new UnsupportedOperationException("todo");
 	}
 
 	/**

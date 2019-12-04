@@ -63,8 +63,11 @@ public class CommandSet<C extends Command> {
 		return commands.get(i);
 	}
 
-	@NotNull
+	@Nullable
 	public C getCommandInstanceById(int id) {
+		if (id < 0 || id >= commands.size()) {
+			return null;
+		}
 		return commands.get(id);
 	}
 
