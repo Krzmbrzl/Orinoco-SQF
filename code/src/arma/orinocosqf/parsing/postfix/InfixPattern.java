@@ -21,16 +21,16 @@ public class InfixPattern {
 
 	@NotNull
 	public static Node start(@NotNull OrinocoLexerLiteralType literal) {
-		return new RootNode(new LiteralNode("", literal));
+		return new PatternNode(".root", new LiteralNode("", literal));
 	}
 
 	@NotNull
 	public static Node start(@NotNull Command command) {
-		return new RootNode(new CommandNode("", command));
+		return new PatternNode(".root", new CommandNode("", command));
 	}
 
 	protected enum NodeType {
-		Root, Command, Operand, Literal, Pattern
+		Command, Operand, Literal, Pattern
 	}
 
 	public static abstract class Node {
@@ -101,7 +101,7 @@ public class InfixPattern {
 
 		@NotNull
 		public Node pattern(@Nullable String captureName, @NotNull InfixPattern pattern) {
-			this.getChildren().add(new PatternNode(captureName, pattern));
+			this.getChildren().add(new PatternNode(captureName, pattern.root));
 			return this;
 		}
 
@@ -145,20 +145,13 @@ public class InfixPattern {
 	}
 
 	public static class PatternNode extends Node {
-		protected final InfixPattern pattern;
 
-		public PatternNode(@Nullable String captureName, @NotNull InfixPattern pattern) {
+		public PatternNode(@Nullable String captureName, @Nullable Node firstChild) {
 			super(captureName, NodeType.Pattern);
-			this.pattern = pattern;
-			this.canHaveChildren = false;
-		}
-	}
-
-	private static class RootNode extends Node {
-		public RootNode(@NotNull Node firstChild) {
-			super(null, NodeType.Root);
 			this.canHaveChildren = true;
-			this.getChildren().add(firstChild);
+			if (firstChild != null) {
+				this.getChildren().add(firstChild);
+			}
 		}
 	}
 
