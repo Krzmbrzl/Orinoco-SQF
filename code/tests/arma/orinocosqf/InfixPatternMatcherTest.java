@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class InfixPatternMatcherTest {
@@ -38,6 +39,7 @@ public class InfixPatternMatcherTest {
 				)
 		);
 		lexer.start(OrinocoReader.fromCharSequence("[getPos 1]"));
+		assertNotNull(matcher.getMatch("OPERAND"));
 		assertTrue(matcher.matches());
 	}
 }

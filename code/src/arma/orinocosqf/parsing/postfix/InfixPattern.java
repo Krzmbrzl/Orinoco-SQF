@@ -21,19 +21,20 @@ public class InfixPattern {
 
 	@NotNull
 	public static Node start(@NotNull OrinocoLexerLiteralType literal) {
-		return new LiteralNode("", literal);
+		return new RootNode(new LiteralNode("", literal));
 	}
 
 	@NotNull
 	public static Node start(@NotNull Command command) {
-		return new CommandNode("", command);
+		return new RootNode(new CommandNode("", command));
 	}
 
 	protected enum NodeType {
-		Command, Operand, Literal, Pattern
+		Root, Command, Operand, Literal, Pattern
 	}
 
 	public static abstract class Node {
+
 		protected boolean canHaveChildren = false;
 		protected final NodeType nodeType;
 		private List<Node> children;
@@ -143,7 +144,6 @@ public class InfixPattern {
 		}
 	}
 
-
 	public static class PatternNode extends Node {
 		protected final InfixPattern pattern;
 
@@ -151,6 +151,14 @@ public class InfixPattern {
 			super(captureName, NodeType.Pattern);
 			this.pattern = pattern;
 			this.canHaveChildren = false;
+		}
+	}
+
+	private static class RootNode extends Node {
+		public RootNode(@NotNull Node firstChild) {
+			super(null, NodeType.Root);
+			this.canHaveChildren = true;
+			this.getChildren().add(firstChild);
 		}
 	}
 

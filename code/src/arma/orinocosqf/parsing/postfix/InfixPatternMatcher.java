@@ -59,6 +59,7 @@ public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
 					this.matches = false;
 					return;
 				}
+				break;
 			}
 			case Literal: {
 				this.matches = false;
