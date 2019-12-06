@@ -2,8 +2,6 @@ package arma.orinocosqf.parsing.postfix;
 
 import arma.orinocosqf.Command;
 import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
-import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
-import arma.orinocosqf.sqf.SQFCommands;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,20 +17,6 @@ public class InfixPattern {
 
 	private InfixPattern(@NotNull Node root) {
 		this.root = root;
-		SQFCommands.Operators ops = SQFCommands.ops();
-		InfixPattern.start(ops.L_SQ_BRACKET).pattern(null,
-				InfixPattern.start(SQFCommands.command("getPos")).operand("OPERAND").toPattern()
-		).command(null, ops.R_SQ_BRACKET).toPattern();
-		// [getPos ANY]
-		// getCaptured("OPERAND")
-
-		// createVehicle [String, getPos thing]
-		// ^ getCaptured("STRING")
-		// ^ getCaptured("PATTERN")
-		InfixPattern.start(SQFCommands.command("createVehicle")).command(ops.L_SQ_BRACKET).pattern("STRING",
-				InfixPattern.start(OrinocoLexerSQFLiteralType.String).command(ops.COMMA).pattern("PATTERN", InfixPattern.start(SQFCommands.command("getPos")).operand().toPattern()).toPattern()
-		).toPattern();
-
 	}
 
 	@NotNull

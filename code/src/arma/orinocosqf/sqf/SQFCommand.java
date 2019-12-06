@@ -31,6 +31,7 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	private boolean uncertain = false;
 
 	private boolean strictlyNular, strictlyBinary, canBeBinary, strictlyUnary, canBeUnary;
+	private int uuid;
 
 	public SQFCommand(@NotNull String commandName,
 					  @NotNull List<SQFCommandSyntax> syntaxList,
@@ -52,6 +53,11 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 	@NotNull
 	public String getName() {
 		return commandName;
+	}
+
+	@Override
+	public int getUUID() {
+		return this.uuid;
 	}
 
 	@Override
@@ -228,5 +234,9 @@ public class SQFCommand implements CaseInsentiveKey, Command<SQFCommandSyntax>, 
 		for (SQFCommandSyntax cs : syntaxList) {
 			cs.memCompact();
 		}
+	}
+
+	public void setUUID(int uuid) {
+		this.uuid = uuid;
 	}
 }

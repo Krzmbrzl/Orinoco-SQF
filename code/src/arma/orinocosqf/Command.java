@@ -23,6 +23,8 @@ public interface Command<Syntax extends CommandSyntax> {
 		return ASCIITextHelper.equalsIgnoreCase(getName(), other.getName());
 	}
 
+	int getUUID();
+
 	/**
 	 * @return true if this command is always nular (always no arguments). Returns false if the command is never nular (always has at least
 	 * 1 argument)

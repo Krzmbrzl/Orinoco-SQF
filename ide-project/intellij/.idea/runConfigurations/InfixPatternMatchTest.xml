@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="InfixPatternMatchTest" type="JUnit" factoryName="JUnit">
+    <module name="Orinoco SQF" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="arma.orinocosqf.lexer.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="PACKAGE_NAME" value="arma.orinocosqf" />
+    <option name="MAIN_CLASS_NAME" value="arma.orinocosqf.InfixPatternMatcherTest" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="class" />
+    <option name="PARAMETERS" value="" />
+    <patterns>
+      <pattern testClass="arma.orinocosqf.BodySegmentExpansionTest" />
+      <pattern testClass="arma.orinocosqf.BodySegmentParserTest" />
+    </patterns>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

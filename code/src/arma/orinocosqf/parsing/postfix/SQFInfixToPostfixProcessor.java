@@ -24,7 +24,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 	private final Stack<DelayEvalOrinocoNode> delayEvalStack = new Stack<>();
 	private final List<OrinocoNode> statementLists = new ArrayList<>();
 	private final List<InfixPattern> patterns = new ArrayList<>();
-	private final List<InfixPattern.Node> activePatterns = new ArrayList<>();
+	private final List<InfixPatternMatcher> matchers = new ArrayList<>();
 
 	public SQFInfixToPostfixProcessor() {
 	}
@@ -125,7 +125,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 
 	@Override
 	public void acceptCommand(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		processToken(token);
+		processOrinocoToken(token, ctx);
 
 		SQFCommand command = SQFCommands.instance.getCommandInstanceById(token.getId());
 		if (command == null) {
@@ -287,9 +287,9 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		operators.add(command);
 	}
 
-	private void processToken(@NotNull OrinocoToken token) {
-		for (InfixPattern.Node patternNode : activePatterns) {
-
+	private void processOrinocoToken(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+		for (InfixPatternMatcher matcher : matchers) {
+			matcher.acceptToken(token, ctx);
 		}
 	}
 
@@ -308,19 +308,19 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 
 	@Override
 	public void acceptLocalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		processToken(token);
+		processOrinocoToken(token, ctx);
 		addNode(new TokenOrinocoNode(OrinocoNode.Flag.Variable, token));
 	}
 
 	@Override
 	public void acceptGlobalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		processToken(token);
+		processOrinocoToken(token, ctx);
 		addNode(new TokenOrinocoNode(OrinocoNode.Flag.Variable, token));
 	}
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		processToken(token);
+		processOrinocoToken(token, ctx);
 		addNode(new TokenOrinocoNode(OrinocoNode.Flag.Literal, token));
 	}
 
@@ -365,4 +365,8 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		delayEvalStack.clear();
 	}
 
+	@NotNull
+	public List<InfixPatternMatcher> getMatchers() {
+		return matchers;
+	}
 }

@@ -114,8 +114,10 @@ public class SQFCommands extends CommandSet<SQFCommand> implements IdTransformer
 		((ArrayList<SQFCommand>) this.commands).trimToSize();
 		this.commands.sort(COMPARATOR);
 
+		int i = 0;
 		for (SQFCommand command : this.commands) {
 			command.memCompact();
+			command.setUUID(i++);
 		}
 
 	}

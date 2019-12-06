@@ -36,6 +36,11 @@ public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
 		return matches;
 	}
 
+	@Nullable
+	public Match getMatch(@NotNull String captureName) {
+		return captures.get(captureName);
+	}
+
 	@Override
 	public void begin(@NotNull OrinocoLexerContext ctx) {
 		this.matchIndex = 0;
@@ -43,32 +48,34 @@ public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
 
 	@Override
 	public void acceptCommand(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		// todo first figure out non-nested pattern matching, then figure out nested pattern matching
-		if (!matches) {
-			return;
-		}
-		if (this.matchIndex > pattern.root.getChildren().size()) {
-			this.matches = false;
+		if (!testMatchIndex()) {
 			return;
 		}
 		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
 		switch (node.nodeType) {
 			case Command: {
 				InfixPattern.CommandNode cmdNode = (InfixPattern.CommandNode) node;
-				Command cmdToken = ctx.getCommandInstance(token.getId());
-				if (!cmdToken.commandNameEquals(cmdNode.command)) {
+				if (cmdNode.command.getUUID() != token.getId()) {
 					this.matches = false;
 					return;
 				}
 			}
 			case Literal: {
-				break; // todo matches=false
+				this.matches = false;
+				return;
 			}
 			case Operand: {
+				Command command = ctx.getCommandInstance(token.getId());
+				if (!command.isStrictlyNular()) {
+					this.matches = false;
+					return;
+				}
 				break;
 			}
 			case Pattern: {
-				break;
+				this.matches = false;  // todo this is incomplete
+				System.out.println("Need to complete this case InfixPatternMatcher.java - acceptCommand()");
+				return;
 			}
 		}
 		this.matchIndex++;
@@ -79,23 +86,97 @@ public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
 
 	@Override
 	public void acceptLocalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!matches) {
+		if (!testMatchIndex()) {
 			return;
+		}
+		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
+		switch (node.nodeType) {
+			case Command: //fall
+			case Literal: {
+				this.matches = false;
+				return;
+			}
+			case Operand: {
+				break;
+			}
+			case Pattern: {
+				this.matches = false;  // todo this is incomplete
+				System.out.println("Need to complete this case - InfixPatternMatcher.java - acceptLocalVariable()");
+				return;
+			}
+		}
+		this.matchIndex++;
+		if (node.getCaptureName() != null) {
+			this.captures.put(node.getCaptureName(), new SingleMatch(token));
 		}
 	}
 
 	@Override
 	public void acceptGlobalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!matches) {
+		if (!testMatchIndex()) {
 			return;
+		}
+		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
+		switch (node.nodeType) {
+			case Command: //fall
+			case Literal: {
+				this.matches = false;
+				return;
+			}
+			case Operand: {
+				break;
+			}
+			case Pattern: {
+				this.matches = false;  // todo this is incomplete
+				System.out.println("Need to complete this case - InfixPatternMatcher.java - acceptGlobalVariable()");
+				return;
+			}
+		}
+		this.matchIndex++;
+		if (node.getCaptureName() != null) {
+			this.captures.put(node.getCaptureName(), new SingleMatch(token));
 		}
 	}
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!matches) {
+		if (!testMatchIndex()) {
 			return;
 		}
+		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
+		switch (node.nodeType) {
+			case Command: {
+				this.matches = false;
+				return;
+			}
+			case Literal: {
+				//todo
+				break;
+			}
+			case Operand: {
+				break;
+			}
+			case Pattern: {
+				this.matches = false;  // todo this is incomplete
+				System.out.println("Need to complete this case - InfixPatternMatcher.java - acceptLiteral()");
+				return;
+			}
+		}
+		this.matchIndex++;
+		if (node.getCaptureName() != null) {
+			this.captures.put(node.getCaptureName(), new SingleMatch(token));
+		}
+	}
+
+	private boolean testMatchIndex() {
+		if (!matches) {
+			return false;
+		}
+		if (this.matchIndex >= pattern.root.getChildren().size()) {
+			this.matches = false;
+			return false;
+		}
+		return true;
 	}
 
 	@Override
