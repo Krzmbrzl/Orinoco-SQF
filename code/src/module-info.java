@@ -13,4 +13,5 @@ module Orinoco.SQF {
 	exports arma.orinocosqf.gui;
 	exports arma.orinocosqf.sqf;
 	exports arma.orinocosqf;
+	exports arma.orinocosqf.lexer;
 }

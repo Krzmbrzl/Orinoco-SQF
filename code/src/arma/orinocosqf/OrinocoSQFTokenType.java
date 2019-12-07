@@ -1,7 +1,5 @@
 package arma.orinocosqf;
 
-import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
-import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 
 /**
@@ -24,12 +22,17 @@ public enum OrinocoSQFTokenType implements OrinocoTokenType {
 	 */
 	GlobalVariable(true),
 	/**
-	 * This type represents all available literal-types available in SQF
+	 * This type represents a number literal in SQF
 	 *
-	 * @see OrinocoLexerLiteralType
-	 * @see OrinocoLexerSQFLiteralType
+	 * @see OrinocoLiteralType#Number
 	 */
-	Literal(false),
+	LiteralNumber(false),
+	/**
+	 * This type represents a string literal in SQF
+	 *
+	 * @see OrinocoLiteralType#String
+	 */
+	LiteralString(false),
 	/**
 	 * This type represents input that needs preprocessing but hasn't been
 	 * preprocessed yet

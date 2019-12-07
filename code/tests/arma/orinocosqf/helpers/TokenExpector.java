@@ -1,8 +1,8 @@
 package arma.orinocosqf.helpers;
 
+import arma.orinocosqf.OrinocoLiteralType;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
-import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.preprocessing.MacroSet;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
@@ -112,7 +112,7 @@ public class TokenExpector implements OrinocoTokenDelegator {
 	}
 
 	@Override
-	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+	public void acceptLiteral(@NotNull OrinocoLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
 							  int originalLength, @NotNull OrinocoLexerContext ctx) {
 		acceptFactory.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
@@ -253,7 +253,7 @@ public class TokenExpector implements OrinocoTokenDelegator {
 		}
 
 		@NotNull
-		public static AcceptedToken acceptLiteral(@NotNull OrinocoLexerLiteralType type, @NotNull String token, int preprocessedOffset,
+		public static AcceptedToken acceptLiteral(@NotNull OrinocoLiteralType type, @NotNull String token, int preprocessedOffset,
 												  int preprocessedLength, int originalOffset, int originalLength) {
 			AcceptedToken t = new AcceptedToken(AcceptMethod.AcceptLiteral);
 			t.putParameter("type", type);
@@ -346,7 +346,7 @@ public class TokenExpector implements OrinocoTokenDelegator {
 		}
 
 		@Override
-		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+		public void acceptLiteral(@NotNull OrinocoLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
 								  int originalLength, @NotNull OrinocoLexerContext ctx) {
 			q.add(AcceptedToken.acceptLiteral(type, ctx.getTextBuffer().getText(originalOffset, originalLength),
 					preprocessedOffset, preprocessedLength, originalOffset, originalLength));

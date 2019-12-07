@@ -1,7 +1,7 @@
 package arma.orinocosqf.parsing.postfix;
 
 import arma.orinocosqf.Command;
-import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
+import arma.orinocosqf.OrinocoLiteralType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +20,7 @@ public class InfixPattern {
 	}
 
 	@NotNull
-	public static Node start(@NotNull OrinocoLexerLiteralType literal) {
+	public static Node start(@NotNull OrinocoLiteralType literal) {
 		return new PatternNode(".root", new LiteralNode("", literal));
 	}
 
@@ -67,7 +67,7 @@ public class InfixPattern {
 		}
 
 		@NotNull
-		public Node literal(@NotNull OrinocoLexerLiteralType literal) {
+		public Node literal(@NotNull OrinocoLiteralType literal) {
 			return literal(null, literal);
 		}
 
@@ -88,7 +88,7 @@ public class InfixPattern {
 		}
 
 		@NotNull
-		public Node literal(@Nullable String captureName, @NotNull OrinocoLexerLiteralType literal) {
+		public Node literal(@Nullable String captureName, @NotNull OrinocoLiteralType literal) {
 			this.getChildren().add(new LiteralNode(captureName, literal));
 			return this;
 		}
@@ -122,16 +122,16 @@ public class InfixPattern {
 	}
 
 	public static class LiteralNode extends Node {
-		protected final OrinocoLexerLiteralType literal;
+		protected final OrinocoLiteralType literal;
 
-		public LiteralNode(@Nullable String captureName, @NotNull OrinocoLexerLiteralType literal) {
+		public LiteralNode(@Nullable String captureName, @NotNull OrinocoLiteralType literal) {
 			super(captureName, NodeType.Literal);
 			this.literal = literal;
 			this.canHaveChildren = false;
 		}
 
 		@NotNull
-		public OrinocoLexerLiteralType getLiteral() {
+		public OrinocoLiteralType getLiteral() {
 			return literal;
 		}
 	}

@@ -2,7 +2,6 @@ package arma.orinocosqf;
 
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
-import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import org.jetbrains.annotations.NotNull;
@@ -86,8 +85,8 @@ public interface OrinocoTokenProcessor extends Resettable {
 	 *        length should be used when emitting (error) messages.</b>
 	 * @param ctx The {@link OrinocoLexerContext} that can be used to process/interpret the lexed result
 	 */
-	void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-			int originalLength, @NotNull OrinocoLexerContext ctx);
+	void acceptLiteral(@NotNull OrinocoLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+					   int originalLength, @NotNull OrinocoLexerContext ctx);
 
 	/**
 	 * Invoked when a macro-token was encountered in the input. This method is only invoked if preprocessing is disabled<br>

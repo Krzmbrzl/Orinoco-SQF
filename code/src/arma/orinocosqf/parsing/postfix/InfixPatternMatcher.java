@@ -1,8 +1,6 @@
 package arma.orinocosqf.parsing.postfix;
 
-import arma.orinocosqf.Command;
-import arma.orinocosqf.OrinocoToken;
-import arma.orinocosqf.OrinocoTokenInstanceProcessor;
+import arma.orinocosqf.*;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -151,7 +149,28 @@ public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
 				return;
 			}
 			case Literal: {
-				//todo
+				InfixPattern.LiteralNode literalNode = (InfixPattern.LiteralNode) node;
+				OrinocoSQFTokenType ott = (OrinocoSQFTokenType) token.getTokenType();
+				switch (ott) {
+					case LiteralNumber: {
+						if (literalNode.literal == OrinocoLiteralType.String) {
+							this.matches = false;
+							return;
+						}
+						break;
+					}
+					case LiteralString: {
+						if (literalNode.literal == OrinocoLiteralType.Number) {
+							this.matches = false;
+							return;
+						}
+						break;
+					}
+					default: {
+						this.matches = false;
+						return;
+					}
+				}
 				break;
 			}
 			case Operand: {

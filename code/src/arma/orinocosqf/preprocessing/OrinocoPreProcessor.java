@@ -1,5 +1,6 @@
 package arma.orinocosqf.preprocessing;
 
+import arma.orinocosqf.OrinocoLiteralType;
 import arma.orinocosqf.OrinocoReader;
 import arma.orinocosqf.OrinocoTokenProcessor;
 import arma.orinocosqf.configuration.OrinocoPreprocessorConfiguration;
@@ -9,7 +10,6 @@ import arma.orinocosqf.exceptions.NoMacroArgumentsGivenException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
-import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegment;
 import arma.orinocosqf.preprocessing.bodySegments.BodySegmentParser;
@@ -214,8 +214,8 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	}
 
 	@Override
-	public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-			int originalLength, @NotNull OrinocoLexerContext ctx) {
+	public void acceptLiteral(@NotNull OrinocoLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
+							  int originalLength, @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 

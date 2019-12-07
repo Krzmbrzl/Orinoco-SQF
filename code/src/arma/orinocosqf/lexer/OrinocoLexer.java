@@ -1,5 +1,6 @@
 package arma.orinocosqf.lexer;
 
+import arma.orinocosqf.OrinocoLiteralType;
 import arma.orinocosqf.OrinocoReader;
 import arma.orinocosqf.Resettable;
 import arma.orinocosqf.TextBuffer;
@@ -12,7 +13,6 @@ import arma.orinocosqf.sqf.SQFVariable;
 import arma.orinocosqf.util.CaseInsensitiveHashSet;
 import arma.orinocosqf.util.HashableCharSequence;
 import arma.orinocosqf.util.LightweightStringBuilder;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -150,8 +150,7 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 * objects by default.
 	 * 
 	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
-	 * @param enableTextBuffering Whether to enable text-buffering for the context used by this lexer
-	 * 
+	 *
 	 * @see BufferingOrinocoLexerContext
 	 * @see NonBufferingOrinocoLexerContext
 	 */
@@ -203,7 +202,6 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 * Starts the lexing process.
 	 *
 	 * @param inputReader The {@link OrinocoReader} for accessing the input
-	 * @param reset A flag indicating whether to reset the lexer before starting
 	 */
 	public void start(@NotNull OrinocoReader inputReader) {
 		this.start(inputReader, true);
@@ -350,11 +348,11 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 				case HEX_LITERAL: // fall
 				case INTEGER_LITERAL: // fall
 				case DEC_LITERAL: {
-					makeLiteral(OrinocoLexerSQFLiteralType.Number);
+					makeLiteral(OrinocoLiteralType.Number);
 					break;
 				}
 				case STRING_LITERAL: {
-					makeLiteral(OrinocoLexerSQFLiteralType.String);
+					makeLiteral(OrinocoLiteralType.String);
 					break;
 				}
 				case GLUED_WORD: // fall
@@ -436,9 +434,9 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 *
 	 * @throws IOException because of {@link TextBuffer}
 	 * @param type literal type
-	 * @see OrinocoTokenDelegator#acceptLiteral(OrinocoLexerLiteralType, int, int, int, int, OrinocoLexerContext)
+	 * @see OrinocoTokenDelegator#acceptLiteral
 	 */
-	protected void makeLiteral(@NotNull OrinocoLexerSQFLiteralType type) throws IOException {
+	protected void makeLiteral(@NotNull OrinocoLiteralType type) throws IOException {
 		if (context.getTextBuffer() != null) {
 			context.getTextBuffer().append(jFlexLexer.getBuffer(), jFlexLexer.yystart(), jFlexLexer.yylength());
 		}

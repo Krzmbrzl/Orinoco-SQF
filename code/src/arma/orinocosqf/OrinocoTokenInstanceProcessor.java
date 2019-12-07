@@ -2,7 +2,6 @@ package arma.orinocosqf;
 
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
-import arma.orinocosqf.lexer.OrinocoLexerLiteralType;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,7 +15,8 @@ public interface OrinocoTokenInstanceProcessor {
 				acceptCommand(token, ctx);
 				return;
 			}
-			case Literal: {
+			case LiteralNumber: // fall
+			case LiteralString: {
 				acceptLiteral(token, ctx);
 				return;
 			}
@@ -121,7 +121,7 @@ public interface OrinocoTokenInstanceProcessor {
 		}
 
 		@Override
-		public void acceptLiteral(@NotNull OrinocoLexerLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength, @NotNull OrinocoLexerContext ctx) {
+		public void acceptLiteral(@NotNull OrinocoLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset, int originalLength, @NotNull OrinocoLexerContext ctx) {
 			String val = "";
 			if (captureLiteralValues) {
 				if (ctx.getTextBufferPreprocessed() != null) {
@@ -130,7 +130,11 @@ public interface OrinocoTokenInstanceProcessor {
 					throw new IllegalStateException("Trying to capture literal value, but text buffer is null");
 				}
 			}
-			p.acceptLiteral(new OrinocoToken(val, OrinocoSQFTokenType.Literal, preprocessedOffset, preprocessedLength, originalOffset, originalLength), ctx);
+			OrinocoTokenType ott = OrinocoSQFTokenType.LiteralNumber;
+			if (type == OrinocoLiteralType.String) {
+				ott = OrinocoSQFTokenType.LiteralString;
+			}
+			p.acceptLiteral(new OrinocoToken(val, ott, preprocessedOffset, preprocessedLength, originalOffset, originalLength), ctx);
 		}
 
 		@Override

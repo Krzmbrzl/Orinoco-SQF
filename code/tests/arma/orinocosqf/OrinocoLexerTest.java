@@ -3,11 +3,9 @@ package arma.orinocosqf;
 import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.PrefilledLexerContext;
 import arma.orinocosqf.helpers.TokenExpector;
-import arma.orinocosqf.lexer.OrinocoLexer;
-import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
 import arma.orinocosqf.lexer.BufferingOrinocoLexerContext;
+import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.sqf.SQFCommands;
-
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -69,7 +67,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -77,7 +75,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -87,7 +85,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -97,7 +95,7 @@ public class OrinocoLexerTest {
 		ctx = new PrefilledLexerContext(lexer, input);
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -107,7 +105,7 @@ public class OrinocoLexerTest {
 		ctx = new PrefilledLexerContext(lexer, input);
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -117,7 +115,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -125,7 +123,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -133,7 +131,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -143,7 +141,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -151,7 +149,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -161,7 +159,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -169,7 +167,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -177,7 +175,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -187,7 +185,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -195,7 +193,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -203,7 +201,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.String, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.String, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -213,7 +211,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -221,7 +219,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -231,7 +229,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -239,7 +237,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -249,7 +247,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -257,7 +255,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -267,7 +265,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -275,7 +273,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -283,7 +281,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -291,7 +289,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -301,7 +299,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -309,7 +307,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -317,7 +315,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -325,7 +323,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -335,7 +333,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -343,7 +341,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -351,7 +349,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -359,7 +357,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -369,7 +367,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -377,7 +375,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -385,7 +383,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -393,7 +391,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -403,7 +401,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -411,7 +409,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -419,7 +417,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -427,7 +425,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -437,7 +435,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -445,7 +443,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -453,7 +451,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -461,7 +459,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -471,7 +469,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -479,7 +477,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -487,7 +485,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
@@ -497,7 +495,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -505,7 +503,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 
 
@@ -513,7 +511,7 @@ public class OrinocoLexerTest {
 
 		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
 		ctx = new PrefilledLexerContext(lexer, input);
-		tokenFactory.acceptLiteral(OrinocoLexerSQFLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
+		tokenFactory.acceptLiteral(OrinocoLiteralType.Number, 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
 
