@@ -4,8 +4,6 @@ import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.PrefilledLexerContext;
 import arma.orinocosqf.helpers.TokenExpector;
 
-import arma.orinocosqf.lexer.OrinocoLexerSQFLiteralType;
-import arma.orinocosqf.preprocessing.PreProcessorCommand;
 import arma.orinocosqf.lexer.BufferingOrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.sqf.SQFCommands;
