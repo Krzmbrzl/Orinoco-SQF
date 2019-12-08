@@ -12,6 +12,7 @@ jdk:
 before_install:
     - sudo apt install ant
     - sudo apt install ant-optional
+    - sudo apt install jflex
 
 script:
   - java --version
