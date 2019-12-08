@@ -1534,4 +1534,66 @@ public class OrinocoLexerTest {
 		tokenFactory.acceptCommand(getCommandTransformer().toId(input), 0, input.length(), 0, input.length(), ctx);
 		performTest(input);
 	}
+
+	@Test
+	public void newline_variations() {
+		String input = "\n";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 1, 0, 1, ctx);
+		performTest(input);
+
+		input = "\r\n";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 2, 0, 2, ctx);
+		performTest(input);
+
+		input = "\r";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 1, 0, 1, ctx);
+		performTest(input);
+	}
+
+	@Test
+	public void whitespace() {
+		String input = " ";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		PrefilledLexerContext ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 1, 0, 1, ctx);
+		performTest(input);
+
+		input = "  ";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 2, 0, 2, ctx);
+		performTest(input);
+
+		input = "\t";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 1, 0, 1, ctx);
+		performTest(input);
+		
+		input = " \t";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 2, 0, 2, ctx);
+		performTest(input);
+		
+		input = "\t\n ";
+
+		lexer.setContext(new BufferingOrinocoLexerContext(lexer));
+		ctx = new PrefilledLexerContext(lexer, input);
+		tokenFactory.acceptWhitespace(0, 3, 0, 3, ctx);
+		performTest(input);
+	}
 }
