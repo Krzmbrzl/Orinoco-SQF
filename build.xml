@@ -33,7 +33,7 @@
 		<mkdir dir="${build.dir}"/>
 	</target>
 	
-	<target name="compile" depends="clean, createBuildDir" description="Builds Orionoco">
+	<target name="compile" depends="clean, createBuildDir, gen-jflex" description="Builds Orionoco">
 		<copy todir="${build.dir}">
 			<fileset dir="${syntax.dir}/../">
 				<include name="arma-commands-syntax/**" />
