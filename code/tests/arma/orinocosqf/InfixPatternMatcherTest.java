@@ -13,24 +13,15 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class InfixPatternMatcherTest {
 	@Test
 	public void test() {
-		SQFCommands.Operators ops = SQFCommands.ops();
-		InfixPattern pattern = InfixPattern.start(ops.L_SQ_BRACKET)
-				.command(SQFCommands.command("getPos")).operand("OPERAND")
-				.command(ops.R_SQ_BRACKET).toPattern();
-		// [getPos ANY]
-		// getCaptured("OPERAND")
-
 
 		ArmaFilesystem fs = new ArmaFilesystem(new File(System.getProperty("user.home")).toPath(), new ArrayList<>());
 		SQFInfixToPostfixProcessor infixProcessor = new SQFInfixToPostfixProcessor();
-		InfixPatternMatcher matcher = new InfixPatternMatcher(pattern);
-		infixProcessor.getMatchers().add(matcher);
+
 		OrinocoLexer lexer = new OrinocoLexer(
 				new OrinocoPreProcessor(
 						new OrinocoTokenInstanceProcessor.ToInstanceTranslator(
@@ -38,8 +29,36 @@ public class InfixPatternMatcherTest {
 						), fs
 				)
 		);
+
+		SQFCommands.Operators ops = SQFCommands.ops();
+		InfixPattern pattern = InfixPattern.start(ops.L_SQ_BRACKET)
+				.command(SQFCommands.command("getPos")).operand("OPERAND")
+				.command(ops.R_SQ_BRACKET).toPattern();
+		// [getPos ANY]
+		// getCaptured("OPERAND")
+
+		InfixPattern patternNested = InfixPattern.start(ops.L_SQ_BRACKET)
+				.pattern("PATTERN",
+						InfixPattern.start(SQFCommands.command("getPos")).operand("OPERAND2").toPattern()
+				)
+				.command(ops.R_SQ_BRACKET).toPattern();
+
+		InfixPatternMatcher matcher = new InfixPatternMatcher(pattern);
+		InfixPatternMatcher matcher2 = new InfixPatternMatcher(patternNested);
+
+		infixProcessor.getMatchers().add(matcher);
+		infixProcessor.getMatchers().add(matcher2);
+
 		lexer.start(OrinocoReader.fromCharSequence("[getPos 1]"));
+
 		assertNotNull(matcher.getMatch("OPERAND"));
 		assertTrue(matcher.matches());
+		assertTrue(matcher.matchComplete());
+
+		assertNotNull(matcher2.getMatch("PATTERN"));
+		assertNotNull(matcher2.getMatch("OPERAND2"));
+		assertNull(matcher2.getMatch("OPERAND"));
+		assertTrue(matcher2.matches());
+		assertTrue(matcher2.matchComplete());
 	}
 }

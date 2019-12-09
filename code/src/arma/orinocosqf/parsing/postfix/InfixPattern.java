@@ -2,6 +2,9 @@ package arma.orinocosqf.parsing.postfix;
 
 import arma.orinocosqf.Command;
 import arma.orinocosqf.OrinocoLiteralType;
+import arma.orinocosqf.OrinocoSQFTokenType;
+import arma.orinocosqf.OrinocoToken;
+import arma.orinocosqf.lexer.OrinocoLexerContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,18 +18,28 @@ import java.util.List;
 public class InfixPattern {
 	protected final Node root;
 
-	private InfixPattern(@NotNull Node root) {
+	public InfixPattern(@NotNull Node root) {
 		this.root = root;
 	}
 
 	@NotNull
 	public static Node start(@NotNull OrinocoLiteralType literal) {
-		return new PatternNode(".root", new LiteralNode("", literal));
+		return start(null, literal);
 	}
 
 	@NotNull
 	public static Node start(@NotNull Command command) {
-		return new PatternNode(".root", new CommandNode("", command));
+		return start(null, command);
+	}
+
+	@NotNull
+	public static Node start(@Nullable String captureName, @NotNull OrinocoLiteralType literal) {
+		return new PatternNode(".root", new LiteralNode(captureName, literal));
+	}
+
+	@NotNull
+	public static Node start(@Nullable String captureName, @NotNull Command command) {
+		return new PatternNode(".root", new CommandNode(captureName, command));
 	}
 
 	protected enum NodeType {
@@ -43,6 +56,12 @@ public class InfixPattern {
 		public Node(@Nullable String captureName, @NotNull NodeType nodeType) {
 			this.captureName = captureName;
 			this.nodeType = nodeType;
+		}
+
+		public abstract boolean matches(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx);
+
+		public boolean isPattern() {
+			return this.nodeType == NodeType.Pattern;
 		}
 
 		@NotNull
@@ -101,7 +120,9 @@ public class InfixPattern {
 
 		@NotNull
 		public Node pattern(@Nullable String captureName, @NotNull InfixPattern pattern) {
-			this.getChildren().add(new PatternNode(captureName, pattern.root));
+			PatternNode node = new PatternNode(captureName, null);
+			node.getChildren().addAll(pattern.root.getChildren());
+			this.getChildren().add(node);
 			return this;
 		}
 
@@ -119,6 +140,12 @@ public class InfixPattern {
 			this.command = command;
 			this.canHaveChildren = true;
 		}
+
+		@Override
+		public boolean matches(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+			return token.getTokenType() == OrinocoSQFTokenType.Command
+					&& token.getId() == this.command.getUUID();
+		}
 	}
 
 	public static class LiteralNode extends Node {
@@ -134,6 +161,22 @@ public class InfixPattern {
 		public OrinocoLiteralType getLiteral() {
 			return literal;
 		}
+
+		@Override
+		public boolean matches(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+			final boolean isLiteral = token.getTokenType() == OrinocoSQFTokenType.LiteralNumber
+					|| token.getTokenType() == OrinocoSQFTokenType.LiteralString;
+			if (!isLiteral) {
+				return false;
+			}
+			if (token.getTokenType() == OrinocoSQFTokenType.LiteralNumber) {
+				return this.literal == OrinocoLiteralType.Number;
+			}
+			if (token.getTokenType() == OrinocoSQFTokenType.LiteralString) {
+				return this.literal == OrinocoLiteralType.String;
+			}
+			return false;
+		}
 	}
 
 	public static class OperandNode extends Node {
@@ -141,6 +184,23 @@ public class InfixPattern {
 		public OperandNode(@Nullable String captureName) {
 			super(captureName, NodeType.Operand);
 			this.canHaveChildren = false;
+		}
+
+		@Override
+		public boolean matches(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+			if (token.getTokenType() == OrinocoSQFTokenType.Command) {
+				return ctx.getCommandInstance(token.getId()).isStrictlyNular();
+			}
+			OrinocoSQFTokenType ott = (OrinocoSQFTokenType) token.getTokenType();
+			switch (ott) {
+				case LiteralNumber: //fall
+				case LiteralString: //fall
+				case GlobalVariable: //fall
+				case LocalVariable: {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
@@ -152,6 +212,12 @@ public class InfixPattern {
 			if (firstChild != null) {
 				this.getChildren().add(firstChild);
 			}
+		}
+
+		@Override
+		public boolean matches(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
+			// Patterns will not match with an individual token
+			throw new IllegalStateException();
 		}
 	}
 

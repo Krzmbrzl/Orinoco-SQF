@@ -1,33 +1,32 @@
 package arma.orinocosqf.parsing.postfix;
 
-import arma.orinocosqf.*;
+import arma.orinocosqf.OrinocoToken;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author K
  * @since 12/3/19
  */
-public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
-	private final InfixPattern pattern;
-	private int matchIndex;
+public class InfixPatternMatcher {
+	private final InfixPattern rootPattern;
 	private final Map<String, Match> captures = new HashMap<>();
 	private boolean matches;
-	private boolean matchComplete;
+	private final Stack<InfixPattern.Node> nodes = new Stack<>();
+	private final Stack<Integer> matchIndices = new Stack<>();
+	private final Stack<ArrayList<OrinocoToken>> tokenListStack = new Stack<>();
 
 	public InfixPatternMatcher(@NotNull InfixPattern pattern) {
-		this.pattern = pattern;
+		this.rootPattern = pattern;
 		this.reset();
 	}
 
 	public boolean matchComplete() {
-		return matchComplete;
+		System.out.println(matchIndices);
+		return this.matchIndices.isEmpty();
 	}
 
 	public boolean matches() {
@@ -39,184 +38,74 @@ public class InfixPatternMatcher implements OrinocoTokenInstanceProcessor {
 		return captures.get(captureName);
 	}
 
-	@Override
-	public void begin(@NotNull OrinocoLexerContext ctx) {
-		this.matchIndex = 0;
-	}
-
-	@Override
-	public void acceptCommand(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!testMatchIndex()) {
-			return;
-		}
-		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
-		switch (node.nodeType) {
-			case Command: {
-				InfixPattern.CommandNode cmdNode = (InfixPattern.CommandNode) node;
-				if (cmdNode.command.getUUID() != token.getId()) {
-					this.matches = false;
-					return;
-				}
-				break;
-			}
-			case Literal: {
-				this.matches = false;
-				return;
-			}
-			case Operand: {
-				Command command = ctx.getCommandInstance(token.getId());
-				if (!command.isStrictlyNular()) {
-					this.matches = false;
-					return;
-				}
-				break;
-			}
-			case Pattern: {
-				this.matches = false;  // todo this is incomplete
-				System.out.println("Need to complete this case InfixPatternMatcher.java - acceptCommand()");
-				return;
-			}
-		}
-		this.matchIndex++;
-		if (node.getCaptureName() != null) {
-			this.captures.put(node.getCaptureName(), new SingleMatch(token));
-		}
-	}
-
-	@Override
-	public void acceptLocalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!testMatchIndex()) {
-			return;
-		}
-		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
-		switch (node.nodeType) {
-			case Command: //fall
-			case Literal: {
-				this.matches = false;
-				return;
-			}
-			case Operand: {
-				break;
-			}
-			case Pattern: {
-				this.matches = false;  // todo this is incomplete
-				System.out.println("Need to complete this case - InfixPatternMatcher.java - acceptLocalVariable()");
-				return;
-			}
-		}
-		this.matchIndex++;
-		if (node.getCaptureName() != null) {
-			this.captures.put(node.getCaptureName(), new SingleMatch(token));
-		}
-	}
-
-	@Override
-	public void acceptGlobalVariable(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!testMatchIndex()) {
-			return;
-		}
-		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
-		switch (node.nodeType) {
-			case Command: //fall
-			case Literal: {
-				this.matches = false;
-				return;
-			}
-			case Operand: {
-				break;
-			}
-			case Pattern: {
-				this.matches = false;  // todo this is incomplete
-				System.out.println("Need to complete this case - InfixPatternMatcher.java - acceptGlobalVariable()");
-				return;
-			}
-		}
-		this.matchIndex++;
-		if (node.getCaptureName() != null) {
-			this.captures.put(node.getCaptureName(), new SingleMatch(token));
-		}
-	}
-
-	@Override
-	public void acceptLiteral(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
-		if (!testMatchIndex()) {
-			return;
-		}
-		InfixPattern.Node node = pattern.root.getChildren().get(this.matchIndex);
-		switch (node.nodeType) {
-			case Command: {
-				this.matches = false;
-				return;
-			}
-			case Literal: {
-				InfixPattern.LiteralNode literalNode = (InfixPattern.LiteralNode) node;
-				OrinocoSQFTokenType ott = (OrinocoSQFTokenType) token.getTokenType();
-				switch (ott) {
-					case LiteralNumber: {
-						if (literalNode.literal == OrinocoLiteralType.String) {
-							this.matches = false;
-							return;
-						}
-						break;
-					}
-					case LiteralString: {
-						if (literalNode.literal == OrinocoLiteralType.Number) {
-							this.matches = false;
-							return;
-						}
-						break;
-					}
-					default: {
-						this.matches = false;
-						return;
-					}
-				}
-				break;
-			}
-			case Operand: {
-				break;
-			}
-			case Pattern: {
-				this.matches = false;  // todo this is incomplete
-				System.out.println("Need to complete this case - InfixPatternMatcher.java - acceptLiteral()");
-				return;
-			}
-		}
-		this.matchIndex++;
-		if (node.getCaptureName() != null) {
-			this.captures.put(node.getCaptureName(), new SingleMatch(token));
-		}
-	}
-
-	private boolean testMatchIndex() {
+	public void acceptToken(@NotNull OrinocoToken token, @NotNull OrinocoLexerContext ctx) {
 		if (!matches) {
-			return false;
+			return;
 		}
-		if (this.matchIndex >= pattern.root.getChildren().size()) {
+		int matchIndex = matchIndex();
+		InfixPattern.Node parentNode = node();
+		if (matchIndex >= parentNode.getChildren().size()) {
 			this.matches = false;
-			return false;
+			return;
 		}
-		return true;
+
+		InfixPattern.Node node = parentNode.getChildren().get(matchIndex);
+		if (node.isPattern()) {
+			matchIndices.push(0);
+			nodes.push(node);
+			tokenListStack.push(new ArrayList<>());
+			acceptToken(token, ctx);
+			return;
+		}
+
+		this.matches = node.matches(token, ctx);
+		if (!this.matches) {
+			return;
+		}
+
+		if (parentNode.isPattern() && parentNode != this.rootPattern.root) {
+			ArrayList<OrinocoToken> tokenList = tokenList();
+			tokenList.add(token);
+		}
+		if (node.getCaptureName() != null) {
+			captures.put(node.getCaptureName(), new SingleMatch(token));
+		}
+
+		matchIndices.pop();
+		if (matchIndex < parentNode.getChildren().size() - 1) {
+			matchIndices.push(matchIndex + 1);
+		} else if (parentNode.isPattern() && parentNode != this.rootPattern.root) {
+			ArrayList<OrinocoToken> tokenList = tokenListStack.pop();
+			tokenList.trimToSize();
+			captures.put(parentNode.getCaptureName(), new GroupMatch(tokenList));
+			nodes.pop();
+			matchIndices.push(matchIndices.pop() + 1);
+		}
 	}
 
-	@Override
-	public void preProcessorTokenSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
-	}
 
-	@Override
-	public void preProcessorCommandSkipped(int offset, int length, @NotNull OrinocoLexerContext ctx) {
-	}
-
-	@Override
 	public void end(@NotNull OrinocoLexerContext ctx) {
 
 	}
 
-	@Override
+	private int matchIndex() {
+		return this.matchIndices.peek();
+	}
+
+	private ArrayList<OrinocoToken> tokenList() {
+		return this.tokenListStack.peek();
+	}
+
+	private InfixPattern.Node node() {
+		return this.nodes.peek();
+	}
+
 	public void reset() {
 		this.matches = true;
-		this.matchComplete = false;
-		this.matchIndex = 0;
+		this.matchIndices.clear();
+		this.matchIndices.push(0);
+		this.nodes.clear();
+		this.nodes.push(this.rootPattern.root);
 	}
 
 	public interface Match extends Iterable<OrinocoToken> {
