@@ -10,8 +10,10 @@ jdk:
  - oraclejdk11
 
 before_install:
+    - sudo apt update
     - sudo apt install ant
     - sudo apt install ant-optional
+    - sudo apt install jflex
 
 script:
   - java --version

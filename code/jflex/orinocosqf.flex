@@ -79,7 +79,7 @@ CMD_UNDEF = "#undef"
     [^\r\n\\/*]+ { updateTokenLength(true); appendTextToPreProcessorCommand(); }
     [/|*] { updateTokenLength(true); appendTextToPreProcessorCommand(); }
     {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToPreProcessorCommand(); }
-	{LINE_TERMINATOR} { yypushback(1); yybegin(YYINITIAL); return preprocessorCommandMatched; }
+	{LINE_TERMINATOR} { yypushback(yytext().length()); yybegin(YYINITIAL); return preprocessorCommandMatched; }
 	<<EOF>> {
 		if (yymoreStreams()) {
 			yypopStream();

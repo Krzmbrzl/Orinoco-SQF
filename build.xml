@@ -33,7 +33,7 @@
 		<mkdir dir="${build.dir}"/>
 	</target>
 	
-	<target name="compile" depends="clean, createBuildDir" description="Builds Orionoco">
+	<target name="compile" depends="clean, createBuildDir, gen-jflex" description="Builds Orionoco">
 		<copy todir="${build.dir}">
 			<fileset dir="${syntax.dir}/../">
 				<include name="arma-commands-syntax/**" />
@@ -70,14 +70,14 @@
 	</target>
 
 
-	<target name="gen-jflex" depends="clean-gen">
+	<target name="gen-jflex" depends="clean-gen" description="Generates the internal OrinocoLexer from the JFlex spec">
 		<taskdef classname="jflex.anttask.JFlexTask" classpathref="classpath" name="jflex"/>
 		<jflex file="${basedir}/code/jflex/orinocosqf.flex" destdir="${basedir}/code/gen"
 			   skeleton="${basedir}/code/jflex/skeleton.nested"/>
 	</target>
 
-	<target name="clean-gen">
-		<delete>
+	<target name="clean-gen" description="Deletes the gen-dir (containing JFlex output">
+		<delete failonerror="false">
 			<fileset dir="${gen.dir}"/>
 		</delete>
 	</target>
