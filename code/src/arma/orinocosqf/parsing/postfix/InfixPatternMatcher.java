@@ -112,6 +112,8 @@ public class InfixPatternMatcher {
 		int length();
 
 		@Nullable OrinocoToken first();
+
+		@Nullable OrinocoToken token(int i);
 	}
 
 	private static class SingleMatch implements Match {
@@ -130,6 +132,14 @@ public class InfixPatternMatcher {
 		@Nullable
 		public OrinocoToken first() {
 			return token;
+		}
+
+		@Override
+		public @Nullable OrinocoToken token(int i) {
+			if (i == 0) {
+				return token;
+			}
+			throw new IndexOutOfBoundsException(i);
 		}
 
 		@NotNull
@@ -171,6 +181,12 @@ public class InfixPatternMatcher {
 		@Nullable
 		public OrinocoToken first() {
 			return tokens.size() > 0 ? tokens.get(0) : null;
+		}
+
+		@Override
+		@Nullable
+		public OrinocoToken token(int i) {
+			return tokens.get(i);
 		}
 
 		@NotNull

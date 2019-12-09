@@ -55,7 +55,12 @@ public class InfixPatternMatcherTest {
 		assertTrue(matcher.matches());
 		assertTrue(matcher.matchComplete());
 
-		assertNotNull(matcher2.getMatch("PATTERN"));
+		InfixPatternMatcher.Match patternMatch = matcher2.getMatch("PATTERN");
+		assertNotNull(patternMatch);
+		assertEquals(2, patternMatch.length());
+		assertEquals(OrinocoSQFTokenType.Command, patternMatch.token(0).getTokenType());
+		assertEquals(OrinocoSQFTokenType.LiteralNumber, patternMatch.token(1).getTokenType());
+
 		assertNotNull(matcher2.getMatch("OPERAND2"));
 		assertNull(matcher2.getMatch("OPERAND"));
 		assertTrue(matcher2.matches());
