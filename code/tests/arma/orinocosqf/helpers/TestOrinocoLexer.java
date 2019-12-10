@@ -2,6 +2,8 @@ package arma.orinocosqf.helpers;
 
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -18,7 +20,7 @@ public class TestOrinocoLexer extends OrinocoLexer {
 	private boolean didPreProcessing = false;
 
 	public TestOrinocoLexer(@NotNull OrinocoTokenDelegator lexerStream) {
-		super(lexerStream);
+		super(lexerStream, new ProblemListenerPanicImplementation());
 	}
 	
 	public void setConsumer(@NotNull Consumer<CharSequence> preprocessedTextCallback) {

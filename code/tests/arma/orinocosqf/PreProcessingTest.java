@@ -11,6 +11,7 @@ import org.junit.Test;
 import arma.orinocosqf.helpers.VirtualArmaFileSystem;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 import arma.orinocosqf.tokenprocessing.OutputTokenProcessor;
 
 public class PreProcessingTest {
@@ -25,7 +26,7 @@ public class PreProcessingTest {
 		virtualFs = new VirtualArmaFileSystem();
 		processor = new OutputTokenProcessor();
 		preprocessor = new OrinocoPreProcessor(processor, virtualFs);
-		lexer = new OrinocoLexer(preprocessor);
+		lexer = new OrinocoLexer(preprocessor, new ProblemListenerPanicImplementation());
 
 		lexer.enableTextBuffering(true);
 	}

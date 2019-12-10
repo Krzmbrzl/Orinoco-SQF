@@ -53,8 +53,10 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 
 	protected OrinocoLexerContext context;
 	protected OrinocoLexerContextFactory contextFactory;
-
 	protected OrinocoTokenDelegator tokenDelegator;
+
+	protected ProblemListener problemListener;
+
 	protected int originalOffset = 0;
 	protected int originalLength = 0;
 	protected int preprocessedOffset = 0;
@@ -102,16 +104,19 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 * Creates an instance of this lexer
 	 * 
 	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param problemListener The {@link ProblemListener} all problems encountered during lexing or preprocessing are delegated to
 	 * @param contextFactory The {@link OrinocoLexerContextFactory} used to produce {@link OrinocoLexerContext}s with the desired properties
 	 * @param enableTextBuffering Whether to enable text-buffering for the context used by this lexer
 	 */
-	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull OrinocoLexerContextFactory contextFactory,
-			boolean enableTextBuffering) {
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull ProblemListener problemListener,
+			@NotNull OrinocoLexerContextFactory contextFactory, boolean enableTextBuffering) {
 		this.tokenDelegator = tokenDelegator;
 		tokenDelegator.setLexer(this);
 
 		this.contextFactory = contextFactory;
 		this.context = contextFactory.produce(this, enableTextBuffering);
+
+		this.setProblemListener(problemListener);
 
 		this.varIdTransformer = new MyVariableIdTransformer();
 	}
@@ -120,23 +125,27 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 * Creates an instance of this lexer. The instanciated lexer will have text-buffering disabled by default.
 	 * 
 	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param problemListener The {@link ProblemListener} all problems encountered during lexing or preprocessing are delegated to
 	 * @param contextFactory The {@link OrinocoLexerContextFactory} used to produce {@link OrinocoLexerContext}s with the desired properties
 	 */
-	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull OrinocoLexerContextFactory contextFactory) {
-		this(tokenDelegator, contextFactory, false);
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull ProblemListener problemListener,
+			@NotNull OrinocoLexerContextFactory contextFactory) {
+		this(tokenDelegator, problemListener, contextFactory, false);
 	}
 
 	/**
 	 * Creates an instance of this lexer. The instantiated lexer will use default LexerContext objects by default.
 	 * 
 	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param problemListener The {@link ProblemListener} all problems encountered during lexing or preprocessing are delegated to
 	 * @param enableTextBuffering Whether to enable text-buffering for the context used by this lexer
 	 * 
 	 * @see BufferingOrinocoLexerContext
 	 * @see NonBufferingOrinocoLexerContext
 	 */
-	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, boolean enableTextBuffering) {
-		this(tokenDelegator, new OrinocoLexerContextFactory() {
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull ProblemListener problemListener,
+			boolean enableTextBuffering) {
+		this(tokenDelegator, problemListener, new OrinocoLexerContextFactory() {
 
 			@Override
 			public OrinocoLexerContext produce(@NotNull OrinocoLexer lexer, boolean textBufferingEnabled) {
@@ -150,12 +159,13 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 * objects by default.
 	 * 
 	 * @param tokenDelegator The {@link OrinocoTokenDelegator} used to process all encountered tokens
+	 * @param problemListener The {@link ProblemListener} all problems encountered during lexing or preprocessing are delegated to
 	 *
 	 * @see BufferingOrinocoLexerContext
 	 * @see NonBufferingOrinocoLexerContext
 	 */
-	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator) {
-		this(tokenDelegator, false);
+	public OrinocoLexer(@NotNull OrinocoTokenDelegator tokenDelegator, @NotNull ProblemListener problemListener) {
+		this(tokenDelegator, problemListener, false);
 	}
 
 
@@ -196,6 +206,13 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 			context = contextFactory.produce(this, false);
 		}
 		this.context = context;
+	}
+	
+	/**
+	 * @param problemListener The {@link ProblemListener} all problems encountered during lexing or preprocessing are delegated to
+	 */
+	public void setProblemListener(@NotNull ProblemListener problemListener) {
+		this.problemListener = problemListener;
 	}
 
 	/**
