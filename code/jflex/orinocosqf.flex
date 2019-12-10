@@ -21,6 +21,7 @@ import java.io.IOException;
 %public %class OrinocoJFlexLexer
 // %implements
 %unicode
+%line
 %function advance
 %type TokenType
 %eof{
@@ -79,7 +80,7 @@ CMD_UNDEF = "#undef"
     [^\r\n\\/*]+ { updateTokenLength(true); appendTextToPreProcessorCommand(); }
     [/|*] { updateTokenLength(true); appendTextToPreProcessorCommand(); }
     {MACRO_NEXT_LINE} { updateTokenLength(true); appendTextToPreProcessorCommand(); }
-	{LINE_TERMINATOR} { yypushback(yytext().length()); yybegin(YYINITIAL); return preprocessorCommandMatched; }
+	{LINE_TERMINATOR} { yypushback(zzMarkedPos-zzStartRead); yybegin(YYINITIAL); return preprocessorCommandMatched; }
 	<<EOF>> {
 		if (yymoreStreams()) {
 			yypopStream();

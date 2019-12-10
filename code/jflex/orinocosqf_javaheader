@@ -42,6 +42,10 @@
 	private int SEMICOLON_id;
 	private int QUEST_id;
 	private int COLON_id;
+	
+	public int getLine() {
+		return this.yyline;
+	}
 
 	private boolean macroArgParenCountBalanced() {
 		if(macroArgRightParenCount == macroArgLeftParenCount) {
