@@ -343,7 +343,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 					if (removedLeadingWS && isMacroNamePart(c, true)) {
 						// report error about leading WS for macro argument
-						lexer.problemEncountered(Problems.ERROR_LEADING_WS, "Leading whitespace before macro argument", startOffset + begin,
+						lexer.problemEncountered(Problems.ERROR_LEADING_WS, "Leading whitespace before macro argument", begin,
 								i - begin, -1);
 					}
 					// If we removed all WS but c is no macro name part, the error about pure WS argument will trigger below
@@ -359,7 +359,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 					if (strCurrentArg.length() == 0) {
 						lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
-								startOffset + i - 1 - originalLength, originalLength, -1);
+								 i - 1 - originalLength, originalLength, -1);
 					}
 
 					params.add(strCurrentArg);
@@ -374,7 +374,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 						lexer.problemEncountered(Problems.ERROR_INVALID_CHARACTER,
 								"Detected invalid character while collecting macro arguments: '" + c
 										+ "' (Expected comma or closing paren)",
-								startOffset + i, 1, -1);
+								i, 1, -1);
 					}
 				}
 			}
@@ -391,7 +391,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 			if (currentArg.length() == 0) {
 				lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
-						startOffset + i - 1 - originalLength, originalLength, -1);
+						i - 1 - originalLength, originalLength, -1);
 			}
 
 			params.add(strCurrentArg);
