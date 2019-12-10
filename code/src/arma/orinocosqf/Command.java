@@ -19,7 +19,7 @@ public interface Command<Syntax extends CommandSyntax> {
 	@NotNull
 	String getName();
 
-	default boolean commandNameEquals(@NotNull Command other) {
+	default boolean commandNameEquals(@NotNull Command<?> other) {
 		return ASCIITextHelper.equalsIgnoreCase(getName(), other.getName());
 	}
 
