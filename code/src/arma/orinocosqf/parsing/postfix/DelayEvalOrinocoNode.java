@@ -13,8 +13,8 @@ public class DelayEvalOrinocoNode extends OrinocoNode {
 	private final List<List<OrinocoNode>> children = new ArrayList<>();
 	private final OrinocoNode node;
 
-	public DelayEvalOrinocoNode(@NotNull OrinocoNode node) {
-		super(node.getFlag());
+	public DelayEvalOrinocoNode(@NotNull Flag flag, @NotNull OrinocoNode node) {
+		super(flag);
 		this.node = node;
 	}
 

@@ -10,7 +10,7 @@ public class InvalidTokenOrinocoNode extends DelayEvalOrinocoNode {
 	private final OrinocoNode node;
 
 	public InvalidTokenOrinocoNode(@NotNull OrinocoNode node) {
-		super(node);
+		super(Flag.CodeBlock, node);
 		this.node = node;
 	}
 
