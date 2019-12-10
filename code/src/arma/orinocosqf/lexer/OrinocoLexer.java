@@ -667,7 +667,12 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 	 */
 	@Override
 	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
-		// TODO process problem and delegate to the actual problem listener
+		// adjust offset and line to actually match the original input
+		offset += originalOffset;
+		if (line < 0) {
+			line = this.jFlexLexer.getLine();
+		}
+		this.problemListener.problemEncountered(problem, msg, offset, length, line);
 	}
 
 	/**
@@ -712,7 +717,7 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		previousPreprocessedOffset = 0;
 		previousPreprocessedLength = 0;
 		preProcessorIfDefState.clear();
-		
+
 		if (jFlexLexer != null) {
 			jFlexLexer.reset();
 		}
