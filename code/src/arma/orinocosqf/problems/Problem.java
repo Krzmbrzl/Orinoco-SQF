@@ -30,10 +30,22 @@ public abstract class Problem {
 	 * @return The unique Id of this problem
 	 */
 	public abstract int getId();
-	
+
 	@Override
 	public String toString() {
 		return getDisplayName() + "{" + "severity=" + getSeverity() + "; id=" + getId() + "}";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Problem)) {
+			return false;
+		}
+
+		Problem other = (Problem) o;
+
+		return this.getDisplayName().equals(other.getDisplayName()) && this.getDescription().equals(other.getDescription())
+				&& this.getSeverity().equals(other.getSeverity()) && this.getId() == other.getId();
 	}
 
 
