@@ -158,7 +158,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 	/**
 	 * Gets the location of the context segment inside the rootsegment
 	 * 
-	 * @param rootSegment The root segment ot search in
+	 * @param rootSegment The root segment to search in
 	 * @param context The context segment to search for
 	 * @return An int-array of length two {offset, length} or <code>null</code> if it couldn't be found
 	 */
