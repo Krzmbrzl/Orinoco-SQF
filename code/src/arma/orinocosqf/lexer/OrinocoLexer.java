@@ -670,7 +670,7 @@ public class OrinocoLexer implements ProblemListener, Resettable {
 		// adjust offset and line to actually match the original input
 		offset += originalOffset;
 		if (line < 0) {
-			line = this.jFlexLexer.getLine();
+			line = this.jFlexLexer.getLine() + 1;
 		}
 		this.problemListener.problemEncountered(problem, msg, offset, length, line);
 	}
