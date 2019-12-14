@@ -8,6 +8,7 @@ import arma.orinocosqf.exceptions.InvalidPathException;
 import arma.orinocosqf.exceptions.MissingMacroArgumentException;
 import arma.orinocosqf.exceptions.NoMacroArgumentsGivenException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
+import arma.orinocosqf.exceptions.WrongMacroArgumentCountException;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoTokenDelegator;
@@ -147,7 +148,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 			if (e instanceof NoMacroArgumentsGivenException) {
 				lexer.problemEncountered(Problems.ERROR_NO_MACRO_ARGUMENTS_PROVIDED, e.getMessage(), contextOffset, contextLength, -1);
-			} else if (e instanceof MissingMacroArgumentException) {
+			} else if (e instanceof MissingMacroArgumentException || e instanceof WrongMacroArgumentCountException) {
 				lexer.problemEncountered(Problems.ERROR_WRONG_ARGUMENT_COUNT, e.getMessage(), contextOffset, contextLength, -1);
 			} else {
 				lexer.problemEncountered(Problems.ERROR_PREPROCESSOR, e.getMessage(), contextOffset, contextLength, -1);
