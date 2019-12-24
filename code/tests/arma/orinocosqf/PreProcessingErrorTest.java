@@ -148,11 +148,16 @@ public class PreProcessingErrorTest {
 	@Test
 	public void preprocessorWhitespaceErrors() {
 		performTest("#define TEST(arg1, arg2)", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_LEADING_WS, 18, 1, 1) });
+		performTest("#define TEST(arg1 ,arg2)", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_TRAILING_WS, 17, 1, 1) });
 	}
-	
+
 	@Test
 	public void macroArgumentCountErrors() {
 		// No argument provided and no parenthesis present
+		// Note that the arma preprocessor doesn't throw an error in this kind of situation and simply doesn't expand the respective macro
+		// essentially treating it as a global variable. However we don't know if this is still an error that is simply hidden behind the
+		// scenes
+		// and even if it is not, this is very bad practice to do. Thus (for now) we throw an error
 		performTest("#define TEST(arg1,arg2) arg1 arg2\nTEST",
 				new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_WRONG_ARGUMENT_COUNT, 34, 4, 2) });
 		// No argument provided
