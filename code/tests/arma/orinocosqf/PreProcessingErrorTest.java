@@ -182,8 +182,11 @@ public class PreProcessingErrorTest {
 
 	@Test
 	public void parenthesisError() {
+		// Unclosed parenthesis
 		performTest("#define TEST(a This is a",
 				new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_UNCLOSED_PARENTHESIS, 12, 1, 1) });
+		// Nested parenthesis
+		performTest("#define a((b))", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_INVALID_CHARACTER, 10, 1, 1)});
 	}
 
 }
