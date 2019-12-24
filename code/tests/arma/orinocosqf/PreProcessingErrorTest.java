@@ -174,4 +174,10 @@ public class PreProcessingErrorTest {
 				new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_WRONG_ARGUMENT_COUNT, 34, 15, 2) });
 	}
 
+	@Test
+	public void parenthesisError() {
+		performTest("#define TEST(a This is a",
+				new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_UNCLOSED_PARENTHESIS, 12, 1, 1) });
+	}
+
 }

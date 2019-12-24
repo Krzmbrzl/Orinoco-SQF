@@ -216,7 +216,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 	@Override
 	public void acceptLiteral(@NotNull OrinocoLiteralType type, int preprocessedOffset, int preprocessedLength, int originalOffset,
-							  int originalLength, @NotNull OrinocoLexerContext ctx) {
+			int originalLength, @NotNull OrinocoLexerContext ctx) {
 		this.processor.acceptLiteral(type, preprocessedOffset, preprocessedLength, originalOffset, originalLength, ctx);
 	}
 
@@ -321,6 +321,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 		// check for macro args
 		boolean firstIteration = true;
 		StringBuilder currentArg = new StringBuilder();
+		int macroArgListStart = i;
 		for (; i < maxOffset; i++) {
 			char c = readOnlyBuf[i];
 
@@ -344,8 +345,8 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 					if (removedLeadingWS && isMacroNamePart(c, true)) {
 						// report error about leading WS for macro argument
-						lexer.problemEncountered(Problems.ERROR_LEADING_WS, "Leading whitespace before macro argument", begin,
-								i - begin, -1);
+						lexer.problemEncountered(Problems.ERROR_LEADING_WS, "Leading whitespace before macro argument", begin, i - begin,
+								-1);
 					}
 					// If we removed all WS but c is no macro name part, the error about pure WS argument will trigger below
 				}
@@ -360,42 +361,76 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 
 					if (strCurrentArg.length() == 0) {
 						lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
-								 i - 1 - originalLength, originalLength, -1);
+								i - 1 - originalLength, originalLength, -1);
 					}
 
 					params.add(strCurrentArg);
 
-					if (c == ')') {
-						i++; // move pointer after paren
-						break;
+					// Skip trailing WS
+					int start = i;
+					while (Character.isWhitespace(c) && i + 1 < maxOffset && c != '\n') {
+						i++;
+						c = readOnlyBuf[i];
 					}
 
-					if (c != ',') {
-						// something's wrong -> report
-						lexer.problemEncountered(Problems.ERROR_INVALID_CHARACTER,
-								"Detected invalid character while collecting macro arguments: '" + c
-										+ "' (Expected comma or closing paren)",
-								i, 1, -1);
+					// First check if the argument list either continues or is closed properly before checking if
+					// a WS error should be emitted
+
+					boolean argumentListIsClosed = false;
+					boolean foundLonelyClosingParen = false;
+					if (c == ')') {
+						i++; // move pointer after paren
+						argumentListIsClosed = true;
+					} else {
+						if (c != ',') {
+							// Check if somewhere later in the definition there is a lonely closing parenthesis
+							int openingParenAmount = 0;
+							for (int k = i; k < maxOffset; k++) {
+								switch (readOnlyBuf[k]) {
+									case '(':
+										openingParenAmount++;
+										break;
+									case ')':
+										if (openingParenAmount == 0) {
+											foundLonelyClosingParen = true;
+										}
+										openingParenAmount--;
+										break;
+								}
+
+								if (foundLonelyClosingParen) {
+									break;
+								}
+							}
+
+							if (!foundLonelyClosingParen) {
+								// The error is most likely an unclosed parenthesis
+								lexer.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "This parenthesis is never closed",
+										macroArgListStart, 1, -1);
+								
+								// A non-closed parenthesis renders this macro unusable
+								return;
+							} else {
+								// The parenthesis is closed somewhere later so this appears to indeed be an invalid character
+								lexer.problemEncountered(Problems.ERROR_INVALID_CHARACTER,
+										"Detected invalid character while collecting macro arguments: '" + c
+												+ "' (Expected comma or closing paren)",
+										i, 1, -1);
+							}
+						}
+					}
+
+					if (start != i && !argumentListIsClosed && !foundLonelyClosingParen) {
+						// It seems as if we had to skip some trailing WS
+						lexer.problemEncountered(Problems.ERROR_TRAILING_WS, "Trailing WS after macro argument", start, i - start, -1);
+					}
+
+					if (argumentListIsClosed) {
+						// argument-gathering is done at this point
+						break;
 					}
 				}
 			}
-		}
-
-		if (currentArg.length() > 0) {
-			// unclosed paren -> issue an error
-			lexer.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "Unclosed paren in macro-argument definition", i, 1, -1);
-
-			// add the argument nonetheless
-			int originalLength = currentArg.length();
-			String strCurrentArg = currentArg.toString().trim();
-			currentArg.setLength(0);
-
-			if (currentArg.length() == 0) {
-				lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
-						i - 1 - originalLength, originalLength, -1);
-			}
-
-			params.add(strCurrentArg);
 		}
 
 		while (i < maxOffset && readOnlyBuf[i] == ' ') {
