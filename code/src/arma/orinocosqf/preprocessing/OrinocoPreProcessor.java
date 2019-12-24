@@ -356,26 +356,11 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 				if (isMacroNamePart(c, currentArg.length() == 0)) {
 					currentArg.append(c);
 				} else {
-					// trim whitespace away
-					String strCurrentArg = currentArg.toString().trim();
-					currentArg.setLength(0);
-
-					if (strCurrentArg.length() == 0) {
-						if (currentSegmentStart + 1 == i) {
-							// empty argument (the segment has begun with the previous char and has been ended by this one
-							lexer.problemEncountered(Problems.ERROR_EMPTY, "Macro argument defined as empty string", currentSegmentStart, 1,
-									-1);
-						} else {
-							// pure WS argument
-							lexer.problemEncountered(Problems.ERROR_EMPTY, "Macro argument consists of whitespace only",
-									currentSegmentStart + 1, i - currentSegmentStart - 1, -1);
-						}
-					}
-
-					params.add(strCurrentArg);
+					// Before we process the currentArgument, we will perform some error-checking and validation
+					// This allows for a better error-reporting
 
 					// Skip trailing WS
-					int start = i;
+					int offsetBeforeTrailingWS = i;
 					while (Character.isWhitespace(c) && i + 1 < maxOffset && c != '\n') {
 						i++;
 						c = readOnlyBuf[i];
@@ -431,10 +416,31 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 						}
 					}
 
-					if (start != i && !argumentListIsClosed && !foundLonelyClosingParen) {
+					if (offsetBeforeTrailingWS != i && !argumentListIsClosed && !foundLonelyClosingParen) {
 						// It seems as if we had to skip some trailing WS
-						lexer.problemEncountered(Problems.ERROR_TRAILING_WS, "Trailing WS after macro argument", start, i - start, -1);
+						lexer.problemEncountered(Problems.ERROR_TRAILING_WS, "Trailing WS after macro argument", offsetBeforeTrailingWS, i - offsetBeforeTrailingWS, -1);
 					}
+					
+					
+					// Process the current macro argument
+					// trim whitespace away from the current macro argument
+					String strCurrentArg = currentArg.toString().trim();
+					currentArg.setLength(0);
+
+					if (strCurrentArg.length() == 0 && (c == ')' || c == ',')) {
+						// Only report error about empty/WS argument if the next character is a valid one (comma or closing paren)
+						if (currentSegmentStart + 1 == offsetBeforeTrailingWS) {
+							// empty argument (the segment has begun with the previous char and has been ended by this one
+							lexer.problemEncountered(Problems.ERROR_EMPTY, "Macro argument defined as empty string", currentSegmentStart, 1,
+									-1);
+						} else {
+							// pure WS argument
+							lexer.problemEncountered(Problems.ERROR_EMPTY, "Macro argument consists of whitespace only",
+									currentSegmentStart + 1, offsetBeforeTrailingWS - currentSegmentStart - 1, -1);
+						}
+					}
+
+					params.add(strCurrentArg);
 
 					if (argumentListIsClosed) {
 						// argument-gathering is done at this point
