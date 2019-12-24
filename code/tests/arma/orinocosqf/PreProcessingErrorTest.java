@@ -149,6 +149,12 @@ public class PreProcessingErrorTest {
 	public void preprocessorWhitespaceErrors() {
 		performTest("#define TEST(arg1, arg2)", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_LEADING_WS, 18, 1, 1) });
 		performTest("#define TEST(arg1 ,arg2)", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_TRAILING_WS, 17, 1, 1) });
+		performTest("#define TEST()", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_EMPTY, 12, 1, 1) });
+		performTest("#define TEST(   )", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_EMPTY, 13, 3, 1) });
+		performTest("#define TEST( )", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_EMPTY, 13, 1, 1) });
+		performTest("#define TEST(a,)", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_EMPTY, 14, 1, 1) });
+		performTest("#define TEST(a,   )", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_EMPTY, 15, 3, 1) });
+		performTest("#define TEST(a, )", new EncounteredProblem[] { new EncounteredProblem(Problems.ERROR_EMPTY, 15, 1, 1) });
 	}
 
 	@Test

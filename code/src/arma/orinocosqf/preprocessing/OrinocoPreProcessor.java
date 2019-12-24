@@ -322,6 +322,8 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 		boolean firstIteration = true;
 		StringBuilder currentArg = new StringBuilder();
 		int macroArgListStart = i;
+		int currentSegmentStart = i;
+
 		for (; i < maxOffset; i++) {
 			char c = readOnlyBuf[i];
 
@@ -355,13 +357,19 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 					currentArg.append(c);
 				} else {
 					// trim whitespace away
-					int originalLength = currentArg.length();
 					String strCurrentArg = currentArg.toString().trim();
 					currentArg.setLength(0);
 
 					if (strCurrentArg.length() == 0) {
-						lexer.problemEncountered(Problems.ERROR_EMPTY, "Empty (or pure WS) macro argument in definition",
-								i - 1 - originalLength, originalLength, -1);
+						if (currentSegmentStart + 1 == i) {
+							// empty argument (the segment has begun with the previous char and has been ended by this one
+							lexer.problemEncountered(Problems.ERROR_EMPTY, "Macro argument defined as empty string", currentSegmentStart, 1,
+									-1);
+						} else {
+							// pure WS argument
+							lexer.problemEncountered(Problems.ERROR_EMPTY, "Macro argument consists of whitespace only",
+									currentSegmentStart + 1, i - currentSegmentStart - 1, -1);
+						}
 					}
 
 					params.add(strCurrentArg);
@@ -407,7 +415,7 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 								// The error is most likely an unclosed parenthesis
 								lexer.problemEncountered(Problems.ERROR_UNCLOSED_PARENTHESIS, "This parenthesis is never closed",
 										macroArgListStart, 1, -1);
-								
+
 								// A non-closed parenthesis renders this macro unusable
 								return;
 							} else {
@@ -417,6 +425,9 @@ public class OrinocoPreProcessor implements OrinocoTokenDelegator {
 												+ "' (Expected comma or closing paren)",
 										i, 1, -1);
 							}
+						} else {
+							// Mark the comma as the start of the new segment
+							currentSegmentStart = i;
 						}
 					}
 
