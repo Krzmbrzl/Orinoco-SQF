@@ -138,9 +138,4 @@ public class PreProcessingTest {
 		performTest(new String[] { "#define QUOTE #a", "QUOTE" }, new String[] { "", "\"a\"" });
 	}
 
-	// TODO: Error test (leading WS before macro argument)
-	// performTest(new String[] {"#define MACRO(arg1, arg2) Hello arg1 and arg2", "MACRO(world,me)"}, new String[] {"", "Hello world and
-	// me"});
-
-
 }
