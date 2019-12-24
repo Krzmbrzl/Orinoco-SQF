@@ -7,7 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ ArmaFilesystemTest.class, ArrayValueHolderTest.class, BodySegmentExpansionTest.class, BodySegmentParserTest.class,
 		OrinocoLexerTest.class, OrinocoPreProcessorTest.class, ProblemImplementationTest.class, ValueTypeEquivalenceTest.class,
-		PreProcessingTest.class, PreProcessingErrorTest.class, SQFSyntaxCheckerTest.class})
+		PreProcessingTest.class, PreProcessingErrorTest.class/*, SQFSyntaxCheckerTest.class*/})
 public class OrinocoTestSuite {
 
 }
