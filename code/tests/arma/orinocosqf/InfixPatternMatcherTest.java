@@ -7,6 +7,7 @@ import arma.orinocosqf.parsing.postfix.InfixPatternMatcher;
 import arma.orinocosqf.parsing.postfix.SQFInfixToPostfixProcessor;
 import arma.orinocosqf.preprocessing.ArmaFilesystem;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 import arma.orinocosqf.sqf.SQFCommands;
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ public class InfixPatternMatcherTest {
 						new OrinocoTokenInstanceProcessor.ToInstanceTranslator(
 								infixProcessor
 						), fs
-				)
+				), new ProblemListenerPanicImplementation()
 		);
 
 		SQFCommands.Operators ops = SQFCommands.ops();

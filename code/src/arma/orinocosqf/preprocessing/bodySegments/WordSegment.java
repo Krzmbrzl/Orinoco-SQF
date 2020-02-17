@@ -72,12 +72,19 @@ public class WordSegment extends BodySegment {
 	 *         a macro, this method will return <code>false</code>
 	 */
 	protected boolean takesArguments() {
+		return this.getArgumentCount() > 0;
+	}
+	
+	/**
+	 * @return The amount of arguments this segment takes (may be zero)
+	 */
+	protected int getArgumentCount() {
 		PreProcessorMacro macro = ownerMacro.getMacroSet().get(word);
 
 		if (macro != null) {
-			return macro.takesArguments();
+			return macro.getParams().length;
 		} else {
-			return false;
+			return 0;
 		}
 	}
 }

@@ -11,6 +11,7 @@ import org.junit.Test;
 import arma.orinocosqf.helpers.VirtualArmaFileSystem;
 import arma.orinocosqf.lexer.OrinocoLexer;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 import arma.orinocosqf.tokenprocessing.OutputTokenProcessor;
 
 public class PreProcessingTest {
@@ -25,7 +26,7 @@ public class PreProcessingTest {
 		virtualFs = new VirtualArmaFileSystem();
 		processor = new OutputTokenProcessor();
 		preprocessor = new OrinocoPreProcessor(processor, virtualFs);
-		lexer = new OrinocoLexer(preprocessor);
+		lexer = new OrinocoLexer(preprocessor, new ProblemListenerPanicImplementation());
 
 		lexer.enableTextBuffering(true);
 	}
@@ -136,10 +137,5 @@ public class PreProcessingTest {
 		performTest(new String[] { "#define QUOTE(a) #a", "#define ONE miau", "QUOTE(ONE)" }, new String[] { "", "", "\"miau\"" });
 		performTest(new String[] { "#define QUOTE #a", "QUOTE" }, new String[] { "", "\"a\"" });
 	}
-
-	// TODO: Error test (leading WS before macro argument)
-	// performTest(new String[] {"#define MACRO(arg1, arg2) Hello arg1 and arg2", "MACRO(world,me)"}, new String[] {"", "Hello world and
-	// me"});
-
 
 }

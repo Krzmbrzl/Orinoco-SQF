@@ -14,24 +14,24 @@ import static arma.orinocosqf.util.ASCIITextHelper.CHARSEQUENCE_CASE_INSENSITIVE
  * @author K
  * @since 5/2/19
  */
-public class CommandSet<C extends Command> {
+public class CommandSet<C extends Command<?>> {
 
 	private static final Comparator<Object> DYNAMIC_COMPARATOR = (left, right) -> {
 		CharSequence c1, c2;
 		if (left instanceof CharSequence) {
 			c1 = (CharSequence) left;
 		} else {
-			c1 = ((Command) left).getName();
+			c1 = ((Command<?>) left).getName();
 		}
 		if (right instanceof CharSequence) {
 			c2 = (CharSequence) right;
 		} else {
-			c2 = ((Command) right).getName();
+			c2 = ((Command<?>) right).getName();
 		}
 		return CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(c1, c2);
 	};
 
-	public static final Comparator<Command> COMPARATOR = (command, other) -> {
+	public static final Comparator<Command<?>> COMPARATOR = (command, other) -> {
 		String c1 = command.getName();
 		String c2 = other.getName();
 		return CHARSEQUENCE_CASE_INSENSITIVE_COMPARATOR.compare(c1, c2);

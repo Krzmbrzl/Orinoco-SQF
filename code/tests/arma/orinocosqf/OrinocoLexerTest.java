@@ -6,6 +6,7 @@ import arma.orinocosqf.helpers.TokenExpector;
 
 import arma.orinocosqf.lexer.BufferingOrinocoLexerContext;
 import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 import arma.orinocosqf.sqf.SQFCommands;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -22,7 +23,7 @@ public class OrinocoLexerTest {
 	@BeforeClass
 	public static void setup() {
 		expector = new TokenExpector(true);
-		lexer = new OrinocoLexer(expector);
+		lexer = new OrinocoLexer(expector, new ProblemListenerPanicImplementation());
 		tokenFactory = new TokenExpector.AcceptedTokenFactory();
 	}
 

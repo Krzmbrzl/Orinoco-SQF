@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import arma.orinocosqf.exceptions.NoMacroArgumentsGivenException;
 import arma.orinocosqf.exceptions.OrinocoPreprocessorException;
+import arma.orinocosqf.exceptions.WrongMacroArgumentCountException;
 import arma.orinocosqf.preprocessing.PreProcessorMacro;
 
 /**
@@ -62,7 +63,21 @@ public class BodySegmentSequence extends BodySegment implements Iterable<BodySeg
 							argList.add(argSegment.segments.get(k).applyArguments(args));
 						}
 
+						int expectedArgCount = ((WordSegment) currentSegment).getArgumentCount();
+						if (expectedArgCount < argList.size()) {
+							// If there are too few arguments the errors are handled more elegantly by the MacroArgumentSegment (if the
+							// respective argument is used. If not, the error will be reported below
+							throw new WrongMacroArgumentCountException(currentSegment.toStringNoPreProcessing().toString(),
+									expectedArgCount, argList.size(), this);
+						}
+
 						sb.append(currentSegment.applyArguments(argList));
+						
+						if (expectedArgCount > argList.size()) {
+							// Apparently the missing argument was not used -> we have to report the error here
+							throw new WrongMacroArgumentCountException(currentSegment.toStringNoPreProcessing().toString(),
+									expectedArgCount, argList.size(), this);
+						}
 					} else {
 						throw new NoMacroArgumentsGivenException(currentSegment.toStringNoPreProcessing().toString(), currentSegment);
 					}

@@ -33,7 +33,7 @@ public interface OrinocoLexerContext {
 	 * @throws UnknownIdException If the given id can't be associated with a command
 	 */
 	@NotNull
-	public Command getCommandInstance(int id) throws UnknownIdException;
+	public Command<?> getCommandInstance(int id) throws UnknownIdException;
 
 	/**
 	 * Converts the given variable-id back into the String representation of the corresponding variable

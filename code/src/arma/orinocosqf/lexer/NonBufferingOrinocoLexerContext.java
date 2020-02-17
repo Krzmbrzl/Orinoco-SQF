@@ -38,8 +38,8 @@ public class NonBufferingOrinocoLexerContext implements OrinocoLexerContext {
 
 	@Override
 	@NotNull
-	public Command getCommandInstance(int id) throws UnknownIdException {
-		Command c = SQFCommands.instance.getCommandInstanceById(id);
+	public Command<?> getCommandInstance(int id) throws UnknownIdException {
+		Command<?> c = SQFCommands.instance.getCommandInstanceById(id);
 		if (c == null) {
 			throw new UnknownIdException(id + "");
 		}
