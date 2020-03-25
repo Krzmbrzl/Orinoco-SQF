@@ -1,8 +1,20 @@
 package arma.orinocosqf.helpers;
 
+import arma.orinocosqf.OrinocoReader;
+import arma.orinocosqf.OrinocoTokenInstanceProcessor;
+import arma.orinocosqf.OrinocoTokenProcessor;
+import arma.orinocosqf.lexer.OrinocoLexer;
+import arma.orinocosqf.lexer.OrinocoTokenDelegator;
+import arma.orinocosqf.parsing.postfix.SQFInfixToPostfixProcessor;
+import arma.orinocosqf.preprocessing.ArmaFilesystem;
+import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 import arma.orinocosqf.type.ValueType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Contains helper methods for SQF syntax checking related tests
@@ -12,6 +24,12 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class SQFSyntaxCheckerTestHelper {
 
+	private OrinocoLexer setup(@NotNull SQFInfixToPostfixProcessor postfixProcessor) {
+		OrinocoTokenProcessor processor = new OrinocoTokenInstanceProcessor.ToInstanceTranslator(postfixProcessor);
+		OrinocoTokenDelegator delegator = new OrinocoPreProcessor(processor, new ArmaFilesystem(new File("").toPath(), new ArrayList<>()));
+		return new OrinocoLexer(delegator, new ProblemListenerPanicImplementation());
+	}
+
 	/**
 	 * Asserts that the problems detected are > 0
 	 *
@@ -19,6 +37,10 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 * @see #assertNoProblems(String)
 	 */
 	public void assertHasProblems(@NotNull String text) {
+		SQFInfixToPostfixProcessor postfixProcessor = new SQFInfixToPostfixProcessor();
+		OrinocoLexer lexer = setup(postfixProcessor);
+		lexer.start(OrinocoReader.fromCharSequence(text));
+
 //		SQFFile file = (SQFFile) myFixture.configureByText(SQFFileType.INSTANCE, text);
 //		ProblemsHolder problems = getProblemsHolder(file);
 //		SQFSyntaxHelper.getInstance().checkSyntax(file, problems);
