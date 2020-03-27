@@ -240,12 +240,14 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		}
 		ProcessContext pctx = this.processStack.peek();
 		if (pctx.firstType == null) {
-			this.tokenProblem(token, Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, "Command " + cmd.getCommandName() + " expects an operand");
+			String msg = "Command " + cmd.getCommandName() + " expects an operand and got none";
+			this.tokenProblem(token, Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, msg);
 			return;
 		}
 		if (pctx.secondType == null) {
 			if (!cmd.canBeUnary()) {
-				this.tokenProblem(token, Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, "Command " + cmd.getCommandName() + " expects 2 operands");
+				String msg = "Command " + cmd.getCommandName() + " expects 2 operands";
+				this.tokenProblem(token, Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, msg);
 				return;
 			}
 			// unary command

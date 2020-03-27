@@ -64,7 +64,14 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 */
 	public void assertNoProblems(@NotNull String text) {
 		MyProblemListener problemListener = parseText(text);
-		assertEquals("Expected no problems, got " + problemListener.problems.toString(), 0, problemListener.problems.size());
+		StringBuilder probs = new StringBuilder();
+		probs.append('\n');
+		for (List<String> prob : problemListener.problems) {
+			probs.append('\t');
+			probs.append(prob.toString());
+			probs.append('\n');
+		}
+		assertEquals("Expected no problems, got: " + probs, 0, problemListener.problems.size());
 	}
 
 	/**
@@ -85,8 +92,8 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	/**
 	 * This will then assert that the return types match and that there were no problems reported
 	 *
-	 * @param text            SQF code to parse
-	 * @param cluster         command descriptors to use
+	 * @param text SQF code to parse
+	 * @param cluster command descriptors to use
 	 * @param expectedRetType expected return type
 	 */
 //	public void assertExitTypeAndNoProblems(@NotNull String text, @Nullable CommandDescriptorCluster cluster,
