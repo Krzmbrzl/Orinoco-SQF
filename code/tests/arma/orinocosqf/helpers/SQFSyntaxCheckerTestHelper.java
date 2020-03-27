@@ -8,6 +8,8 @@ import arma.orinocosqf.lexer.OrinocoTokenDelegator;
 import arma.orinocosqf.parsing.postfix.SQFInfixToPostfixProcessor;
 import arma.orinocosqf.preprocessing.ArmaFilesystem;
 import arma.orinocosqf.preprocessing.OrinocoPreProcessor;
+import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
 import arma.orinocosqf.problems.ProblemListenerPanicImplementation;
 import arma.orinocosqf.type.ValueType;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +17,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Contains helper methods for SQF syntax checking related tests
@@ -24,10 +30,19 @@ import java.util.ArrayList;
  */
 public abstract class SQFSyntaxCheckerTestHelper {
 
-	private OrinocoLexer setup(@NotNull SQFInfixToPostfixProcessor postfixProcessor) {
+	@NotNull
+	private SQFSyntaxCheckerTestHelper.MyProblemListener parseText(@NotNull String text) {
+		SQFInfixToPostfixProcessor postfixProcessor = new SQFInfixToPostfixProcessor();
+		MyProblemListener problemListener = new MyProblemListener();
+		postfixProcessor.setProblemListener(problemListener);
+
 		OrinocoTokenProcessor processor = new OrinocoTokenInstanceProcessor.ToInstanceTranslator(postfixProcessor);
 		OrinocoTokenDelegator delegator = new OrinocoPreProcessor(processor, new ArmaFilesystem(new File("").toPath(), new ArrayList<>()));
-		return new OrinocoLexer(delegator, new ProblemListenerPanicImplementation());
+		OrinocoLexer lexer = new OrinocoLexer(delegator, new ProblemListenerPanicImplementation());
+
+		lexer.start(OrinocoReader.fromCharSequence(text));
+
+		return problemListener;
 	}
 
 	/**
@@ -37,15 +52,8 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 * @see #assertNoProblems(String)
 	 */
 	public void assertHasProblems(@NotNull String text) {
-		SQFInfixToPostfixProcessor postfixProcessor = new SQFInfixToPostfixProcessor();
-		OrinocoLexer lexer = setup(postfixProcessor);
-		lexer.start(OrinocoReader.fromCharSequence(text));
-
-//		SQFFile file = (SQFFile) myFixture.configureByText(SQFFileType.INSTANCE, text);
-//		ProblemsHolder problems = getProblemsHolder(file);
-//		SQFSyntaxHelper.getInstance().checkSyntax(file, problems);
-//
-//		assertEquals("Expected there to be problems.", true, problems.getResultCount() > 0);
+		MyProblemListener problemListener = parseText(text);
+		assertFalse("Expected there to be problems.", problemListener.problems.isEmpty());
 	}
 
 	/**
@@ -55,11 +63,8 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 * @see #assertNoProblems(String)
 	 */
 	public void assertNoProblems(@NotNull String text) {
-//		SQFFile file = (SQFFile) myFixture.configureByText(SQFFileType.INSTANCE, text);
-//		ProblemsHolder problems = getProblemsHolder(file);
-//		SQFSyntaxHelper.getInstance().checkSyntax(file, problems);
-//
-//		assertEquals("Expected no problems, got " + problems.getResults(), 0, problems.getResultCount());
+		MyProblemListener problemListener = parseText(text);
+		assertEquals("Expected no problems, got " + problemListener.problems.size(), 0, problemListener.problems.size());
 	}
 
 	/**
@@ -93,5 +98,15 @@ public abstract class SQFSyntaxCheckerTestHelper {
 //		assertEquals("Expected no problems, got " + problems.getResults(), 0, problems.getResultCount());
 //		assertEquals(expectedRetType, ret);
 //	}
+
+	private static class MyProblemListener implements ProblemListener {
+
+		private final List<Problem> problems = new ArrayList<>();
+
+		@Override
+		public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
+			problems.add(problem);
+		}
+	}
 
 }

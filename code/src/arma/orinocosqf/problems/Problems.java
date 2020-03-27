@@ -20,6 +20,11 @@ public class Problems {
 	public static final Error_LeadingWS ERROR_LEADING_WS = new Error_LeadingWS();
 	public static final Error_TrailingWS ERROR_TRAILING_WS = new Error_TrailingWS();
 
+	public static final Error_Syntax ERROR_SYNTAX = new Error_Syntax();
+	public static final Error_SyntaxIllegalCharacter ERROR_SYNTAX_ILLEGAL_CHARACTER = new Error_SyntaxIllegalCharacter();
+	public static final Error_SyntaxTooManyOperands ERROR_SYNTAX_TOO_MANY_OPERANDS = new Error_SyntaxTooManyOperands();
+	public static final Error_InvalidCommandSyntax ERROR_INVALID_COMMAND_SYNTAX = new Error_InvalidCommandSyntax();
+
 	public static final Warning_OverwriteExisting WARNING_OVERWRITE = new Warning_OverwriteExisting();
 	public static final Warning_UndefineNonExistent WARNING_UNDEFINE_NONEXISTENT = new Warning_UndefineNonExistent();
 }

@@ -4,12 +4,16 @@ import arma.orinocosqf.OrinocoSQFTokenType;
 import arma.orinocosqf.OrinocoToken;
 import arma.orinocosqf.OrinocoTokenInstanceProcessor;
 import arma.orinocosqf.lexer.OrinocoLexerContext;
+import arma.orinocosqf.problems.Problem;
+import arma.orinocosqf.problems.ProblemListener;
+import arma.orinocosqf.problems.Problems;
 import arma.orinocosqf.sqf.SQFCommand;
 import arma.orinocosqf.sqf.SQFCommandSyntax;
 import arma.orinocosqf.sqf.SQFCommands;
 import arma.orinocosqf.type.ExpandedValueType;
 import arma.orinocosqf.type.ValueType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +25,15 @@ import static arma.orinocosqf.util.ASCIITextHelper.equalsIgnoreCase;
  * @author K
  * @since 7/28/19
  */
-public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor {
+public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor, ProblemListener {
 	private final List<InfixPatternMatcher> matchers = new ArrayList<>();
 	private final Stack<ProcessContext> processStack = new Stack<>();
+	private ProblemListener problemListener;
 
 	public SQFInfixToPostfixProcessor() {
 	}
 
-	private int precedence(@NotNull ProcessContext ctx, @NotNull SQFCommand cmd) {
+	private int precedence(@NotNull ProcessContext ctx, @NotNull OrinocoToken token, @NotNull SQFCommand cmd) {
 		// ORDER OF PRECEDENCE: (Lower number is highest precedence)
 		// https://community.bistudio.com/wiki/SQF_syntax
 		// 1. Nular
@@ -49,7 +54,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			return 2;
 		}
 		final String cn = cmd.getName();
-		if (ctx.canBeUnary && cmd.canBeUnary()) {
+		if (ctx.secondType == null && cmd.canBeUnary()) {
 			return 2;
 		}
 		final SQFCommands.Operators ops = SQFCommands.ops();
@@ -95,8 +100,9 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		if (cmd.canBeBinary() && !special_binary) {
 			return 8;
 		} else {
-			//todo report error
+			illegalCharacterProblem(token, "Expected a binary command/operator");
 		}
+
 		if (comp_or_conf_getter) {
 			return 9;
 		}
@@ -106,16 +112,16 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		if (logical_or) {
 			return 11;
 		}
-		throw new IllegalStateException("Couldn't determine precedence for " + cn);
+		return 8;
 	}
 
 	@Override
-	public void acceptCommand(@NotNull OrinocoToken acceptedOrinocoToken, @NotNull OrinocoLexerContext lctx) {
+	public void acceptCommand(@NotNull OrinocoToken orinocoToken, @NotNull OrinocoLexerContext lctx) {
 		for (InfixPatternMatcher matcher : matchers) {
-			matcher.acceptToken(acceptedOrinocoToken, lctx);
+			matcher.acceptToken(orinocoToken, lctx);
 		}
 
-		SQFCommand command = SQFCommands.instance.getCommandInstanceById(acceptedOrinocoToken.getId());
+		SQFCommand command = SQFCommands.instance.getCommandInstanceById(orinocoToken.getId());
 		if (command == null) {
 			throw new IllegalStateException();
 		}
@@ -130,17 +136,23 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			this.processStack.push(arrayContext);
 			return;
 		} else if (command == ops.R_SQ_BRACKET) {
-			if (pctx.inspiredBy.inspirationEquals(ProcessContextInspiration.array())) {
-				// todo report error
+			if (!pctx.inspiredBy.inspirationEquals(ProcessContextInspiration.array())) {
+				illegalCharacterProblem(orinocoToken, "] is not allowed here");
 			} else {
 				this.processStack.pop();
-				ProcessContext peek = this.processStack.peek();
-				processNularType(pctx.returnType);
+				boolean success = processNularType(pctx.returnType);
+				if (!success) {
+					int off = orinocoToken.getOriginalOffset();
+					int len = orinocoToken.getOriginalLength();
+					int line = 0;
+					// todo highlight whole array value not just closing ]
+					this.problemEncountered(Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, "Array value not allowed here", off, len, line);
+				}
 			}
 			return;
 		} else if (command == ops.COMMA) {
-			if (pctx.inspiredBy.inspirationEquals(ProcessContextInspiration.array())) {
-				// todo report error
+			if (!pctx.inspiredBy.inspirationEquals(ProcessContextInspiration.array())) {
+				illegalCharacterProblem(orinocoToken, ", is not allowed here");
 			} else {
 				pctx.returnType.getExpanded().addValueType(pctx.firstType);
 				pctx.firstType = null;
@@ -153,16 +165,22 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			this.processStack.push(codeContext);
 			return;
 		} else if (command == ops.R_CURLY_BRACE) {
-			if (pctx.inspiredBy.inspirationEquals(ProcessContextInspiration.code())) {
-				// todo report error
+			if (!pctx.inspiredBy.inspirationEquals(ProcessContextInspiration.code())) {
+				illegalCharacterProblem(orinocoToken, "} is not allowed here");
 			} else {
 				this.processStack.pop();
-				ProcessContext peek = this.processStack.peek();
-				processNularType(pctx.returnType);
+				boolean success = processNularType(pctx.firstType == null ? ValueType.BaseType.NOTHING : pctx.firstType);
+				if (!success) {
+					int off = orinocoToken.getOriginalOffset();
+					int len = orinocoToken.getOriginalLength();
+					int line = 0;
+					// todo highlight whole array value not just closing }
+					this.problemEncountered(Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, "Code block not allowed here", off, len, line);
+				}
 			}
 			return;
 		} else if (command == ops.SEMICOLON) {
-			pctx.returnType = pctx.firstType;
+			pctx.returnType = null;
 			pctx.firstType = null;
 			pctx.secondType = null;
 			return;
@@ -174,63 +192,59 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		}
 
 		if (command == ops.COLON) {
-			// todo report error
-			// 1 + 1
-			// acceptBinaryExpression(leftArgument, rightArgument, operator)
-			// acceptUnaryExpression(rightArgument, operator)
-			// acceptNularExpression(operator)
-
-			// !a && b
-			// a ! b &&
+			// todo
 		}
 
 		if (command == ops.LPAREN) {
-			pctx.operators.add(acceptedOrinocoToken);
+			pctx.operators.add(orinocoToken);
 		} else if (command == ops.RPAREN) {
 			while (!pctx.operators.isEmpty()) {
 				SQFCommand peek = pctx.commandFromOperators(false);
 				if (peek == ops.LPAREN) {
 					break;
 				}
-				processCommand(pctx.commandFromOperators(true));
+				processCommand(pctx.peekOperatorToken(), pctx.commandFromOperators(true));
 			}
 			if (!pctx.operators.isEmpty()) {
 				SQFCommand peek = pctx.commandFromOperators(false);
 				if (peek != ops.LPAREN) {
-					// todo report error
-					processCommand(pctx.commandFromOperators(true));
+					illegalCharacterProblem(pctx.peekOperatorToken(), "Expected a ( here");
+					processCommand(pctx.peekOperatorToken(), pctx.commandFromOperators(true));
 				} else {
 					pctx.operators.pop();
 				}
 			}
 		} else { // operator is encountered
-			int prec = precedence(pctx, command);
-			while (!pctx.operators.isEmpty() && prec <= precedence(pctx, pctx.commandFromOperators(false))) {
+			int prec = precedence(pctx, orinocoToken, command);
+			while (!pctx.operators.isEmpty() && prec <= precedence(pctx, pctx.peekOperatorToken(), pctx.commandFromOperators(false))) {
 				if (pctx.commandFromOperators(false) == ops.LPAREN) {
-					// todo report error
-					processCommand(pctx.commandFromOperators(true));
+					illegalCharacterProblem(pctx.peekOperatorToken(), "( is not allowed here");
+					processCommand(pctx.peekOperatorToken(), pctx.commandFromOperators(true));
 				} else {
-					processCommand(pctx.commandFromOperators(true));
+					processCommand(pctx.peekOperatorToken(), pctx.commandFromOperators(true));
 				}
 			}
 		}
 
-		pctx.operators.add(acceptedOrinocoToken);
+		pctx.operators.add(orinocoToken);
 	}
 
-	private void processCommand(@NotNull SQFCommand cmd) {
+	private void processCommand(@NotNull OrinocoToken token, @NotNull SQFCommand cmd) {
 		if (cmd.isStrictlyNular()) {
-			processNularType(cmd.getSyntaxList().get(0).getReturnValue().getType());
+			boolean success = processNularType(cmd.getSyntaxList().get(0).getReturnValue().getType());
+			if (!success) {
+				illegalCharacterProblem(token, "Command " + cmd.getCommandName() + " is not allowed here");
+			}
 			return;
 		}
 		ProcessContext pctx = this.processStack.peek();
 		if (pctx.firstType == null) {
-			// todo report error not enough operands
+			this.tokenProblem(token, Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, "Command " + cmd.getCommandName() + " expects an operand");
 			return;
 		}
 		if (pctx.secondType == null) {
 			if (!cmd.canBeUnary()) {
-				//todo report error too few operands
+				this.tokenProblem(token, Problems.ERROR_SYNTAX_TOO_MANY_OPERANDS, "Command " + cmd.getCommandName() + " expects 2 operands");
 				return;
 			}
 			// unary command
@@ -245,7 +259,8 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 				}
 			}
 			if (commandReturnType == null) {
-				//todo report error no syntax available
+				String msg = String.format("Command %1$s has no syntax for %1$s %2$s", cmd.getCommandName(), pctx.firstType);
+				this.tokenProblem(token, Problems.ERROR_INVALID_COMMAND_SYNTAX, msg);
 			} else {
 				pctx.firstType = commandReturnType;
 				pctx.secondType = null;
@@ -267,23 +282,37 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			}
 		}
 		if (commandReturnType == null) {
-			//todo report error no syntax available
+			String f = "Command %1$s has no syntax for %2$s %1$s %3$s";
+			String msg = String.format(f, cmd.getCommandName(), pctx.firstType.getDisplayName(), pctx.secondType.getDisplayName());
+			this.tokenProblem(token, Problems.ERROR_INVALID_COMMAND_SYNTAX, msg);
 		} else {
 			pctx.firstType = commandReturnType;
 			pctx.secondType = null;
 		}
 	}
 
+	private void illegalCharacterProblem(@NotNull OrinocoToken orinocoToken, String s) {
+		this.tokenProblem(orinocoToken, Problems.ERROR_SYNTAX_ILLEGAL_CHARACTER, s);
+	}
 
-	private void processNularType(@NotNull ValueType valueType) {
+	private void tokenProblem(@NotNull OrinocoToken orinocoToken, @NotNull Problem p, String s) {
+		int off = orinocoToken.getOriginalOffset();
+		int len = orinocoToken.getOriginalLength();
+		int line = 0;
+		this.problemEncountered(p, s, off, len, line);
+	}
+
+
+	private boolean processNularType(@NotNull ValueType valueType) {
 		ProcessContext pctx = this.processStack.peek();
 		if (pctx.firstType == null) {
 			pctx.firstType = valueType;
+			return true;
 		} else if (pctx.secondType == null) {
 			pctx.secondType = valueType;
-		} else {
-			// todo report error expected operator
+			return true;
 		}
+		return false;
 	}
 
 	@Override
@@ -291,7 +320,10 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		for (InfixPatternMatcher matcher : matchers) {
 			matcher.acceptToken(token, ctx);
 		}
-		processNularType(ValueType.BaseType._VARIABLE);
+		boolean success = processNularType(ValueType.BaseType._VARIABLE);
+		if (!success) {
+			illegalCharacterProblem(token, "variable is not allowed here");
+		}
 	}
 
 	@Override
@@ -300,7 +332,10 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			matcher.acceptToken(token, ctx);
 		}
 
-		processNularType(ValueType.BaseType._VARIABLE);
+		boolean success = processNularType(ValueType.BaseType._VARIABLE);
+		if (!success) {
+			illegalCharacterProblem(token, "variable is not allowed here");
+		}
 	}
 
 	@Override
@@ -309,21 +344,26 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			matcher.acceptToken(token, ctx);
 		}
 		OrinocoSQFTokenType tokenType = (OrinocoSQFTokenType) token.getTokenType();
-		ProcessContext pctx = this.processStack.peek();
 		ValueType valueType = null;
+		String type = "";
 		if (tokenType == OrinocoSQFTokenType.LiteralNumber) {
 			valueType = ValueType.BaseType.NUMBER;
+			type = "number";
 		} else if (tokenType == OrinocoSQFTokenType.LiteralString) {
 			valueType = ValueType.BaseType.STRING;
+			type = "string";
 		} else {
 			throw new IllegalStateException();
 		}
 
-		processNularType(valueType);
+		boolean success = processNularType(valueType);
+		if (!success) {
+			illegalCharacterProblem(token, type + " is not allowed here");
+		}
 	}
 
 	private static class ProcessContext {
-		boolean canBeUnary = false;
+
 		final Stack<OrinocoToken> operators = new Stack<>();
 		OrinocoToken leftToken, rightToken;
 		ValueType firstType, secondType, returnType;
@@ -335,6 +375,11 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		public ProcessContext(@NotNull String debugName, @NotNull ProcessContextInspiration inspiredBy) {
 			this.debugName = debugName;
 			this.inspiredBy = inspiredBy;
+		}
+
+		@NotNull
+		public OrinocoToken peekOperatorToken() {
+			return operators.peek();
 		}
 
 		@NotNull
@@ -376,12 +421,34 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 
 	@Override
 	public void end(@NotNull OrinocoLexerContext ctx) {
-		// endExpression();
+		while (!this.processStack.isEmpty()) {
+			ProcessContext pctx = this.processStack.peek();
+			while (!pctx.operators.isEmpty()) {
+				processCommand(pctx.peekOperatorToken(), pctx.commandFromOperators(true));
+			}
+			this.processStack.pop();
+		}
 	}
 
 	@Override
 	public void begin(@NotNull OrinocoLexerContext ctx) {
 		reset();
+	}
+
+	@Nullable
+	public ProblemListener getProblemListener() {
+		return problemListener;
+	}
+
+	public void setProblemListener(@NotNull ProblemListener problemListener) {
+		this.problemListener = problemListener;
+	}
+
+	@Override
+	public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
+		if (this.problemListener != null) {
+			this.problemListener.problemEncountered(problem, msg, offset, length, line);
+		}
 	}
 
 }

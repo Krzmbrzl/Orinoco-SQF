@@ -769,7 +769,7 @@ public class SQFSyntaxCheckerTest extends SQFSyntaxCheckerTestHelper {
 //		assertExitTypeAndNoProblems("0 position;", cluster, BaseType.CONFIG);
 //
 //		assertExitTypeAndNoProblems("position;", cluster, ValueType.BaseType.CONFIG);
-
+		throw new RuntimeException("todo");
 	}
 	//----END command expression----
 }
