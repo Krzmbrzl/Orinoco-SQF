@@ -64,7 +64,7 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 */
 	public void assertNoProblems(@NotNull String text) {
 		MyProblemListener problemListener = parseText(text);
-		assertEquals("Expected no problems, got " + problemListener.problems.size(), 0, problemListener.problems.size());
+		assertEquals("Expected no problems, got " + problemListener.problems.toString(), 0, problemListener.problems.size());
 	}
 
 	/**
@@ -101,11 +101,14 @@ public abstract class SQFSyntaxCheckerTestHelper {
 
 	private static class MyProblemListener implements ProblemListener {
 
-		private final List<Problem> problems = new ArrayList<>();
+		private final List<List<String>> problems = new ArrayList<>();
 
 		@Override
 		public void problemEncountered(@NotNull Problem problem, @NotNull String msg, int offset, int length, int line) {
-			problems.add(problem);
+			List<String> prob = new ArrayList();
+			prob.add(problem.getDisplayName());
+			prob.add(msg);
+			problems.add(prob);
 		}
 	}
 

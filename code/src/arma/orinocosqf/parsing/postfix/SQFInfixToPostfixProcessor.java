@@ -12,6 +12,7 @@ import arma.orinocosqf.sqf.SQFCommandSyntax;
 import arma.orinocosqf.sqf.SQFCommands;
 import arma.orinocosqf.type.ExpandedValueType;
 import arma.orinocosqf.type.ValueType;
+import arma.orinocosqf.type.ValueType.BaseType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -161,7 +162,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			return;
 		} else if (command == ops.L_CURLY_BRACE) {
 			ProcessContext codeContext = new ProcessContext("code", ProcessContextInspiration.code());
-			codeContext.returnType = ValueType.BaseType.NOTHING;
+			codeContext.returnType = BaseType.NOTHING;
 			this.processStack.push(codeContext);
 			return;
 		} else if (command == ops.R_CURLY_BRACE) {
@@ -169,7 +170,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 				illegalCharacterProblem(orinocoToken, "} is not allowed here");
 			} else {
 				this.processStack.pop();
-				boolean success = processNularType(pctx.firstType == null ? ValueType.BaseType.NOTHING : pctx.firstType);
+				boolean success = processNularType(pctx.firstType == null ? BaseType.NOTHING : pctx.firstType);
 				if (!success) {
 					int off = orinocoToken.getOriginalOffset();
 					int len = orinocoToken.getOriginalLength();
@@ -262,6 +263,10 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 				String msg = String.format("Command %1$s has no syntax for %1$s %2$s", cmd.getCommandName(), pctx.firstType);
 				this.tokenProblem(token, Problems.ERROR_INVALID_COMMAND_SYNTAX, msg);
 			} else {
+				if (pctx.firstType.isHardEqual(BaseType._VARIABLE)) {
+					// set to _VARIABLE to preserve uncertainty about return type
+					commandReturnType = BaseType._VARIABLE;
+				}
 				pctx.firstType = commandReturnType;
 				pctx.secondType = null;
 			}
@@ -277,8 +282,8 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			if (syntax.getLeftParam().getType().typeEquivalent(pctx.firstType)) {
 				if (syntax.getRightParam().getType().typeEquivalent(pctx.secondType)) {
 					commandReturnType = syntax.getReturnValue().getType();
+					break;
 				}
-				break;
 			}
 		}
 		if (commandReturnType == null) {
@@ -286,6 +291,10 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			String msg = String.format(f, cmd.getCommandName(), pctx.firstType.getDisplayName(), pctx.secondType.getDisplayName());
 			this.tokenProblem(token, Problems.ERROR_INVALID_COMMAND_SYNTAX, msg);
 		} else {
+			if (pctx.firstType.isHardEqual(BaseType._VARIABLE) || pctx.secondType.isHardEqual(BaseType._VARIABLE)) {
+				// set to _VARIABLE to preserve uncertainty about return type
+				commandReturnType = BaseType._VARIABLE;
+			}
 			pctx.firstType = commandReturnType;
 			pctx.secondType = null;
 		}
@@ -320,7 +329,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		for (InfixPatternMatcher matcher : matchers) {
 			matcher.acceptToken(token, ctx);
 		}
-		boolean success = processNularType(ValueType.BaseType._VARIABLE);
+		boolean success = processNularType(BaseType._VARIABLE);
 		if (!success) {
 			illegalCharacterProblem(token, "variable is not allowed here");
 		}
@@ -332,7 +341,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 			matcher.acceptToken(token, ctx);
 		}
 
-		boolean success = processNularType(ValueType.BaseType._VARIABLE);
+		boolean success = processNularType(BaseType._VARIABLE);
 		if (!success) {
 			illegalCharacterProblem(token, "variable is not allowed here");
 		}
@@ -347,10 +356,10 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		ValueType valueType = null;
 		String type = "";
 		if (tokenType == OrinocoSQFTokenType.LiteralNumber) {
-			valueType = ValueType.BaseType.NUMBER;
+			valueType = BaseType.NUMBER;
 			type = "number";
 		} else if (tokenType == OrinocoSQFTokenType.LiteralString) {
-			valueType = ValueType.BaseType.STRING;
+			valueType = BaseType.STRING;
 			type = "string";
 		} else {
 			throw new IllegalStateException();
