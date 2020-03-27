@@ -100,8 +100,6 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		}
 		if (cmd.canBeBinary() && !special_binary) {
 			return 8;
-		} else {
-			illegalCharacterProblem(token, "Expected a binary command/operator");
 		}
 
 		if (comp_or_conf_getter) {
@@ -113,6 +111,7 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 		if (logical_or) {
 			return 11;
 		}
+		illegalCharacterProblem(token, "Expected a binary command/operator");
 		return 8;
 	}
 
@@ -215,7 +214,16 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 					pctx.operators.pop();
 				}
 			}
-		} else { // operator is encountered
+		} else {
+			if (command.isStrictlyNular()) {
+				boolean success = processNularType(command.getSyntaxList().get(0).getReturnValue().getType());
+				if (!success) {
+					illegalCharacterProblem(orinocoToken, "Command " + command.getCommandName() + " is not allowed here");
+				}
+				return;
+			}
+
+			// operator is encountered
 			int prec = precedence(pctx, orinocoToken, command);
 			while (!pctx.operators.isEmpty() && prec <= precedence(pctx, pctx.peekOperatorToken(), pctx.commandFromOperators(false))) {
 				if (pctx.commandFromOperators(false) == ops.LPAREN) {
@@ -231,13 +239,6 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 	}
 
 	private void processCommand(@NotNull OrinocoToken token, @NotNull SQFCommand cmd) {
-		if (cmd.isStrictlyNular()) {
-			boolean success = processNularType(cmd.getSyntaxList().get(0).getReturnValue().getType());
-			if (!success) {
-				illegalCharacterProblem(token, "Command " + cmd.getCommandName() + " is not allowed here");
-			}
-			return;
-		}
 		ProcessContext pctx = this.processStack.peek();
 		if (pctx.firstType == null) {
 			String msg = "Command " + cmd.getCommandName() + " expects an operand and got none";
@@ -376,7 +377,6 @@ public class SQFInfixToPostfixProcessor implements OrinocoTokenInstanceProcessor
 	private static class ProcessContext {
 
 		final Stack<OrinocoToken> operators = new Stack<>();
-		OrinocoToken leftToken, rightToken;
 		ValueType firstType, secondType, returnType;
 		final String debugName;
 		/** What inspired the creation for the context */
