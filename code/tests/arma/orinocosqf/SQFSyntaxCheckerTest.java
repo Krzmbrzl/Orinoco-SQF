@@ -1,23 +1,14 @@
 package arma.orinocosqf;
 
 
-import arma.orinocosqf.exceptions.UnknownIdException;
 import arma.orinocosqf.helpers.SQFSyntaxCheckerTestHelper;
-import arma.orinocosqf.sqf.SQFCommand;
-import arma.orinocosqf.sqf.SQFCommandSyntax;
-import arma.orinocosqf.sqf.SQFCommands;
-import arma.orinocosqf.syntax.ArrayParam;
-import arma.orinocosqf.syntax.BIGame;
-import arma.orinocosqf.syntax.Param;
-import arma.orinocosqf.syntax.ReturnValueHolder;
 import arma.orinocosqf.type.ExpandedValueType;
 import arma.orinocosqf.type.ValueType;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static arma.orinocosqf.type.ValueType.BaseType;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for syntax/type checking for SQF code
@@ -43,10 +34,8 @@ public class SQFSyntaxCheckerTest extends SQFSyntaxCheckerTestHelper {
 	@Test
 	public void testLiteralExpression_array() {
 		ValueType ret = getExitTypeForText("[1,2,3]");
-
 		ValueType t = new ExpandedValueType(BaseType.NUMBER, BaseType.NUMBER, BaseType.NUMBER);
-
-		assertEquals(t, ret);
+		assertTrue(ValueType.typeEquivalent(ret, t));
 	}
 
 	//----END Literal Expression----
@@ -70,7 +59,7 @@ public class SQFSyntaxCheckerTest extends SQFSyntaxCheckerTestHelper {
 		ValueType ret = getExitTypeForText("([1,2,3])");
 		ValueType t = new ExpandedValueType(ValueType.BaseType.NUMBER, BaseType.NUMBER, BaseType.NUMBER);
 
-		assertEquals(t, ret);
+		assertTrue(t.typeEquivalent(ret));
 	}
 
 	@Test
@@ -666,7 +655,7 @@ public class SQFSyntaxCheckerTest extends SQFSyntaxCheckerTestHelper {
 	public void testCommandExpression_githubReports_valid() {
 		//all these tests are from github issues page: https://github.com/kayler-renslow/arma-intellij-plugin/issues/
 
-//		assertNoProblems("AAS_JIPplayer = not isServer && isNull player;");//55
+		assertNoProblems("AAS_JIPplayer = not isServer && isNull player;");//55
 		assertNoProblems("_ammoType = getText(configFile/'CfgMagazines'/_x/'ammo')"); //56
 		assertNoProblems("_target setPosASL [(eyePos _unit select 0) + 10 * sin _angle, (eyePos _unit select 1) + 10 * cos _angle, eyePos _unit select 2];"); //57
 		assertNoProblems("if((missionNameSpace getVariable ['LIB_Explosion_Effect_Intensity', 0]) <= 0) then {};");//58
@@ -683,16 +672,10 @@ public class SQFSyntaxCheckerTest extends SQFSyntaxCheckerTestHelper {
 
 	@Test
 	public void testCommandExpression_ifThen_valid() {
-		try {
-			SQFCommands.instance.fromId(0);
-		} catch (UnknownIdException e) {
-			e.printStackTrace();
-		}
-		throw new RuntimeException("todo");
-//		assertExitTypeAndNoProblems("if true then {};", null, BaseType.ANYTHING);
-//		assertExitTypeAndNoProblems("if true then {} else {};", null, BaseType.ARRAY);
-//		assertExitTypeAndNoProblems("if true then [{},{}];", null, BaseType.ANYTHING);
-//		assertExitTypeAndNoProblems("if true then [{},{},{}];", null, BaseType.ANYTHING);
+		assertExitTypeAndNoProblems("if true then {}", BaseType.ANYTHING);
+		assertExitTypeAndNoProblems("if true then {} else {}", BaseType.ARRAY);
+		assertExitTypeAndNoProblems("if true then [{},{}]", BaseType.ANYTHING);
+		assertExitTypeAndNoProblems("if true then [{},{},{}]", BaseType.ANYTHING);
 	}
 
 	@Test
@@ -715,61 +698,24 @@ public class SQFSyntaxCheckerTest extends SQFSyntaxCheckerTestHelper {
 
 	@Test
 	public void testCommandExpression_optionalParameters() {
-		//fake a command syntax to assert that the syntax xml isn't the one creating false positives/negatives
-		SQFCommand d1 = new SQFCommand("getPos", Arrays.asList(
-				new SQFCommandSyntax(
-						null,
-						new ArrayParam(
-								false,
-								Arrays.asList(
-										new Param("required", BaseType.NUMBER, "", false),
-										new Param("optional", ValueType.BaseType.NUMBER, "", true)
-								),
-								true
-						),
-						new ReturnValueHolder(BaseType.VOID, "")
-				)
-		), "", BIGame.UNKNOWN);
+		// todo set proper return types
 
-		SQFCommand dd = new SQFCommand("position", Arrays.asList(
-				new SQFCommandSyntax(
-						new Param("optionalPrefix", BaseType.NUMBER, "", true),
-						new ArrayParam(
-								false,
-								Arrays.asList(
-										new ArrayParam(
-												false,
-												Arrays.asList(
-														new Param("required", ValueType.BaseType.CODE, "", false)
-												),
-												true
-										),
-										new Param("optional", ValueType.BaseType.NUMBER, "", true)
-								),
-								true
-						),
-						new ReturnValueHolder(BaseType.CONFIG, "")
-				)
-		), "", BIGame.UNKNOWN);
+		assertExitTypeAndNoProblems("getPos [1,1];", ValueType.BaseType.VOID);
+		assertExitTypeAndNoProblems("getPos [1];", ValueType.BaseType.VOID);
+		assertExitTypeAndNoProblems("getPos;", ValueType.BaseType.VOID);
+		assertHasProblems("1 getPos"); //can't have prefix
 
+		assertExitTypeAndNoProblems("position [[{}],1];", ValueType.BaseType.CONFIG);
+		assertExitTypeAndNoProblems("position [[{}]];", BaseType.CONFIG);
+		assertExitTypeAndNoProblems("position [];", ValueType.BaseType.CONFIG);
 
-//		assertExitTypeAndNoProblems("getPos [1,1];", cluster, ValueType.BaseType.VOID);
-//		assertExitTypeAndNoProblems("getPos [1];", cluster, ValueType.BaseType.VOID);
-//		assertExitTypeAndNoProblems("getPos;", cluster, ValueType.BaseType.VOID);
-//		assertHasProblems("1 getPos"); //can't have prefix
-//
-//		assertExitTypeAndNoProblems("position [[{}],1];", cluster, ValueType.BaseType.CONFIG);
-//		assertExitTypeAndNoProblems("position [[{}]];", cluster, BaseType.CONFIG);
-//		assertExitTypeAndNoProblems("position [];", cluster, ValueType.BaseType.CONFIG);
-//
-//		assertExitTypeAndNoProblems("0 position;", cluster, BaseType.CONFIG);
-//		assertExitTypeAndNoProblems("0 position [[{}],1];", cluster, ValueType.BaseType.CONFIG);
-//		assertExitTypeAndNoProblems("0 position [[{}]];", cluster, BaseType.CONFIG);
-//		assertExitTypeAndNoProblems("0 position [];", cluster, BaseType.CONFIG);
-//		assertExitTypeAndNoProblems("0 position;", cluster, BaseType.CONFIG);
-//
-//		assertExitTypeAndNoProblems("position;", cluster, ValueType.BaseType.CONFIG);
-		throw new RuntimeException("todo");
+		assertExitTypeAndNoProblems("0 position;", BaseType.CONFIG);
+		assertExitTypeAndNoProblems("0 position [[{}],1];", ValueType.BaseType.CONFIG);
+		assertExitTypeAndNoProblems("0 position [[{}]];", BaseType.CONFIG);
+		assertExitTypeAndNoProblems("0 position [];", BaseType.CONFIG);
+		assertExitTypeAndNoProblems("0 position;", BaseType.CONFIG);
+
+		assertExitTypeAndNoProblems("position;", ValueType.BaseType.CONFIG);
 	}
 	//----END command expression----
 }

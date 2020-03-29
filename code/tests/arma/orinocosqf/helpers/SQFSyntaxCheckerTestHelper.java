@@ -31,7 +31,7 @@ import static org.junit.Assert.assertFalse;
 public abstract class SQFSyntaxCheckerTestHelper {
 
 	@NotNull
-	private SQFSyntaxCheckerTestHelper.MyProblemListener parseText(@NotNull String text) {
+	private TestCaseHelper parseText(@NotNull String text) {
 		SQFInfixToPostfixProcessor postfixProcessor = new SQFInfixToPostfixProcessor();
 		MyProblemListener problemListener = new MyProblemListener();
 		postfixProcessor.setProblemListener(problemListener);
@@ -42,7 +42,11 @@ public abstract class SQFSyntaxCheckerTestHelper {
 
 		lexer.start(OrinocoReader.fromCharSequence(text));
 
-		return problemListener;
+		TestCaseHelper helper = new TestCaseHelper();
+		helper.problemListener = problemListener;
+		helper.processor = postfixProcessor;
+
+		return helper;
 	}
 
 	/**
@@ -52,8 +56,10 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 * @see #assertNoProblems(String)
 	 */
 	public void assertHasProblems(@NotNull String text) {
-		MyProblemListener problemListener = parseText(text);
-		assertFalse("Expected there to be problems.", problemListener.problems.isEmpty());
+		TestCaseHelper helper = parseText(text);
+		MyProblemListener problemListener = helper.problemListener;
+		SQFInfixToPostfixProcessor processor = helper.processor;
+		assertFalse("Expected there to be problems. Return Type: " + processor.getReturnType(), problemListener.problems.isEmpty());
 	}
 
 	/**
@@ -63,7 +69,11 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 * @see #assertNoProblems(String)
 	 */
 	public void assertNoProblems(@NotNull String text) {
-		MyProblemListener problemListener = parseText(text);
+		MyProblemListener problemListener = parseText(text).problemListener;
+		doAssertNoProblems(problemListener);
+	}
+
+	private void doAssertNoProblems(@NotNull MyProblemListener problemListener) {
 		StringBuilder probs = new StringBuilder();
 		probs.append('\n');
 		for (List<String> prob : problemListener.problems) {
@@ -80,31 +90,25 @@ public abstract class SQFSyntaxCheckerTestHelper {
 	 * @param text SQF code to parse
 	 * @return the sqf return value
 	 */
-	@Nullable
+	@NotNull
 	public ValueType getExitTypeForText(@NotNull String text) {
-//		SQFFile file = (SQFFile) myFixture.configureByText(SQFFileType.INSTANCE, text);
-//		ProblemsHolder problems = getProblemsHolder(file);
-//		CommandDescriptorCluster cluster = SQFSyntaxHelper.getInstance().getCommandDescriptors(file.getNode());
-//		return new SQFSyntaxChecker(file.getFileScope().getChildStatements(), cluster, problems).begin();
-		return null;
+		SQFInfixToPostfixProcessor processor = parseText(text).processor;
+		return processor.getReturnType();
 	}
 
 	/**
 	 * This will then assert that the return types match and that there were no problems reported
 	 *
 	 * @param text SQF code to parse
-	 * @param cluster command descriptors to use
 	 * @param expectedRetType expected return type
 	 */
-//	public void assertExitTypeAndNoProblems(@NotNull String text, @Nullable CommandDescriptorCluster cluster,
-//											@Nullable ValueType expectedRetType) {
-//		SQFFile file = (SQFFile) myFixture.configureByText(SQFFileType.INSTANCE, text);
-//		ProblemsHolder problems = getProblemsHolder(file);
-//		cluster = cluster == null ? SQFSyntaxHelper.getInstance().getCommandDescriptors(file.getNode()) : cluster;
-//		ValueType ret = new SQFSyntaxChecker(file.getFileScope().getChildStatements(), cluster, problems).begin();
-//		assertEquals("Expected no problems, got " + problems.getResults(), 0, problems.getResultCount());
-//		assertEquals(expectedRetType, ret);
-//	}
+	public void assertExitTypeAndNoProblems(@NotNull String text,
+											@Nullable ValueType expectedRetType) {
+		TestCaseHelper helper = parseText(text);
+
+		doAssertNoProblems(helper.problemListener);
+		assertEquals(expectedRetType, helper.processor.getReturnType());
+	}
 
 	private static class MyProblemListener implements ProblemListener {
 
@@ -117,6 +121,11 @@ public abstract class SQFSyntaxCheckerTestHelper {
 			prob.add(msg);
 			problems.add(prob);
 		}
+	}
+
+	private static class TestCaseHelper {
+		MyProblemListener problemListener;
+		SQFInfixToPostfixProcessor processor;
 	}
 
 }
